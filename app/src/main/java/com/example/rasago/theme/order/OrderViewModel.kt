@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.rasago.data.mapper.toOrder
 import com.example.rasago.data.model.Order
 import com.example.rasago.data.repository.OrderRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
 class OrderViewModel(private val orderRepository: OrderRepository): ViewModel(){
