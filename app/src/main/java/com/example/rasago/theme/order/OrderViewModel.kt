@@ -11,7 +11,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
-class OrderViewModel(private val orderRepository: OrderRepository): ViewModel(){
+
+@HiltViewModel
+class OrderViewModel @Inject constructor(private val orderRepository: OrderRepository) : ViewModel(){
     private val _orders = MutableLiveData<List<Order>>()
     val orders: LiveData<List<Order>> = _orders
 
