@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Rasa Go</string>
+    <string name="change_profile_picture">Change Profile Picture</string>
+    <string name="edit">Edit</string>
+    <string name="background">Background</string>
+    <string name="default_profile_picture">Default Profile Picture</string>
+    <string name="choice_1_profile_picture">Choice 1 Profile Picture</string>
+    <string name="choice_2_profile_picture">Choice 2 Profile Picture</string>
+    <string name="personal_information">Personal Information</string>
+    <string name="name">Name</string>
+    <string name="status">Status</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string name="email">Email</string>
+    <string name="dob">Date Of Birth (DOB)</string>
+    <string name="gender">Gender</string>
+    <string name="active">Active</string>
+    <string name="save">Save</string>
+    <string name="change_pfp">Change Profile Picture</string>
+    <string name="dine_in">Dine-In</string>
+    <string name="take_away">Take Away</string>
+    <string name="return_back">Return Back</string>
+    <string name="food_status">Food Status</string>
+    <string name="profile_page">Food Status</string>
+    <string name="edit_profile">Food Status</string>
+    <string name="cancel">Cancelled</string>
+    <string name="preparing">Preparing</string>
+    <string name="ready">Ready</string>
+    <string name="defaultStatus">Default</string>
+    <string name="placeholder">Placeholder</string>
+
+</resources>
