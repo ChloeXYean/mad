@@ -6,9 +6,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rasago.data.entity.MenuItem
 import com.example.rasago.data.repository.MenuRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
-class MenuViewModel(private val menuRepository: MenuRepository): ViewModel(){
+@HiltViewModel
+class MenuViewModel @Inject constructor(private val menuRepository: MenuRepository): ViewModel(){
     private val _menuItems = MutableLiveData<List<MenuItem>>()
     val menuItems: LiveData<List<MenuItem>> = _menuItems
 

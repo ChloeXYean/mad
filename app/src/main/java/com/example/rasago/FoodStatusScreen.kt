@@ -65,7 +65,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.*
 import com.example.rasago.data.model.Order
 import com.example.rasago.ui.theme.GreyGreen
+import com.example.rasago.ui.theme.order.OrderViewModel
 import java.util.Calendar
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+
 
 data class FoodOrder(
     val id: Int,
@@ -511,13 +516,14 @@ fun StaffPage(
 }
 @Composable
 fun FoodOrderStatusList(
+    orderViewModel: OrderViewModel,
     role: UserRole = UserRole.CUSTOMER,
     context: Context = LocalContext.current,
     onViewStatusClick: (Order) -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
-    val orderNo = "T01"
-    val orderTime = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
+    val orders by orderViewModel.orders.observeAsState(emptyList())
+    val context = LocalContext.current
 
     var selectedDate by remember { mutableStateOf(Calendar.getInstance()) }
     var selectedStatus by remember { mutableStateOf("All") }
@@ -680,5 +686,5 @@ fun FoodOrderStatusList(
 @Preview(showBackground = true)
 @Composable
 fun PreviewScreen() {
-    FoodOrderStatusList()
+//    FoodOrderStatusList()
 }

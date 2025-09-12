@@ -45,25 +45,50 @@ android {
 
 dependencies {
     val room_version = "2.7.2"
+    val lifecycle_version = "2.9.3"
+    val arch_version = "2.2.0"
+
+    // Hilt
     implementation("com.google.dagger:hilt-android:2.57.1")
     kapt("com.google.dagger:hilt-compiler:2.57.1")
-    implementation("androidx.compose.ui:ui:1.6.7")
-    implementation ("androidx.compose.ui:ui-text-google-fonts:1.6.7")
+
+    // Room
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     implementation("androidx.room:room-paging:$room_version")
     testImplementation("androidx.room:room-testing:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.navigation:navigation-compose:2.9.3")
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+
+    // Compose
+    implementation("androidx.compose.ui:ui:1.6.7")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.7")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.activity.compose)
+    implementation("androidx.compose.runtime:runtime-livedata")
 
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.9.3")
+
+    // Lifecycle / ViewModel / LiveData
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version")
+    kapt("androidx.lifecycle:lifecycle-compiler:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-service:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-process:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:$lifecycle_version")
+    testImplementation("androidx.arch.core:core-testing:$arch_version")
+    testImplementation("androidx.lifecycle:lifecycle-runtime-testing:$lifecycle_version")
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -72,3 +97,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
