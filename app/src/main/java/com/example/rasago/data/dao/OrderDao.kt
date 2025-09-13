@@ -27,7 +27,7 @@ interface OrderDao{
 
     //From table named orders
     @Query("SELECT * FROM orders where orderId = :orderId")
-    suspend fun getOrderById(orderId:Int)
+    suspend fun getOrderById(orderId:Int): OrderEntity
 
     @Query ("UPDATE orders SET foodStatus = :newStatus WHERE orderNo = :orderNo")
     suspend fun updateStatus(orderNo: String, newStatus: String)
@@ -41,5 +41,4 @@ interface OrderDao{
 
     @Transaction
     @Query("SELECT * FROM orders ORDER BY orderTime DESC")
-    suspend fun getAllOrdersWithItemsFlow(): Flow<List<OrderWithItems>>
-}
+    suspend fun getAllOrdersWithItems(): List<OrderWithItems> }

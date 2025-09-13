@@ -8,7 +8,7 @@ object DummyData {
         Order(
             no = "T01",
             type = "Dine-In",
-            time = "2025-09-09 12:30",
+            time = "2025-09-13 12:30",
             status = "Preparing",
             orderItems = listOf(
                 OrderItem("Nasi Lemak", 8.5, 2),
@@ -18,7 +18,7 @@ object DummyData {
         Order(
             no = "T02",
             type = "Takeaway",
-            time = "2025-09-09 13:10",
+            time = "2025-09-13 13:10",
             status = "Done",
             orderItems = listOf(
                 OrderItem("Mee Goreng", 7.0, 1),
@@ -27,3 +27,4 @@ object DummyData {
         )
     )
 }
+

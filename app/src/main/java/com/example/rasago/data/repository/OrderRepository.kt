@@ -18,10 +18,8 @@ class OrderRepository @Inject constructor(
     private val orderDao: OrderDao,
     private val orderItemDao: OrderItemDao
 ){
-    suspend fun getAllOrders(): Flow<List<Order>> {
-        return orderDao.getAllOrdersWithItemsFlow().map { listOfDatabaseObj ->
-            listOfDatabaseObj.map { it.toOrder() }
-        }
+    suspend fun getAllOrders(): List<OrderWithItems> {
+        return orderDao.getAllOrdersWithItems();
     }
 
     suspend fun prepopulateDatabase(){

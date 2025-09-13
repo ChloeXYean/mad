@@ -15,7 +15,7 @@ interface MenuItemDao {
     suspend fun insertMenuItem(item: MenuItem): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMenuItem(item: List<MenuItem>): Long
+    suspend fun insertMenuItem(item: List<MenuItem>): List<Long>
 
     @Update
     suspend fun updateMenuItem(item: MenuItem)

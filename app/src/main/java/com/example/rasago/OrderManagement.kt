@@ -1,7 +1,7 @@
 package com.example.rasago
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
-import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,14 +31,14 @@ import java.util.*
 
 
 @Composable
+//if (role == STAFF || role == MANAGER || role == CASHIER || role == KITCHEN)
 fun OrderManagementScreen(
     orderViewModel: OrderViewModel,
-    role: UserRole = UserRole.CASHIER,
+    role: UserRole = UserRole.CASHIER, //TODO: Need to check if cashier/staff cuz multiple staff = staff
     onViewStatusClick: (Order) -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
     val uiState by orderViewModel.uiState.collectAsState()
-
     OrderManagementContent(
         orders = uiState.orders,
         role = role,
@@ -66,6 +66,7 @@ fun OrderManagementContent(
     var selectedDate by remember { mutableStateOf(Calendar.getInstance()) }
     var selectedStatus by remember { mutableStateOf("All") }
     var searchQuery by remember { mutableStateOf("") }
+    var showStatusDropdown by remember { mutableStateOf(false) }
 
     val filteredOrders = orders.filter { order ->
         val matchesDate by lazy {
@@ -77,7 +78,6 @@ fun OrderManagementContent(
         val matchesSearch = searchQuery.isEmpty() ||
                 order.no.contains(searchQuery, ignoreCase = true) ||
                 order.type.contains(searchQuery, ignoreCase = true)
-
         matchesDate && matchesStatus && matchesSearch
     }
 
@@ -118,8 +118,6 @@ fun OrderManagementContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                var showStatusDropdown by remember { mutableStateOf(false) }
-
                 OutlinedButton(
                     onClick = {
                         DatePickerDialog(
@@ -188,6 +186,7 @@ fun OrderManagementContent(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun OrderCard(
     order: Order,
@@ -302,13 +301,12 @@ fun OrderCard(
 @Preview(showBackground = true)
 @Composable
 fun PreviewOrderManagement() {
-    // This preview now works by calling the stateless composable with DummyData.
     OrderManagementContent(
         orders = DummyData.orders,
         role = UserRole.CASHIER,
         onViewStatusClick = {},
         onBackClick = {},
-        onStatusChange = { _, _ -> }
+        onStatusChange = { _, _ -> },
     )
 }
 
