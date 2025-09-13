@@ -1,5 +1,7 @@
 package com.example.rasago
 
+import com.example.rasago.data.model.CustomerProfile
+import com.example.rasago.data.model.MenuItem
 import com.example.rasago.data.model.Order
 import com.example.rasago.data.model.OrderItem
 
@@ -24,6 +26,32 @@ object DummyData {
                 OrderItem("Mee Goreng", 7.0, 1),
                 OrderItem("Sirap Bandung", 2.5, 2)
             )
+        )
+    )
+
+    val customerProfile = CustomerProfile(
+        name = "John Doe",
+        email = "john.c.calhoun@examplepetstore.com",
+        phone = "123-456-7890",
+        profileImageRes = R.drawable.default_profile_picture
+    )
+
+    val menuItems = listOf(
+        MenuItem(
+            id = 1,
+            name = "Nasi Lemak",
+            description = " ",
+            price = 8.5,
+            category = "Main Course",
+            imageRes = R.drawable.rice_nasilemak
+        ),
+        MenuItem(
+            id = 2,
+            name = "Teh Tarik",
+            description = " ",
+            price = 2.0,
+            category = "Drinks",
+            imageRes = R.drawable.drink_tehtarik
         )
     )
 }

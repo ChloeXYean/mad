@@ -1,13 +1,23 @@
 package com.example.rasago.data.repository
 
+import com.example.rasago.DummyData
 import com.example.rasago.data.dao.MenuItemDao
-import com.example.rasago.data.entity.MenuItem
+import com.example.rasago.data.entity.MenuItemEntity
+import com.example.rasago.data.model.MenuItem
+import kotlinx.coroutines.flow.Flow
 
 //Repository = “bridge” between DAO (entities, database) and ViewModel (Ui, app logic)
-class MenuRepository(private val menuDao: MenuItemDao){
+class MenuRepository(private val menuItemDao: MenuItemDao){
     suspend fun insertMenuItem(item: MenuItem) =
-        menuDao.insertMenuItem(item)
+        menuItemDao.insertMenuItem(item)
 
-    suspend fun getAllMenuItems(): List<MenuItem> =
-        menuDao.getAllMenuItems()
+    suspend fun getAllMenuItems(): Flow<List<MenuItem>> {
+        return menuItemDao.getAllMenuItemsFlow()
+    }
+
+    suspend fun prepopulateMenu(){
+        if (menuItemDao.getCount() == 0){
+            menuItemDao.insertAll(DummyData.menuItems)
+        }
+    }
 }

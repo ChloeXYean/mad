@@ -7,12 +7,12 @@ import androidx.room.RoomDatabase
 import com.example.rasago.data.dao.MenuItemDao
 import com.example.rasago.data.dao.OrderDao
 import com.example.rasago.data.dao.OrderItemDao
-import com.example.rasago.data.entity.MenuItem
+import com.example.rasago.data.entity.MenuItemEntity
 import com.example.rasago.data.entity.OrderEntity
 import com.example.rasago.data.entity.OrderItemEntity
 
 @Database(
-    entities = [OrderEntity::class, OrderItemEntity::class, MenuItem::class], //Entity class for kotlin
+    entities = [OrderEntity::class, OrderItemEntity::class, MenuItemEntity::class], //Entity class for kotlin
     version = 1, //Increment when change schema (add/remove columns or table)
     exportSchema = false //true to export for tracking history, vice versa
 )

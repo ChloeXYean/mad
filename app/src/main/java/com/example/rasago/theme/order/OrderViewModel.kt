@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rasago.DummyData
 import com.example.rasago.data.model.Order
+import com.example.rasago.data.repository.OrderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,7 @@ data class FoodStatusUiState(
 )
 
 @HiltViewModel
-class OrderViewModel @Inject constructor() : ViewModel() {
+class OrderViewModel @Inject constructor(private val orderRepository: OrderRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FoodStatusUiState())
     val uiState: StateFlow<FoodStatusUiState> = _uiState.asStateFlow()
@@ -33,8 +34,7 @@ class OrderViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                // Using DummyData for now
-                val orders = DummyData.orders
+                val orders = orderRepository.getAllOrders()
                 _uiState.update {
                     it.copy(orders = orders, isLoading = false)
                 }
@@ -50,26 +50,25 @@ class OrderViewModel @Inject constructor() : ViewModel() {
         _uiState.update { it.copy(selectedOrder = order) }
     }
 
+
     fun updateOrderStatus(orderNo: String, newStatus: String) {
-        _uiState.update { currentState ->
-            // Create a new list with the updated order status
-            val updatedOrders = currentState.orders.map { order ->
-                if (order.no == orderNo) {
-                    order.copy(status = newStatus)
-                } else {
-                    order
+        viewModelScope.launch {
+            try {
+                orderRepository.updateOrderStatus(orderNo, newStatus)
+                fetchOrders()
+                _uiState.update { currentState ->
+                    val updatedSelectedOrder = currentState.selectedOrder?.let {
+                        if (it.no == orderNo) {
+                            it.copy(status = newStatus)
+                        } else {
+                            it
+                        }
+                    }
+                    currentState.copy(selectedOrder = updatedSelectedOrder)
                 }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Failed to update status: ${e.message}") }
             }
-            val updatedSelectedOrder = if (currentState.selectedOrder?.no == orderNo) {
-                currentState.selectedOrder.copy(status = newStatus)
-            } else {
-                currentState.selectedOrder
-            }
-            // Return
-            currentState.copy(
-                orders = updatedOrders,
-                selectedOrder = updatedSelectedOrder
-            )
         }
     }
 }
