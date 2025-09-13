@@ -1,8 +1,6 @@
-package com.example.assignmenttest
+package com.example.rasago
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,7 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.assignmenttest.ui.theme.AssignmentTestTheme
+import com.example.rasago.ui.theme.RasagoApp
+
 
 // 食物数据类
 data class Food(
@@ -62,22 +61,6 @@ data class Order(
 // 订单状态枚举
 enum class OrderStatus {
     NEW, PREPARING, READY, COMPLETED, CANCELLED
-}
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AssignmentTestTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color(0xFFF5F5F5) // 浅灰色背景
-                ) {
-                    MenuScreen()
-                }
-            }
-        }
-    }
 }
 
 // 主屏幕
@@ -892,7 +875,7 @@ fun StaffBottomNavigationBar(
 @Preview(showBackground = true, name = "Restaurant Screen Preview")
 @Composable
 fun RestaurantScreenPreview() {
-    AssignmentTestTheme {
+    RasagoApp {
         MenuScreen()
     }
 }

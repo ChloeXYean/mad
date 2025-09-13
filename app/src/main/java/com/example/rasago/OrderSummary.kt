@@ -1,4 +1,4 @@
-package com.example.assignmenttest
+package com.example.rasago
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

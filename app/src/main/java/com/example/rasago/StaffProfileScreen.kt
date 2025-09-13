@@ -1,4 +1,4 @@
-package com.example.assignmenttest
+package com.example.rasago
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.assignmenttest.ui.theme.AssignmentTestTheme
+import com.example.rasago.ui.theme.RasagoApp
 
 // 员工数据类：用于存储员工信息
 data class Staff(
@@ -306,7 +306,7 @@ fun StaffBottomNavigationBar(
 @Preview(showBackground = true, name = "Staff Profile Preview")
 @Composable
 fun StaffProfilePreview() {
-    AssignmentTestTheme {
+    RasagoApp {
         StaffProfileScreen(
             staff = Staff(
                 name = "Ali",
