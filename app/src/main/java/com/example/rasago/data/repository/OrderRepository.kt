@@ -1,18 +1,44 @@
 package com.example.rasago.data.repository
 
+import com.example.rasago.DummyData
 import com.example.rasago.data.dao.OrderDao
 import com.example.rasago.data.dao.OrderItemDao
 import com.example.rasago.data.entity.OrderEntity
 import com.example.rasago.data.entity.OrderItemEntity
 import com.example.rasago.data.mapper.toEntity
+import com.example.rasago.data.mapper.toOrder
 import com.example.rasago.data.model.Order
 import com.example.rasago.data.model.OrderWithItems
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 //Repository = “bridge” between DAO (entities, database) and ViewModel (Ui, app logic)
-class OrderRepository(
+class OrderRepository @Inject constructor(
     private val orderDao: OrderDao,
     private val orderItemDao: OrderItemDao
 ){
+    suspend fun getAllOrders(): Flow<List<Order>> {
+        return orderDao.getAllOrdersWithItemsFlow().map { listOfDatabaseObj ->
+            listOfDatabaseObj.map { it.toOrder() }
+        }
+    }
+
+    suspend fun prepopulateDatabase(){
+        //Check if data ady exist
+        if (orderDao.getOrderCount() == 0){
+            DummyData.orders.forEach { order ->
+                val orderEntity = order.toEntity()
+                val newOrderId = orderDao.insertOrder(orderEntity)
+
+                order.orderItems.forEach { orderItem ->
+                    val orderItemEntity = orderItem.toEntity(newOrderId)
+                    orderItemDao.insertItem(orderItemEntity)
+                }
+            }
+        }
+    }
+
     suspend fun createOrder(order: OrderEntity, items: List<OrderItemEntity>){
         val orderId = orderDao.insertOrder(order)
         items.forEach { item ->
@@ -24,13 +50,6 @@ class OrderRepository(
     suspend fun getOrderWithItem(orderId: Long): OrderWithItems {
         return orderDao.getOrderWithItems(orderId)
     }
-
-    //Fetch all orders (like order history)
-    suspend fun getAllOrders(): List<OrderWithItems>{
-        return orderDao.getAllOrdersWithItem()
-    }
-
-    suspend fun getAllOrdersWithItems(): List<OrderWithItems> = orderDao.getAllOrdersWithItem()
 
     suspend fun insertOrder(order: Order) {
         // Convert to entity
