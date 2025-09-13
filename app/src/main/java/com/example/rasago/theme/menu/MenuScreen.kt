@@ -29,6 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rasago.R
+import com.example.rasago.ui.theme.menu.MenuViewModel
+import com.example.rasago.ui.theme.order.OrderViewModel
 
 // 食物数据类
 data class Food(
@@ -47,7 +49,7 @@ data class NavItem(
 
 
 @Composable
-fun MenuScreen(initialShowLogin: Boolean = false) {
+fun MenuScreen(initialShowLogin: Boolean = false, menuViewModel: MenuViewModel, onNavigateToCart: () -> Unit) {
     // 状态管理
     var cartItemCount by remember { mutableStateOf(0) }
     var searchText by remember { mutableStateOf("") }
@@ -463,106 +465,9 @@ fun CartFloatingView(
     }
 }
 
-// 顾客底部导航栏
-@Composable
-fun CustomerBottomNavigationBar(
-    cartItemCount: Int,
-    selectedNavItem: String,
-    onNavItemSelect: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    NavigationBar(
-        modifier = modifier.height(64.dp),
-        containerColor = Color.White,
-        contentColor = MaterialTheme.colorScheme.onSurface
-    ) {
-        val navItems = listOf(
-            NavItem("Menu", Icons.Default.Home),
-            NavItem("Orders", Icons.Default.ShoppingCart),
-            NavItem("Log Out", Icons.Default.Logout),
-            NavItem("Profile", Icons.Default.Person)
-        )
 
-        navItems.forEach { item ->
-            NavigationBarItem(
-                icon = {
-                    // 订单项显示购物车数量徽章
-                    if (item.title == "Orders") {
-                        BadgedBox(
-                            badge = {
-                                if (cartItemCount > 0) {
-                                    Badge {
-                                        Text(cartItemCount.toString())
-                                    }
-                                }
-                            }
-                        ) {
-                            Icon(
-                                item.icon,
-                                contentDescription = item.title,
-                                tint = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
-                            )
-                        }
-                    } else {
-                        Icon(
-                            item.icon,
-                            contentDescription = item.title,
-                            tint = if (item.title == selectedNavItem) Color(0xFF4CAF50) else Color.Black
-                        )
-                    }
-                },
-                label = {
-                    Text(
-                        item.title,
-                        color = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
-                    )
-                },
-                selected = item.title == selectedNavItem,
-                onClick = { onNavItemSelect(item.title) }
-            )
-        }
-    }
-}
 
-// 员工底部导航栏
-@Composable
-fun StaffBottomNavigationBar(
-    selectedNavItem: String,
-    onNavItemSelect: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    NavigationBar(
-        modifier = modifier.height(64.dp),
-        containerColor = Color.White,
-        contentColor = MaterialTheme.colorScheme.onSurface
-    ) {
-        val navItems = listOf(
-            NavItem("Menu", Icons.Default.Home),
-            NavItem("Staff", Icons.Default.Person),  // 员工专属页面
-            NavItem("Log Out", Icons.Default.Logout)
-        )
 
-        navItems.forEach { item ->
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        item.icon,
-                        contentDescription = item.title,
-                        tint = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
-                    )
-                },
-                label = {
-                    Text(
-                        item.title,
-                        color = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
-                    )
-                },
-                selected = item.title == selectedNavItem,
-                onClick = { onNavItemSelect(item.title) }
-            )
-        }
-    }
-}
 
 // 预览
 //@Preview(showBackground = true, name = "Restaurant Screen Preview")

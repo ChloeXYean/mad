@@ -4,15 +4,18 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.rasago.data.dao.CustomerDao
 import com.example.rasago.data.dao.MenuItemDao
 import com.example.rasago.data.dao.OrderDao
 import com.example.rasago.data.dao.OrderItemDao
+import com.example.rasago.data.entity.CustomerEntity
 import com.example.rasago.data.entity.MenuItemEntity
 import com.example.rasago.data.entity.OrderEntity
 import com.example.rasago.data.entity.OrderItemEntity
+import com.example.rasago.data.entity.StaffEntity
 
 @Database(
-    entities = [OrderEntity::class, OrderItemEntity::class, MenuItemEntity::class], //Entity class for kotlin
+    entities = [OrderEntity::class, OrderItemEntity::class, MenuItemEntity::class, CustomerEntity::class, StaffEntity::class], //Entity class for kotlin
     version = 1, //Increment when change schema (add/remove columns or table)
     exportSchema = false //true to export for tracking history, vice versa
 )
@@ -22,6 +25,10 @@ abstract class AppDatabase : RoomDatabase(){
     abstract fun orderDao(): OrderDao
     abstract fun orderItemDao(): OrderItemDao
     abstract fun menuItemDao(): MenuItemDao
+
+    abstract fun customerDao(): CustomerDao
+
+    abstract fun staffDao(): StaffDao
 
     //Singleton = shared one database
     companion object{

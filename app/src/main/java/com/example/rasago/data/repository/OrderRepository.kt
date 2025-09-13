@@ -17,6 +17,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 //Repository = “bridge” between DAO (entities, database) and ViewModel (Ui, app logic)
+//TODO: SIngleton means
 @Singleton
 class OrderRepository @Inject constructor(
     private val orderDao: OrderDao,
