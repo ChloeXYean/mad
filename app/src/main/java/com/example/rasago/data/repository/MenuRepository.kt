@@ -11,8 +11,8 @@ class MenuRepository(private val menuItemDao: MenuItemDao){
     suspend fun insertMenuItem(item: MenuItemEntity) =
         menuItemDao.insertMenuItem(item)
 
-    suspend fun getAllMenuItems(): Flow<List<MenuItem>> {
-        return menuItemDao.getAllMenuItemsFlow()
+    suspend fun getAllMenuItems(): List<MenuItem> {
+        return menuItemDao.getAllMenuItems()
     }
 
     suspend fun prepopulateMenu(){

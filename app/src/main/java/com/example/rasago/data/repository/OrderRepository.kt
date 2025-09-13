@@ -38,7 +38,7 @@ class OrderRepository @Inject constructor(
     }
 
     suspend fun getOrderById(orderId: Long): Order? = withContext(Dispatchers.IO) {
-        orderDao.getOrderWithItems(orderId)?.toOrder()
+        orderDao.getOrderWithItems(orderId).toOrder()
     }
 
     suspend fun updateOrderStatus(orderNo: String, newStatus: String) = withContext(Dispatchers.IO) {

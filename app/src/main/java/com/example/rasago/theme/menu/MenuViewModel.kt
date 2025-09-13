@@ -5,14 +5,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rasago.data.entity.MenuItemEntity
+import com.example.rasago.data.model.MenuItem
 import com.example.rasago.data.repository.MenuRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
 data class MenuUiState(
-    val menuItems: List<MenuItemEntity> = emptyList(),
-    val isLoading: Boolean = true
+    val menuItems: List<MenuItem> = emptyList(),
+    val cart: Map<MenuItem, Int> = emptyMap(),
+    val isLoading: Boolean = true,
+    val error: String? = null,
+    val orderPlaced: Boolean = false,
+    val placedOrderId: Long? = null
 )
 
 @HiltViewModel

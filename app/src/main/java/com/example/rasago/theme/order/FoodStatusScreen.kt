@@ -1,7 +1,6 @@
-﻿package com.example.rasago
+﻿package com.example.rasago.theme.order
 
-import android.content.Context
-import androidx.compose.animation.animateColorAsState
+import android.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,11 +13,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,7 +37,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rasago.ui.theme.Baloo2
@@ -51,10 +47,10 @@ import com.example.rasago.ui.theme.YellowPrepare
 import com.example.rasago.ui.theme.GreenDone
 import com.example.rasago.ui.theme.RedCancel
 import java.util.Locale
-import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
-import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
+import com.example.rasago.theme.navigation.AppTopBar
+import com.example.rasago.theme.profile.UserRole
 import com.example.rasago.data.model.OrderItem
 import com.example.rasago.ui.theme.order.OrderViewModel
 
@@ -156,7 +152,7 @@ fun FoodItemRow(item: OrderItem, status: String, role: UserRole) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = android.R.drawable.ic_menu_gallery),
+                    painter = painterResource(id = R.drawable.ic_menu_gallery),
                     contentDescription = item.name,
                     modifier = Modifier
                         .size(60.dp)
@@ -181,8 +177,8 @@ fun FoodItemRow(item: OrderItem, status: String, role: UserRole) {
 
 @Composable
 fun OrderTypeSelection(orderType: String) {
-    val dineIn = stringResource(R.string.dine_in)
-    val takeAway = stringResource(R.string.take_away)
+    val dineIn = stringResource(com.example.rasago.R.string.dine_in)
+    val takeAway = stringResource(com.example.rasago.R.string.take_away)
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -218,7 +214,7 @@ fun OrderTypeSelection(orderType: String) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 val isSelected = orderType == "Dine-In"
                 Icon(
-                    painter = painterResource(if (isSelected) R.drawable.dine_in_white else R.drawable.dine_in_black),
+                    painter = painterResource(if (isSelected) com.example.rasago.R.drawable.dine_in_white else com.example.rasago.R.drawable.dine_in_black),
                     contentDescription = dineIn,
                     modifier = Modifier.size(24.dp),
                     tint = if (isSelected) Color.White else Color.Black
@@ -246,7 +242,7 @@ fun OrderTypeSelection(orderType: String) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 val isSelected = orderType == "Takeaway"
                 Icon(
-                    painter = painterResource(if (isSelected) R.drawable.take_away_white else R.drawable.take_away_black),
+                    painter = painterResource(if (isSelected) com.example.rasago.R.drawable.take_away_white else com.example.rasago.R.drawable.take_away_black),
                     contentDescription = takeAway,
                     modifier = Modifier.size(24.dp),
                     tint = if (isSelected) Color.White else Color.Black
@@ -275,10 +271,10 @@ fun StatusDropdown(status: String, enabled: Boolean) {
         else -> Color.LightGray
     }
     val statusImage = when (currentStatus) {
-        "Preparing" -> R.drawable.food_prepare
-        "Done" -> R.drawable.food_ready
-        "Cancelled" -> R.drawable.food_cancel
-        else -> android.R.drawable.ic_menu_help
+        "Preparing" -> com.example.rasago.R.drawable.food_prepare
+        "Done" -> com.example.rasago.R.drawable.food_ready
+        "Cancelled" -> com.example.rasago.R.drawable.food_cancel
+        else -> R.drawable.ic_menu_help
     }
 
     Box(

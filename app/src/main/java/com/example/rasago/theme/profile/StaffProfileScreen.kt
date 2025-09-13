@@ -1,9 +1,5 @@
-package com.example.rasago
+package com.example.rasago.theme.profile
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -19,6 +15,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.rasago.data.model.CustomerProfile
 
 // 员工数据类
 data class Staff(
@@ -37,6 +35,7 @@ enum class StaffStatus {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StaffProfileScreen(
+    customerProfile: CustomerProfile = viewModel(),
     staff: Staff,
     onMenuClick: () -> Unit,
     onLogoutClick: () -> Unit

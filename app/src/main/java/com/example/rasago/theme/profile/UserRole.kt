@@ -1,4 +1,4 @@
-package com.example.rasago
+package com.example.rasago.theme.profile
 
 enum class UserRole {
     CUSTOMER,

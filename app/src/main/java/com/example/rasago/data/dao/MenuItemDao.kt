@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 interface   MenuItemDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMenuItem(item: MenuItem): Long
+    suspend fun insertMenuItem(item: MenuItemEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(items: List<MenuItem>): List<Long>
@@ -29,7 +29,7 @@ interface   MenuItemDao {
     suspend fun getCount(): Int
 
     @Query("SELECT * FROM menu_items ORDER BY category ASC, name ASC") //ASC = Ascending, DES = Descending
-    suspend fun getAllMenuItems(): List<MenuItemEntity> //Get data once
+    suspend fun getAllMenuItems(): List<MenuItem> //Get data once
 
     @Query("SELECT * FROM menu_items ORDER BY category ASC, name ASC") //ASC = Ascending, DES = Descending
     fun getAllMenuItemsFlow(): Flow<List<MenuItem>> //Keep getting updated data

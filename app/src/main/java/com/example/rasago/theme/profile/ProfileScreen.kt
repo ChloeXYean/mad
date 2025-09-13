@@ -1,4 +1,4 @@
-package com.example.rasago
+package com.example.rasago.theme.profile
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.rasago.R
 import com.example.rasago.ui.theme.Baloo2
 import com.example.rasago.ui.theme.DarkGreen
 import com.example.rasago.ui.theme.LightGreen

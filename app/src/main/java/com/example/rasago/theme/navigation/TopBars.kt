@@ -1,4 +1,4 @@
-package com.example.rasago
+package com.example.rasago.theme.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
