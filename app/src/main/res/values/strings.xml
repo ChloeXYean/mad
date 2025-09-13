@@ -27,5 +27,34 @@
     <string name="ready">Ready</string>
     <string name="defaultStatus">Default</string>
     <string name="placeholder">Placeholder</string>
+    <string name="back">back</string>
+    <string name="staff_schedule">Staff Schedule</string>
+    <string name="app_name">Rasa Go</string>
+    <string name="login_your_account">Login Your Account</string>
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="login_button_text">Login</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="sedap_anytime_anywhere">Sedap Anytime, Anywhere</string>
+    <string name="create_account">Create Account</string>
+    <string name="username">Username</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="register">Register</string>
+    <string name="background">Background</string>
+    <string name="rasa_go">Rasa Go</string>
+    <string name="back">Back</string>
+    <string name="receipt">Receipt</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="service_charge">Service Charge</string>
+    <string name="sst_6">SST (6%)</string>
+    <string name="proceed">Proceed</string>
+    <string name="sambal">Sambal</string>
+    <string name="fried_egg">Fried Egg</string>
+    <string name="rice">Rice</string>
+    <string name="fried_chicken">Fried Chicken</string>
+    <string name="nasi_lemak">Nasi Lemak</string>
+    <string name="staff_schedule">Staff Schedule</string>
 
 </resources>
