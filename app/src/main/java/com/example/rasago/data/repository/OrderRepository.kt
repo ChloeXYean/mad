@@ -45,7 +45,7 @@ class OrderRepository @Inject constructor(
         orderDao.updateStatus(orderNo, newStatus)
     }
 
-    suspend fun getAllOrders(): List<Order> = withContext(Dispatchers.IO) {
-        orderDao.getAllOrdersWithItems().map { it.toOrder() }
+    suspend fun getAllOrders(): Flow<List<OrderWithItems>> {
+        return orderDao.getAllOrdersWithItems()
     }
 }

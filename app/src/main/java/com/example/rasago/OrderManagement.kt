@@ -170,7 +170,6 @@ fun OrderManagementContent(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-
             LazyColumn {
                 items(filteredOrders) { order ->
                     OrderCard(
@@ -309,4 +308,3 @@ fun PreviewOrderManagement() {
         onStatusChange = { _, _ -> },
     )
 }
-

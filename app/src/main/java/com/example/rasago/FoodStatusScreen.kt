@@ -312,6 +312,7 @@ fun StatusDropdown(status: String, enabled: Boolean) {
         DropdownMenu(
             expanded = expanded && enabled,
             onDismissRequest = { if (enabled) expanded = false },
+
             modifier = Modifier.background(Color.White)
         ) {
             DropdownMenuItem(

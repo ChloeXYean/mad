@@ -45,6 +45,10 @@ android {
 
 dependencies {
     val room_version = "2.7.2"
+    implementation("com.google.dagger:hilt-android:2.57.1")
+    kapt("com.google.dagger:hilt-compiler:2.57.1")
+    implementation("androidx.compose.ui:ui:1.6.7")
+    implementation ("androidx.compose.ui:ui-text-google-fonts:1.6.7")
     val lifecycle_version = "2.9.3"
     val arch_version = "2.2.0"
 
@@ -65,6 +69,10 @@ dependencies {
     implementation("androidx.room:room-paging:$room_version")
     testImplementation("androidx.room:room-testing:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
+    implementation("androidx.navigation:navigation-compose:2.9.3")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
 
     // Compose
     implementation("androidx.compose.ui:ui:1.6.7")
@@ -104,4 +112,3 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
-

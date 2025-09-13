@@ -41,4 +41,4 @@ interface OrderDao{
 
     @Transaction
     @Query("SELECT * FROM orders ORDER BY orderTime DESC")
-    suspend fun getAllOrdersWithItems(): List<OrderWithItems> }
+    suspend fun getAllOrdersWithItems(): Flow<List<OrderWithItems>> }

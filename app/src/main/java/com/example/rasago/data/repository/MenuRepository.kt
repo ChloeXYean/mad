@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 //Repository = “bridge” between DAO (entities, database) and ViewModel (Ui, app logic)
 class MenuRepository(private val menuItemDao: MenuItemDao){
-    suspend fun insertMenuItem(item: MenuItem) =
+    suspend fun insertMenuItem(item: MenuItemEntity) =
         menuItemDao.insertMenuItem(item)
 
     suspend fun getAllMenuItems(): Flow<List<MenuItem>> {
