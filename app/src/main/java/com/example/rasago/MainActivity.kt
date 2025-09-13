@@ -4,35 +4,39 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.rasago.ui.theme.MyAssignmentTheme
+import com.example.rasago.ui.theme.RasagoApp
+import com.example.rasago.ui.theme.menu.MenuViewModel
+import com.example.rasago.ui.theme.order.OrderViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlin.getValue
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val menuViewModel: MenuViewModel by viewModels()
+    private val orderViewModel: OrderViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            MyAssignmentTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    EditProfileScreen(modifier = Modifier.padding(innerPadding))
-                }
+        setContent{
+            RasagoApp {
+//               Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    HomeScreen(
+//                        menuViewModel = menuViewModel,
+//                        orderViewModel = orderViewModel,
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                }
             }
         }
     }
 }
 
-@Composable
-fun Greeting( modifier: Modifier = Modifier) {
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MyAssignmentTheme {}
-}

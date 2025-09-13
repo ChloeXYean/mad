@@ -1,6 +1,7 @@
 package com.example.rasago.data.mapper
 
 import com.example.rasago.data.entity.OrderEntity
+import com.example.rasago.data.entity.OrderItemEntity
 import com.example.rasago.data.model.Order
 import com.example.rasago.data.model.OrderItem
 import com.example.rasago.data.model.OrderWithItems
@@ -36,7 +37,7 @@ fun OrderWithItems.toOrder(): Order {
     return Order(
         no = order.orderNo,
         type = order.orderType,
-        time = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(order.orderTime),
+        time = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()).format(order.orderTime),
         status = order.foodStatus,
         orderItems = items.map {
             OrderItem(
@@ -47,3 +48,13 @@ fun OrderWithItems.toOrder(): Order {
         }
     )
 }
+
+fun OrderItem.toEntity(orderId: Long): OrderItemEntity {
+    return OrderItemEntity(
+        orderId = orderId,
+        menuItemName = this.name,
+        price = this.price,
+        quantity = this.quantity
+    )
+}
+

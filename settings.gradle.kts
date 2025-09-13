@@ -19,5 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Assignment"
+
+rootProject.name = "RasaGo"
 include(":app")
+ 
