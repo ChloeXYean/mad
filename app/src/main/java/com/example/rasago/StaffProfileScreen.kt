@@ -1,5 +1,9 @@
 package com.example.rasago
 
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,9 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.rasago.ui.theme.RasagoApp
 
-// 员工数据类：用于存储员工信息
+// 员工数据类
 data class Staff(
     val name: String,
     val role: String,
@@ -176,147 +179,84 @@ fun StaffProfileScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 中间三个绿色按钮（仅UI设计，无实际功能）
+            // 中间按钮保持不变
             Button(
-                onClick = { /* 暂不实现功能 */ },
+                onClick = { /* 功能暂不实现 */ },
                 modifier = Modifier
                     .height(60.dp)
                     .width(250.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50)
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
             ) {
-                Text(
-                    text = "Orders Management",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Text("Orders Management", fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
 
             Spacer(modifier = Modifier.padding(15.dp))
 
             Button(
-                onClick = { /* 暂不实现功能 */ },
+                onClick = { /* 功能暂不实现 */ },
                 modifier = Modifier
                     .width(250.dp)
                     .height(60.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50)
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
             ) {
-                Text(
-                    text = "Orders History",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Text("Orders History", fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
 
             Spacer(modifier = Modifier.padding(15.dp))
 
             Button(
-                onClick = { /* 暂不实现功能 */ },
+                onClick = { /* 功能暂不实现 */ },
                 modifier = Modifier
                     .width(250.dp)
                     .height(60.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50)
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
             ) {
-                Text(
-                    text = "Staff Schedule",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Text("Staff Schedule", fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
         }
     }
 }
 
-// 员工底部导航栏
+// 员工底部导航栏（保持不变）
 @Composable
 fun StaffBottomNavigationBar(
     selectedItem: String,
     onMenuClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
-    NavigationBar(
-        containerColor = Color.White,
-        modifier = Modifier.height(64.dp)
-    ) {
+    NavigationBar(containerColor = Color.White) {
         NavigationBarItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = "Menu",
-                    tint = if (selectedItem == "Menu") Color(0xFF4CAF50) else Color.Gray
-                )
-            },
-            label = {
-                Text(
-                    text = "Menu",
-                    color = if (selectedItem == "Menu") Color(0xFF4CAF50) else Color.Gray
-                )
-            },
+            icon = { Icon(Icons.Default.Home, "Menu") },
+            label = { Text("Menu") },
             selected = selectedItem == "Menu",
             onClick = onMenuClick
         )
-
         NavigationBarItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Staff",
-                    tint = if (selectedItem == "Staff") Color(0xFF4CAF50) else Color.Gray
-                )
-            },
-            label = {
-                Text(
-                    text = "Staff",
-                    color = if (selectedItem == "Staff") Color(0xFF4CAF50) else Color.Gray
-                )
-            },
+            icon = { Icon(Icons.Default.Person, "Staff") },
+            label = { Text("Staff") },
             selected = selectedItem == "Staff",
             onClick = {}
         )
-
         NavigationBarItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Logout,
-                    contentDescription = "Log Out",
-                    tint = if (selectedItem == "Log Out") Color(0xFF4CAF50) else Color.Gray
-                )
-            },
-            label = {
-                Text(
-                    text = "Log Out",
-                    color = if (selectedItem == "Log Out") Color(0xFF4CAF50) else Color.Gray
-                )
-            },
+            icon = { Icon(Icons.Default.Logout, "Log Out") },
+            label = { Text("Log Out") },
             selected = selectedItem == "Log Out",
             onClick = onLogoutClick
         )
     }
 }
 
-// 预览
-@Preview(showBackground = true, name = "Staff Profile Preview")
+@Preview
 @Composable
 fun StaffProfilePreview() {
-    RasagoApp {
-        StaffProfileScreen(
-            staff = Staff(
-                name = "Ali",
-                role = "Cashier",
-                jobTime = "8am - 8pm",
-                lastLogin = "Sept 13, 2025 8:10 AM",
-                status = StaffStatus.WORKING
-            ),
-            onMenuClick = {},
-            onLogoutClick = {}
-        )
-    }
+//    AssignmentTestTheme {
+//        StaffProfileScreen(
+//            staff = Staff("Ali", "Cashier", "8am - 8pm", "Sept 13, 2025", StaffStatus.WORKING),
+//            onMenuClick = {},
+//            onLogoutClick = {}
+//        )
+//    }
 }
