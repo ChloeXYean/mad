@@ -50,36 +50,6 @@ data class NavItem(
     val icon: ImageVector
 )
 
-// 订单数据类
-data class Order(
-    val id: Int,
-    val tableNumber: Int,
-    val items: List<Food>,
-    val status: OrderStatus,
-    val timestamp: String
-)
-
-// 订单状态枚举
-enum class OrderStatus {
-    NEW, PREPARING, READY, COMPLETED, CANCELLED
-}
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AssignmentTestTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color(0xFFF5F5F5) // 浅灰色背景
-                ) {
-                    MenuScreen()
-                }
-            }
-        }
-    }
-}
-
 // 主屏幕
 @Composable
 fun MenuScreen() {
@@ -92,15 +62,6 @@ fun MenuScreen() {
 
     // 根据选中的导航项和用户类型显示不同屏幕
     when {
-        isStaff && selectedNavItem == "Staff" -> {
-            StaffMenuScreen(
-                onBackToMenu = { selectedNavItem = "Menu" },
-                onLogout = {
-                    isStaff = false
-                    selectedNavItem = "Menu"
-                }
-            )
-        }
         selectedNavItem == "Log Out" -> {
             // 切换用户类型或退出登录
             LoginScreen(
@@ -110,7 +71,7 @@ fun MenuScreen() {
             )
         }
         else -> {
-            // 顾客菜单屏幕
+            // 顾客菜单屏幕（同时支持员工模式的导航栏切换）
             CustomerMenuContent(
                 cartItemCount = cartItemCount,
                 searchText = searchText,
@@ -119,13 +80,14 @@ fun MenuScreen() {
                 onCategorySelect = { selectedCategory = it },
                 onAddToCart = { cartItemCount++ },
                 selectedNavItem = selectedNavItem,
-                onNavItemSelect = { selectedNavItem = it }
+                onNavItemSelect = { selectedNavItem = it },
+                isStaff = isStaff // 传递员工状态给内容区域
             )
         }
     }
 }
 
-// 顾客菜单内容
+// 顾客菜单内容（修改版，支持动态切换导航栏）
 @Composable
 fun CustomerMenuContent(
     cartItemCount: Int,
@@ -135,9 +97,10 @@ fun CustomerMenuContent(
     onCategorySelect: (String) -> Unit,
     onAddToCart: () -> Unit,
     selectedNavItem: String,
-    onNavItemSelect: (String) -> Unit
+    onNavItemSelect: (String) -> Unit,
+    isStaff: Boolean // 新增：接收员工状态
 ) {
-    // 食物列表数据
+    // 食物列表数据（保持不变）
     val foodList = remember {
         listOf(
             Food("Nasi Lemak", 8.5, R.drawable.rice_nasilemak, "Rice", true),
@@ -155,13 +118,13 @@ fun CustomerMenuContent(
         )
     }
 
-    // 根据分类和搜索文本筛选食物
+    // 根据分类和搜索文本筛选食物（保持不变）
     val filteredFoods = foodList.filter { food ->
         (selectedCategory == "All" || food.category == selectedCategory) &&
                 (searchText.isEmpty() || food.name.contains(searchText, ignoreCase = true))
     }
 
-    // 主布局结构
+    // 主布局结构（保持不变）
     Column(modifier = Modifier.fillMaxSize()) {
         // 顶部横幅
         Banner(modifier = Modifier.height(180.dp))
@@ -212,325 +175,22 @@ fun CustomerMenuContent(
             )
         }
 
-        // 底部导航栏
-        CustomerBottomNavigationBar(
-            cartItemCount = cartItemCount,
-            selectedNavItem = selectedNavItem,
-            onNavItemSelect = onNavItemSelect
-        )
-    }
-}
-
-// 员工菜单屏幕
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun StaffMenuScreen(
-    onBackToMenu: () -> Unit,
-    onLogout: () -> Unit
-) {
-    // 模拟订单数据
-    val orders = remember {
-        listOf(
-            Order(
-                id = 101,
-                tableNumber = 3,
-                items = listOf(
-                    Food("Nasi Lemak", 8.5, R.drawable.rice_nasilemak, "Rice", true),
-                    Food("Teh C", 3.5, R.drawable.drink_tehtarik, "Drinks")
-                ),
-                status = OrderStatus.NEW,
-                timestamp = "10:30 AM"
-            ),
-            Order(
-                id = 102,
-                tableNumber = 5,
-                items = listOf(
-                    Food("Asam Laksa", 10.0, R.drawable.noodle_asamlaksa, "Noodles", true),
-                    Food("Otak Otak", 7.0, R.drawable.side_otakotak, "Side Dishes"),
-                    Food("Milo Ais", 4.0, R.drawable.drink_miloais, "Drinks")
-                ),
-                status = OrderStatus.PREPARING,
-                timestamp = "10:25 AM"
-            ),
-            Order(
-                id = 103,
-                tableNumber = 2,
-                items = listOf(
-                    Food("Char Kuey Teow", 11.0, R.drawable.noodle_charkueyteow, "Noodles"),
-                    Food("Cendol", 5.0, R.drawable.dessert_cendol, "Desserts")
-                ),
-                status = OrderStatus.READY,
-                timestamp = "10:15 AM"
+        // 底部导航栏（核心修改：根据员工状态切换）
+        if (isStaff) {
+            StaffBottomNavigationBar(
+                selectedNavItem = selectedNavItem,
+                onNavItemSelect = onNavItemSelect
             )
-        )
-    }
-
-    var selectedOrder by remember { mutableStateOf<Order?>(null) }
-    var expandedOrderId by remember { mutableStateOf<Int?>(null) }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Staff Profile",
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            )
-        },
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
-                // 订单统计卡片
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                ) {
-                    OrderStatCard(
-                        title = "New",
-                        count = orders.count { it.status == OrderStatus.NEW },
-                        color = Color(0xFFFF5252),
-                        modifier = Modifier.weight(1f)
-                    )
-                    OrderStatCard(
-                        title = "Preparing",
-                        count = orders.count { it.status == OrderStatus.PREPARING },
-                        color = Color(0xFFFFC107),
-                        modifier = Modifier.weight(1f)
-                    )
-                    OrderStatCard(
-                        title = "Ready",
-                        count = orders.count { it.status == OrderStatus.READY },
-                        color = Color(0xFF4CAF50),
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                // 订单列表标题
-                Text(
-                    "Recent Orders",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                // 订单列表
-                LazyColumn(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    items(orders) { order ->
-                        OrderItem(
-                            order = order,
-                            isExpanded = expandedOrderId == order.id,
-                            onExpandToggle = {
-                                expandedOrderId = if (expandedOrderId == order.id) null else order.id
-                            },
-                            onStatusChange = { newStatus ->
-                                // 这里会更新订单状态
-                                println("Order ${order.id} status changed to $newStatus")
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    )
-}
-
-// 订单统计卡片
-@Composable
-fun OrderStatCard(
-    title: String,
-    count: Int,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color)
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                title,
-                color = Color.White,
-                fontSize = 14.sp
-            )
-            Text(
-                count.toString(),
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+        } else {
+            CustomerBottomNavigationBar(
+                cartItemCount = cartItemCount,
+                selectedNavItem = selectedNavItem,
+                onNavItemSelect = onNavItemSelect
             )
         }
     }
 }
 
-// 订单项组件
-@Composable
-fun OrderItem(
-    order: Order,
-    isExpanded: Boolean,
-    onExpandToggle: () -> Unit,
-    onStatusChange: (OrderStatus) -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column {
-            // 订单头部 - 可点击展开/折叠
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onExpandToggle() }
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        "Order #${order.id}",
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        "Table ${order.tableNumber} • ${order.timestamp}",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // 状态标签
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                when (order.status) {
-                                    OrderStatus.NEW -> Color(0xFFFFEBEE)
-                                    OrderStatus.PREPARING -> Color(0xFFFFF8E1)
-                                    OrderStatus.READY -> Color(0xE8F5E9)
-                                    OrderStatus.COMPLETED -> Color(0xE0F7FA)
-                                    OrderStatus.CANCELLED -> Color(0xFFEEEEEE)
-                                },
-                                RoundedCornerShape(4.dp)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            order.status.name,
-                            fontSize = 12.sp,
-                            color = when (order.status) {
-                                OrderStatus.NEW -> Color(0xFFD32F2F)
-                                OrderStatus.PREPARING -> Color(0xFFF57C00)
-                                OrderStatus.READY -> Color(0xFF388E3C)
-                                OrderStatus.COMPLETED -> Color(0xFF0097A7)
-                                OrderStatus.CANCELLED -> Color(0xFF757575)
-                            }
-                        )
-                    }
-
-                    // 展开/折叠图标
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand",
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-
-            // 展开状态时显示的内容
-            if (isExpanded) {
-                Divider()
-
-                // 订单项列表
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text("Items:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
-
-                    order.items.forEach { item ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(item.name)
-                            Text("RM ${String.format("%.2f", item.price)}")
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // 订单总价
-                    val total = order.items.sumOf { it.price }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Total:", fontWeight = FontWeight.Bold)
-                        Text("RM ${String.format("%.2f", total)}", fontWeight = FontWeight.Bold)
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // 状态更新按钮
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // 根据当前状态显示适当的按钮
-                        when (order.status) {
-                            OrderStatus.NEW -> {
-                                Button(
-                                    onClick = { onStatusChange(OrderStatus.PREPARING) },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text("Start Preparing")
-                                }
-                                Button(
-                                    onClick = { onStatusChange(OrderStatus.CANCELLED) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text("Cancel")
-                                }
-                            }
-                            OrderStatus.PREPARING -> {
-                                Button(
-                                    onClick = { onStatusChange(OrderStatus.READY) },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text("Mark as Ready")
-                                }
-                            }
-                            OrderStatus.READY -> {
-                                Button(
-                                    onClick = { onStatusChange(OrderStatus.COMPLETED) },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text("Mark as Completed")
-                                }
-                            }
-                            else -> {}
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 // 登录/切换用户类型屏幕
 @Composable
