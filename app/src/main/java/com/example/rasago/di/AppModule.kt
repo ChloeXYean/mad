@@ -2,8 +2,6 @@ package com.example.rasago.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.rasago.data.dao.CustomerDao
 import com.example.rasago.data.dao.MenuItemDao
 import com.example.rasago.data.dao.OrderDao
@@ -18,10 +16,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -31,26 +25,15 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDatabase(
-        @ApplicationContext appContext: Context,
-        orderRepositoryProvider: Provider<OrderRepository>,
-        menuRepositoryProvider: Provider<MenuRepository>,
-        userRepositoryProvider: Provider<UserRepository>
+        @ApplicationContext appContext: Context
     ): AppDatabase {
+        // The database creation is now simplified, with no callback.
+        // Pre-population will be handled by the Application class.
         return Room.databaseBuilder(
             appContext,
             AppDatabase::class.java,
             "rasago_database"
-        ).addCallback(object : RoomDatabase.Callback() {
-            override fun onCreate(db: SupportSQLiteDatabase) {
-                super.onCreate(db)
-                // Prepopulate all data on a background thread when the DB is first created.
-                CoroutineScope(Dispatchers.IO).launch {
-                    orderRepositoryProvider.get().prepopulateDatabase()
-                    menuRepositoryProvider.get().prepopulateMenu()
-                    userRepositoryProvider.get().prepopulateUsers()
-                }
-            }
-        }).build()
+        ).build()
     }
 
     // --- DAO Providers ---
@@ -74,9 +57,11 @@ object AppModule {
     @Singleton
     fun provideOrderRepository(
         orderDao: OrderDao,
+        menuItemDao: MenuItemDao,
         orderItemDao: OrderItemDao
     ): OrderRepository {
-        return OrderRepository(orderDao, orderItemDao)
+        // Pass all required DAOs to the repository constructor in the correct order
+        return OrderRepository(orderDao, menuItemDao)
     }
 
     @Provides

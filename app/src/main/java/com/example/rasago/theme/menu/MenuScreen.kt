@@ -623,52 +623,27 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rasago.R
+import com.example.rasago.data.model.MenuItem
 import com.example.rasago.theme.navigation.CustomerBottomNavigationBar
 import com.example.rasago.theme.navigation.StaffBottomNavigationBar
-import com.example.rasago.ui.theme.RasagoApp
-
-// Data classes remain the same
-data class Food(
-    val name: String,
-    val price: Double,
-    val imageRes: Int,
-    val category: String,
-    val isRecommended: Boolean = false
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuScreen(
     isStaff: Boolean = false,
+    foodList: List<MenuItem>,
+    cartItemCount: Int, // Accept cart count as a parameter
     onNavigateToOrders: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToStaffProfile: () -> Unit = {},
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onFoodItemClicked: (MenuItem) -> Unit
 ) {
-    var cartItemCount by remember { mutableStateOf(0) }
     var searchText by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
-
-    val foodList = remember {
-        listOf(
-            Food("Nasi Lemak", 8.5, R.drawable.rice_nasilemak, "Rice", true),
-            Food("Asam Laksa", 10.0, R.drawable.noodle_asamlaksa, "Noodles", true),
-            Food("Curry Mee", 9.5, R.drawable.noodle_currymee, "Noodles"),
-            Food("Otak Otak", 7.0, R.drawable.side_otakotak, "Side Dishes"),
-            Food("Chicken Rice", 9.0, R.drawable.rice_chickenrice, "Rice"),
-            Food("Char Kuey Teow", 11.0, R.drawable.noodle_charkueyteow, "Noodles"),
-            Food("Satay", 12.0, R.drawable.side_chickensatay, "Side Dishes"),
-            Food("Keropok Lekor", 4.0, R.drawable.side_lekor, "Side Dishes"),
-            Food("Cendol", 5.0, R.drawable.dessert_cendol, "Desserts"),
-            Food("Ais Kacang", 5.0, R.drawable.dessert_abc, "Desserts"),
-            Food("Teh C", 3.5, R.drawable.drink_tehtarik, "Drinks"),
-            Food("Milo Ais", 4.0, R.drawable.drink_miloais, "Drinks")
-        )
-    }
 
     val filteredFoods = foodList.filter { food ->
         (selectedCategory == "All" || food.category == selectedCategory) &&
@@ -689,7 +664,7 @@ fun MenuScreen(
                 )
             } else {
                 CustomerBottomNavigationBar(
-                    cartItemCount = cartItemCount,
+                    cartItemCount = cartItemCount, // Use the passed-in value
                     selectedNavItem = "Menu",
                     onNavItemSelect = { title ->
                         when (title) {
@@ -704,11 +679,10 @@ fun MenuScreen(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
                 .fillMaxSize()
+                .padding(innerPadding)
         ) {
             Banner(modifier = Modifier.height(180.dp))
-
             SearchBar(
                 searchText = searchText,
                 onSearchTextChange = { searchText = it },
@@ -716,7 +690,6 @@ fun MenuScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
-
             CategoryScrollableButtons(
                 categories = listOf("All", "Rice", "Noodles", "Drinks", "Side Dishes", "Desserts"),
                 selectedCategory = selectedCategory,
@@ -725,27 +698,22 @@ fun MenuScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
-
             Text(
                 text = " Recommended for you",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(16.dp)
             )
-
             FoodGrid(
                 foodList = filteredFoods,
-                onItemClick = { /* Handle item click if needed */ },
-                modifier = Modifier.weight(1f) // This makes the grid fill available space
+                onItemClick = onFoodItemClicked,
+                modifier = Modifier.weight(1f)
             )
         }
     }
 }
 
 @Composable
-fun LoginScreen(
-    onLoginAsStaff: () -> Unit,
-    onLoginAsCustomer: () -> Unit
-) {
+fun LoginScreen(onLoginAsCustomer: () -> Unit, onLoginAsStaff: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -763,7 +731,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-                .height(60.dp),
+                .height(60.dp)
         ) {
             Text("Login as Customer", fontSize = 18.sp)
         }
@@ -771,7 +739,7 @@ fun LoginScreen(
             onClick = onLoginAsStaff,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp),
+                .height(60.dp)
         ) {
             Text("Login as Staff", fontSize = 18.sp)
         }
@@ -861,18 +829,13 @@ fun CategoryScrollableButtons(
 
 @Composable
 fun FoodGrid(
-    foodList: List<Food>,
-    onItemClick: (Food) -> Unit,
+    foodList: List<MenuItem>,
+    onItemClick: (MenuItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 8.dp,
-            bottom = 8.dp
-        ),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
@@ -888,8 +851,8 @@ fun FoodGrid(
 
 @Composable
 fun MenuItemCard(
-    food: Food,
-    onItemClick: (Food) -> Unit,
+    food: MenuItem,
+    onItemClick: (MenuItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -905,7 +868,7 @@ fun MenuItemCard(
                 .background(Color.LightGray)
         ) {
             Image(
-                painter = painterResource(food.imageRes),
+                painter = painterResource(food.photo),
                 contentDescription = food.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -928,7 +891,6 @@ fun MenuItemCard(
                 }
             }
         }
-
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = food.name,
@@ -944,14 +906,5 @@ fun MenuItemCard(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start
         )
-    }
-}
-
-
-@Preview(showBackground = true, name = "Restaurant Screen Preview")
-@Composable
-fun RestaurantScreenPreview() {
-    RasagoApp {
-        MenuScreen()
     }
 }

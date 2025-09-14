@@ -22,30 +22,30 @@ class ProfileViewModel @Inject constructor(
     private val _staff = MutableLiveData<StaffEntity?>()
     val staff: LiveData<StaffEntity?> = _staff
 
-    fun loadCustomerById(customerId: Long) {
-        viewModelScope.launch {
-            _customer.value = userRepository.getCustomerById(customerId)
-        }
-    }
-
-    fun loadStaffById(staffId: Long) {
-        viewModelScope.launch {
-            _staff.value = userRepository.getStaffById(staffId)
-        }
-    }
-
-    fun updateCustomer(updated: CustomerEntity) {
-        viewModelScope.launch {
-            userRepository.updateCustomer(updated)
-            _customer.value = updated
-        }
-    }
-
-    fun updateStaff(updated: StaffEntity) {
-        viewModelScope.launch {
-            userRepository.updateStaff(updated)
-            _staff.value = updated
-        }
-    }
+//    fun loadCustomerById(customerId: Long) {
+//        viewModelScope.launch {
+//            _customer.value = userRepository.getCustomerById(customerId)
+//        }
+//    }
+//
+//    fun loadStaffById(staffId: Long) {
+//        viewModelScope.launch {
+//            _staff.value = userRepository.getStaffById(staffId)
+//        }
+//    }
+//
+//    fun updateCustomer(updated: CustomerEntity) {
+//        viewModelScope.launch {
+//            userRepository.updateCustomer(updated)
+//            _customer.value = updated
+//        }
+//    }
+//
+//    fun updateStaff(updated: StaffEntity) {
+//        viewModelScope.launch {
+//            userRepository.updateStaff(updated)
+//            _staff.value = updated
+//        }
+//    }
 }
 

@@ -10,7 +10,8 @@ fun MenuItem.toEntity(): MenuItemEntity {
         price = this.price,
         category = this.category,
         description = this.description,
-        imageRes = this.imageRes
+        photo = this.photo,
+        isRecommended = this.isRecommended
     )
 }
 
@@ -18,19 +19,22 @@ fun List<MenuItem>.toEntityList(): List<MenuItemEntity> {
     return this.map { it.toEntity() }
 }
 
-// You'll also likely need the reverse for when you fetch data:
-fun MenuItemEntity.toDomain(): MenuItem {
+/**
+ * Converts a MenuItemEntity from the database into a MenuItem model for the app's UI.
+ */
+fun MenuItemEntity.toMenuItem(): MenuItem {
     return MenuItem(
         id = this.id,
         name = this.name,
-        description = this.description,
+        description = this.description, // Map the description
         price = this.price,
         category = this.category,
-        imageRes = this.imageRes
+        photo = this.photo,
+        isRecommended = this.isRecommended
     )
 }
 
 
 fun List<MenuItemEntity>.toDomainList(): List<MenuItem> {
-    return this.map { it.toDomain() }
+    return this.map { it.toMenuItem() }
 }

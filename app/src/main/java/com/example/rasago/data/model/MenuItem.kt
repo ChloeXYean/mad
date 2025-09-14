@@ -6,5 +6,7 @@ data class MenuItem(
     val description: String,
     val price: Double,
     val category: String,
-    val imageRes: Int
+    val photo: Int,
+    val isRecommended: Boolean,
+    var quantity : Int = 0
 )

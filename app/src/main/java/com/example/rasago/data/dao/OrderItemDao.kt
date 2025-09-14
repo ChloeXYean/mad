@@ -11,7 +11,8 @@ import com.example.rasago.data.entity.OrderItemEntity
 
 @Dao
 interface OrderItemDao {
-
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(orderItem: OrderItemEntity)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertItem(item: OrderItemEntity): Long
 
@@ -25,10 +26,8 @@ interface OrderItemDao {
     suspend fun deleteItem(item: OrderItemEntity)
 
     @Query("SELECT * FROM order_items where orderId = :orderId")
-    suspend fun getItemsForOrder(orderId: Int): List<OrderItemEntity>
+    suspend fun getItemsForOrder(orderId: Long): List<OrderItemEntity>
 
     @Query("SELECT * FROM order_items")
     suspend fun getAllItemsOrder(): List<OrderItemEntity>
-
-
 }

@@ -23,23 +23,23 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        loadUserProfile()
-    }
-
-    private fun loadUserProfile() {
-        viewModelScope.launch {
-            val user = DummyData.customerProfile
-            _uiState.update {
-                it.copy(
-                    name = user.name,
-                    email = user.email,
-                    phone = user.phone,
-                    profileImageRes = user.profileImageRes
-                )
-            }
-        }
-    }
+//    init {
+//        loadUserProfile()
+//    }
+//
+//    private fun loadUserProfile() {
+//        viewModelScope.launch {
+//            val user = DummyData.customerProfile
+//            _uiState.update {
+//                it.copy(
+//                    name = user.name,
+//                    email = user.email,
+//                    phone = user.phone,
+//                    profileImageRes = user.profileImageRes
+//                )
+//            }
+//        }
+//    }
 
     fun onNameChange(newName: String) {
         _uiState.update { it.copy(name = newName) }

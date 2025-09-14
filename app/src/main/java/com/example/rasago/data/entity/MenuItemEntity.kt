@@ -5,10 +5,12 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "menu_items")
 data class MenuItemEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L,
     val name: String,
+    val description: String,
     val price: Double,
     val category: String,
-    val description: String,
-    val imageRes: Int
+    val photo: Int,
+    val isRecommended: Boolean = false
 )

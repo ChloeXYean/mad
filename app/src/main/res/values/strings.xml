@@ -28,5 +28,11 @@
     <string name="defaultStatus">Default</string>
     <string name="placeholder">Placeholder</string>
     <string name="role">Role</string>
+    <string name="order_summary">Order Summary</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="tax">Tax</string>
+    <string name="total">Total</string>
+    <string name="quantity_display">Quantity</string>
+    <string name="next">Next</string>
 
 </resources>

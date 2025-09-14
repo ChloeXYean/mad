@@ -8,13 +8,14 @@ import androidx.room.PrimaryKey
 data class OrderEntity(
     @PrimaryKey(autoGenerate = true) val orderId: Long = 0L, //like int orderId = 0, but it is long, because onConflict returns long, not int
     val orderNo: String,
-    val orderTime: Long,
+    val orderTime: String,
     val subtotal: Double,
     val serviceCharge: Double,
     val sst: Double,
     val totalPayment: Double,
-    val paymentMethod: String,       // cash, card, e-wallet
+    val paymentMethod: String,
     val remarks: String?,
     val orderType: String,           // dine-in / takeaway
-    val foodStatus: String           // preparing / done / cancelled
+    val foodStatus: String,           // preparing / done / cancelled
+    val customerId: String
 )
