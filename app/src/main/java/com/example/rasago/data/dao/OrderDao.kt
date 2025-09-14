@@ -11,7 +11,7 @@ import com.example.rasago.data.model.OrderWithItems
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface OrderDao{
+interface OrderDao {
 
     @Insert
     suspend fun insertOrder(order: OrderEntity): Long //return new row id
@@ -22,14 +22,14 @@ interface OrderDao{
     @Delete
     suspend fun deleteOrder(order: OrderEntity)
 
-    @Query ("SELECT COUNT(*) FROM orders")
+    @Query("SELECT COUNT(*) FROM orders")
     suspend fun getOrderCount(): Int
 
     //From table named orders
     @Query("SELECT * FROM orders where orderId = :orderId")
-    suspend fun getOrderById(orderId:Int): OrderEntity
+    suspend fun getOrderById(orderId: Int): OrderEntity
 
-    @Query ("UPDATE orders SET foodStatus = :newStatus WHERE orderNo = :orderNo")
+    @Query("UPDATE orders SET foodStatus = :newStatus WHERE orderNo = :orderNo")
     suspend fun updateStatus(orderNo: String, newStatus: String)
 
     @Query("SELECT * FROM orders ORDER BY orderTime DESC")
@@ -41,4 +41,6 @@ interface OrderDao{
 
     @Transaction
     @Query("SELECT * FROM orders ORDER BY orderTime DESC")
-    suspend fun getAllOrdersWithItems(): Flow<List<OrderWithItems>> }
+    fun getAllOrdersWithItems(): Flow<List<OrderWithItems>>
+
+}

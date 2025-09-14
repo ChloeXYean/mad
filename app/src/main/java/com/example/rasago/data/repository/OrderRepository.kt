@@ -23,6 +23,10 @@ class OrderRepository @Inject constructor(
     private val orderDao: OrderDao,
     private val orderItemDao: OrderItemDao
 ){
+
+    suspend fun getAllOrderWithItems(orderEntity: OrderEntity) = withContext(Dispatchers.IO){
+        orderItemDao.getItemsForOrder()
+    }
     suspend fun insertOrder(orderEntity: OrderEntity, orderItems: List<OrderItemEntity>): Long = withContext(Dispatchers.IO) {
         val orderId = orderDao.insertOrder(orderEntity)
         val itemsWithOrderId = orderItems.map { it.copy(orderId = orderId) }

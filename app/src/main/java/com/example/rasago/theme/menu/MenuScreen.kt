@@ -26,9 +26,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.rasago.R
+import com.example.rasago.theme.navigation.CustomerBottomNavigationBar
+import com.example.rasago.theme.navigation.StaffBottomNavigationBar
+import com.example.rasago.ui.theme.RasagoApp
 import com.example.rasago.ui.theme.menu.MenuViewModel
 import com.example.rasago.ui.theme.order.OrderViewModel
 
@@ -49,7 +54,7 @@ data class NavItem(
 
 
 @Composable
-fun MenuScreen(initialShowLogin: Boolean = false, menuViewModel: MenuViewModel, onNavigateToCart: () -> Unit) {
+fun MenuScreen(navController: NavController, menuViewModel: MenuViewModel, initialShowLogin: Boolean = false) {
     // 状态管理
     var cartItemCount by remember { mutableStateOf(0) }
     var searchText by remember { mutableStateOf("") }
@@ -469,11 +474,11 @@ fun CartFloatingView(
 
 
 
-// 预览
+//, menuViewModel: MenuViewModel, onNavigateToCart: () -> Unit
 //@Preview(showBackground = true, name = "Restaurant Screen Preview")
 //@Composable
 //fun RestaurantScreenPreview() {
-//    AssignmentTestTheme {
+//    RasagoApp {
 //        MenuScreen()
 //    }
 //}

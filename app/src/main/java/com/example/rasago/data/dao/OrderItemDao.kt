@@ -27,4 +27,8 @@ interface OrderItemDao {
     @Query("SELECT * FROM order_items where orderId = :orderId")
     suspend fun getItemsForOrder(orderId: Int): List<OrderItemEntity>
 
+    @Query("SELECT * FROM order_items")
+    suspend fun getAllItemsOrder(): List<OrderItemEntity>
+
+
 }

@@ -8,6 +8,7 @@ import com.example.rasago.data.dao.CustomerDao
 import com.example.rasago.data.dao.MenuItemDao
 import com.example.rasago.data.dao.OrderDao
 import com.example.rasago.data.dao.OrderItemDao
+import com.example.rasago.data.dao.StaffDao
 import com.example.rasago.data.entity.CustomerEntity
 import com.example.rasago.data.entity.MenuItemEntity
 import com.example.rasago.data.entity.OrderEntity

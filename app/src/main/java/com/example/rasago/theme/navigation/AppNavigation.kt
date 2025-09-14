@@ -1,42 +1,91 @@
 package com.example.rasago.theme.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.rasago.theme.menu.LoginScreen
 import com.example.rasago.theme.menu.MenuScreen
+import com.example.rasago.theme.order.OrderManagementScreen
 import com.example.rasago.theme.order.OrderSummaryScreen
 import com.example.rasago.ui.theme.menu.MenuViewModel
 import com.example.rasago.ui.theme.order.OrderViewModel
 
+
 @Composable
 fun AppNavigation(
-    menuViewModel: MenuViewModel = viewModel(),
-    orderViewModel: OrderViewModel = viewModel()
-){
+    menuViewModel: MenuViewModel = hiltViewModel(),
+    orderViewModel: OrderViewModel = hiltViewModel()
+) {
     val navController = rememberNavController()
+
+    // track user role selection in local state
+    var isStaff by remember { mutableStateOf(false) }
+
     NavHost(
         navController = navController,
         startDestination = "login"
-    ){
-        composable("login"){ //TODO: Need to check if staff or guest
-            LoginScreen(false, onLoginAsStaff = { navController.navigate("menu")}, onLoginAsCustomer = { navController.navigate("menu")})
+    ) {
+        // --- Login Flow ---
+        navigation(startDestination = "login", route = "login_flow") {
+            composable("login") {
+                LoginScreen(
+                    isStaff = isStaff,
+                    onLoginAsCustomer = {
+                        isStaff = false
+                        navController.navigate("customer_app") {
+                            popUpTo("login") { inclusive = true } // optional: remove login from back stack
+                        }
+                    },
+                    onLoginAsStaff = {
+                        isStaff = true
+                        navController.navigate("staff_app") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
 
-        composable("menu"){
-            MenuScreen(initialShowLogin = false, menuViewModel = menuViewModel, onNavigateToCart = { navController.navigate("cart")})
+        // --- Customer App Flow ---
+        navigation(startDestination = "menu", route = "customer_app") {
+            composable("menu") {
+                MenuScreen(navController = navController, menuViewModel = menuViewModel)
+            }
+
+            composable(
+                route = "foodDetail/{menuItemId}",
+                arguments = listOf(navArgument("menuItemId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val menuItemId = backStackEntry.arguments?.getInt("menuItemId") ?: 0
+//                FoodDetailScreen(
+//                    navController = navController,
+//                    menuItemId = menuItemId,
+//                    viewModel = menuViewModel
+//                )
+            }
+
+            composable("cart") {
+                OrderSummaryScreen(navController = navController, viewModel = menuViewModel)
+            }
         }
 
-        composable ("cart"){
-            OrderSummaryScreen(
-                onBackClick = { },
-                onAddItemClick = { },
-                onQuantityChange = { _, _ -> },
-                selectedPaymentMethod = 0,
-                onPaymentMethodSelect = { },
-                onPlaceOrderClick = { })
+        // --- Staff App Flow ---
+        navigation(startDestination = "order_management", route = "staff_app") {
+            composable("order_management") {
+                OrderManagementScreen(
+                    orderViewModel = orderViewModel,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

@@ -3,8 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.dagger.hilt.android")
-    id("com.google.devtools.ksp") //Room
-    id("kotlin-kapt") //Hilt
+    id("com.google.devtools.ksp")
+    id("kotlin-kapt") // For Hilt
 }
 
 
