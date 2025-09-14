@@ -1,10 +1,12 @@
 package com.example.rasago.theme.navigation
 
+import OrderViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,13 +19,12 @@ import com.example.rasago.theme.menu.MenuScreen
 import com.example.rasago.theme.order.OrderManagementScreen
 import com.example.rasago.theme.order.OrderSummaryScreen
 import com.example.rasago.ui.theme.menu.MenuViewModel
-import com.example.rasago.ui.theme.order.OrderViewModel
 
 
 @Composable
 fun AppNavigation(
-    menuViewModel: MenuViewModel = viewModel(),
-    orderViewModel: OrderViewModel = viewModel()
+    menuViewModel: MenuViewModel = hiltViewModel(),
+    orderViewModel: OrderViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
 
@@ -38,7 +39,6 @@ fun AppNavigation(
         navigation(startDestination = "login", route = "login_flow") {
             composable("login") {
                 LoginScreen(
-                    isStaff = isStaff,
                     onLoginAsCustomer = {
                         isStaff = false
                         navController.navigate("customer_app") {

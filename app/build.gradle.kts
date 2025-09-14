@@ -1,12 +1,11 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.dagger.hilt.android")
-    id("com.google.devtools.ksp")
-    id("kotlin-kapt") // For Hilt
+    id("com.google.devtools.ksp") // <-- Apply here
+    kotlin("kapt") // still needed for Hilt
 }
-
 
 android {
     namespace = "com.example.rasago"
@@ -45,50 +44,38 @@ android {
 
 dependencies {
     val room_version = "2.7.2"
-    implementation("com.google.dagger:hilt-android:2.57.1")
-    kapt("com.google.dagger:hilt-compiler:2.57.1")
-    implementation("androidx.compose.ui:ui:1.6.7")
-    implementation ("androidx.compose.ui:ui-text-google-fonts:1.6.7")
     val lifecycle_version = "2.9.3"
     val arch_version = "2.2.0"
 
-    //Icon
-    implementation("androidx.compose.material:material-icons-core:1.7.8")
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
-    implementation("androidx.compose.material3:material3:1.2.0")
-    implementation("androidx.compose.material:material-icons-core")
-    implementation("androidx.compose.material:material-icons-extended")
-
-    // Hilt
+    // --- Hilt (use kapt only) ---
     implementation("com.google.dagger:hilt-android:2.57.1")
-    kapt("com.google.dagger:hilt-compiler:2.57.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.57.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
-    // Room
+    // --- Room (can still use ksp) ---
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     implementation("androidx.room:room-paging:$room_version")
     testImplementation("androidx.room:room-testing:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.navigation:navigation-compose:2.9.3")
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
 
-    // Compose
+    // --- Compose ---
     implementation("androidx.compose.ui:ui:1.6.7")
     implementation("androidx.compose.ui:ui-text-google-fonts:1.6.7")
+    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.compose.material:material-icons-core:1.7.8")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
     implementation(libs.androidx.activity.compose)
     implementation("androidx.compose.runtime:runtime-livedata")
 
-    // Navigation
+    // --- Navigation ---
     implementation("androidx.navigation:navigation-compose:2.9.3")
 
-    // Lifecycle / ViewModel / LiveData
+    // --- Lifecycle / ViewModel ---
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
@@ -103,7 +90,7 @@ dependencies {
     testImplementation("androidx.arch.core:core-testing:$arch_version")
     testImplementation("androidx.lifecycle:lifecycle-runtime-testing:$lifecycle_version")
 
-    // Testing
+    // --- Testing ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -2,8 +2,11 @@ package com.example.rasago.theme.profile
 
 enum class UserRole {
     CUSTOMER,
-    STAFF,
     MANAGER,
     KITCHEN,
-    CASHIER
+    CASHIER,
+    NONE
 }
+
+val UserRole.isStaff: Boolean
+    get() = this != UserRole.CUSTOMER && this != UserRole.NONE

@@ -1,5 +1,6 @@
 package com.example.rasago.theme.navigation
 
+import OrderViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.example.rasago.ui.theme.RasagoApp
 import com.example.rasago.ui.theme.menu.MenuViewModel
-import com.example.rasago.ui.theme.order.OrderViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

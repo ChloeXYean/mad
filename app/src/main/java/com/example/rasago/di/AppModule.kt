@@ -1,6 +1,5 @@
 package com.example.rasago.di
 
-import OrderRepository
 import android.content.Context
 import androidx.room.Room
 import com.example.rasago.data.dao.MenuItemDao
@@ -8,6 +7,7 @@ import com.example.rasago.data.dao.OrderDao
 import com.example.rasago.data.dao.OrderItemDao
 import com.example.rasago.data.database.AppDatabase
 import com.example.rasago.data.repository.MenuRepository
+import com.example.rasago.data.repository.OrderRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,5 +40,6 @@ object AppModule{
     fun provideMenuRepository(menuDao: MenuItemDao) = MenuRepository(menuDao)
 
     @Provides
-    fun provideOrderRepository(orderDao: OrderDao, orderItemDao: OrderItemDao) = OrderRepository(orderDao, orderItemDao)
+    fun provideOrderRepository(orderDao: OrderDao, orderItemDao: OrderItemDao) =
+        OrderRepository(orderDao, orderItemDao)
 }

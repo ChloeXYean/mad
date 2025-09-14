@@ -1,5 +1,7 @@
 ﻿package com.example.rasago.theme.order
 
+import OrderUiState
+import OrderViewModel
 import android.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -52,7 +54,8 @@ import androidx.compose.runtime.collectAsState
 import com.example.rasago.theme.navigation.AppTopBar
 import com.example.rasago.theme.profile.UserRole
 import com.example.rasago.data.model.OrderItem
-import com.example.rasago.ui.theme.order.OrderViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun FoodStatusScreen(
@@ -170,7 +173,7 @@ fun FoodItemRow(item: OrderItem, status: String, role: UserRole) {
 
         StatusDropdown(
             status = status,
-            enabled = (role == UserRole.STAFF)
+            enabled = (role == UserRole.MANAGER)
         )
     }
 }

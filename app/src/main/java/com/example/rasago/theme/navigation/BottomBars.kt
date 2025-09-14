@@ -16,9 +16,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.rasago.theme.menu.NavItem
 
+data class NavItem(
+    val title: String,
+    val icon: ImageVector
+)
 // 顾客底部导航栏
 @Composable
 fun CustomerBottomNavigationBar(

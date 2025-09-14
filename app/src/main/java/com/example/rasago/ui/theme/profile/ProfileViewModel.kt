@@ -8,7 +8,7 @@ import com.example.rasago.data.entity.CustomerEntity
 import com.example.rasago.data.entity.StaffEntity
 import com.example.rasago.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @HiltViewModel

@@ -39,11 +39,13 @@ fun OrderWithItems.toOrder(): Order {
         type = order.orderType,
         time = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()).format(order.orderTime),
         status = order.foodStatus,
-        orderItems = items.map {
+        orderItems = items.map { entity ->
             OrderItem(
-                name = it.menuItemName,
-                price = it.price,
-                quantity = it.quantity
+                id = entity.id,
+                name = entity.menuItemName,
+                price = entity.price,
+                quantity = entity.quantity,
+                status = "Preparing"
             )
         }
     )

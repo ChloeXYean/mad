@@ -13,8 +13,8 @@ object DummyData {
             time = "2025-09-13 12:30",
             status = "Preparing",
             orderItems = listOf(
-                OrderItem("Nasi Lemak", 8.5, 2),
-                OrderItem("Teh Tarik", 2.0, 1)
+                OrderItem(1,"Nasi Lemak", 8.5, 2),
+                OrderItem(2,"Teh Tarik", 2.0, 1)
             )
         ),
         Order(
@@ -23,8 +23,8 @@ object DummyData {
             time = "2025-09-13 13:10",
             status = "Done",
             orderItems = listOf(
-                OrderItem("Mee Goreng", 7.0, 1),
-                OrderItem("Sirap Bandung", 2.5, 2)
+                OrderItem(1,"Mee Goreng", 7.0, 1),
+                OrderItem(2,"Sirap Bandung", 2.5, 2)
             )
         )
     )

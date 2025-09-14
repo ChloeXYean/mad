@@ -2,6 +2,7 @@ package com.example.rasago.data.model
 
 //App logic and UI
 data class OrderItem(
+    val id: Long, // unique identifier
     val name: String,
     val price: Double,
     val quantity: Int,
