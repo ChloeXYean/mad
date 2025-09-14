@@ -63,6 +63,13 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.57.1")
     kapt("com.google.dagger:hilt-compiler:2.57.1")
 
+    // Hilt core
+    implementation ("com.google.dagger:hilt-android:2.52")
+    kapt ("com.google.dagger:hilt-compiler:2.52")
+
+    // Hilt navigation for Compose
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
     // Room
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")

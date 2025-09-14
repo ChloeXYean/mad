@@ -1,11 +1,7 @@
 package com.example.rasago.theme.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.*
+import androidx.    hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,7 +15,6 @@ import com.example.rasago.theme.order.OrderSummaryScreen
 import com.example.rasago.ui.theme.menu.MenuViewModel
 import com.example.rasago.ui.theme.order.OrderViewModel
 
-
 @Composable
 fun AppNavigation(
     menuViewModel: MenuViewModel = hiltViewModel(),
@@ -32,7 +27,7 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = "login"
+        startDestination = "login_flow"
     ) {
         // --- Login Flow ---
         navigation(startDestination = "login", route = "login_flow") {
@@ -42,7 +37,7 @@ fun AppNavigation(
                     onLoginAsCustomer = {
                         isStaff = false
                         navController.navigate("customer_app") {
-                            popUpTo("login") { inclusive = true } // optional: remove login from back stack
+                            popUpTo("login") { inclusive = true }
                         }
                     },
                     onLoginAsStaff = {
@@ -58,7 +53,10 @@ fun AppNavigation(
         // --- Customer App Flow ---
         navigation(startDestination = "menu", route = "customer_app") {
             composable("menu") {
-                MenuScreen(navController = navController, menuViewModel = menuViewModel)
+                MenuScreen(
+                    navController = navController,
+                    menuViewModel = menuViewModel
+                )
             }
 
             composable(
@@ -66,15 +64,32 @@ fun AppNavigation(
                 arguments = listOf(navArgument("menuItemId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val menuItemId = backStackEntry.arguments?.getInt("menuItemId") ?: 0
-//                FoodDetailScreen(
-//                    navController = navController,
-//                    menuItemId = menuItemId,
-//                    viewModel = menuViewModel
-//                )
+                // Uncomment when FoodDetailScreen is ready
+                // FoodDetailScreen(
+                //     navController = navController,
+                //     menuItemId = menuItemId,
+                //     viewModel = menuViewModel
+                // )
             }
 
             composable("cart") {
-                OrderSummaryScreen(navController = navController, viewModel = menuViewModel)
+                OrderSummaryScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onAddItemClick = {
+                        // TODO: handle add item
+                    },
+                    onQuantityChange = { itemIndex, change ->
+                        // TODO: handle quantity change
+                    },
+                    selectedPaymentMethod = 0, // TODO: hook into state
+                    onPaymentMethodSelect = { methodIndex ->
+                        // TODO: handle payment method select
+                    },
+                    onPlaceOrderClick = {
+                        // TODO: place order logic
+                        navController.popBackStack()
+                    }
+                )
             }
         }
 
@@ -83,6 +98,9 @@ fun AppNavigation(
             composable("order_management") {
                 OrderManagementScreen(
                     orderViewModel = orderViewModel,
+                    onViewStatusClick = { order ->
+                        // TODO: handle order status click
+                    },
                     onBackClick = { navController.popBackStack() }
                 )
             }
