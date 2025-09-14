@@ -28,6 +28,7 @@
 package com.example.rasago.data.repository
 
 import com.example.rasago.data.dao.MenuItemDao
+import com.example.rasago.data.entity.MenuItemEntity
 import com.example.rasago.data.mapper.toMenuItem
 import com.example.rasago.data.model.MenuItem
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +44,46 @@ class MenuRepository @Inject constructor(private val menuItemDao: MenuItemDao) {
 
     fun getMenuItemById(id: Long): Flow<MenuItem?> {
         return menuItemDao.getMenuItemById(id).map { it?.toMenuItem() }
+    }
+
+    /**
+     * Inserts a new menu item into the database.
+     */
+    suspend fun addMenuItem(
+        name: String,
+        description: String,
+        price: Double,
+        category: String,
+        photoUri: String,
+        isRecommended: Boolean
+    ) {
+        val newMenuItem = MenuItemEntity(
+            name = name,
+            description = description,
+            price = price,
+            category = category,
+            photo = photoUri,
+            isRecommended = isRecommended
+        )
+        menuItemDao.insertMenuItem(newMenuItem)
+    }
+
+    suspend fun updateMenuItem(menuItem: MenuItem) {
+        val menuItemEntity = MenuItemEntity(
+            id = menuItem.id,
+            name = menuItem.name,
+            description = menuItem.description,
+            price = menuItem.price,
+            category = menuItem.category,
+            photo = menuItem.photo,
+            isRecommended = menuItem.isRecommended
+        )
+        menuItemDao.updateMenuItem(menuItemEntity)
+    }
+
+    suspend fun deleteMenuItem(menuItem: MenuItem) {
+        val menuItemEntity = MenuItemEntity(id = menuItem.id, name = menuItem.name, description = menuItem.description, price = menuItem.price, category = menuItem.category, photo = menuItem.photo, isRecommended = menuItem.isRecommended)
+        menuItemDao.deleteMenuItem(menuItemEntity)
     }
 }
 

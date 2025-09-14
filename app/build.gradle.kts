@@ -47,6 +47,8 @@ dependencies {
     val lifecycle_version = "2.9.3"
     val arch_version = "2.2.0"
 
+
+    implementation("io.coil-kt:coil-compose:2.5.0")
     // --- Hilt (use kapt only) ---
     implementation("com.google.dagger:hilt-android:2.57.1")
     kapt("com.google.dagger:hilt-android-compiler:2.57.1")

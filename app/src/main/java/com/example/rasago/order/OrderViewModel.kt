@@ -90,7 +90,6 @@
 package com.example.rasago.order
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.rasago.data.model.MenuItem
 import com.example.rasago.data.repository.OrderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -98,7 +97,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -111,12 +109,12 @@ class OrderViewModel @Inject constructor(
 
     init {
         // When the ViewModel is created, we start with a fresh, empty order.
-        // In a real app, you might load a pending order from the database here.
+        // This resolves the crash that occurred when trying to load a non-existent order.
         clearOrder()
     }
 
     /**
-     * Clears the current order and resets all totals.
+     * Clears the current order and resets all totals to zero.
      */
     fun clearOrder() {
         _uiState.value = OrderUiState()

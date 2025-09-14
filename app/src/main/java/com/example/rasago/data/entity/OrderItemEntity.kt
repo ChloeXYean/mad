@@ -42,7 +42,7 @@ data class OrderItemEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val orderId: Long,
-    val menuItemId: Long?, // Link back to the original menu item
+    val menuItemId: Long, // Link back to the original menu item
     val quantity: Int,
     val price: Double // Price at the time of order
 )

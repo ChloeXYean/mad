@@ -310,9 +310,11 @@
 
 package com.example.rasago.theme.order
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -325,31 +327,51 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Money
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.rasago.R
+import androidx.compose.ui.unit.sp
 import com.example.rasago.data.model.MenuItem
 import com.example.rasago.order.OrderUiState
-import com.example.rasago.theme.navigation.AppTopBar
 import java.text.NumberFormat
+import java.util.Locale
+
+// --- Style Constants ---
+private val backgroundColor = Color(0xFFF0F0F0)
+private val cardColor = Color.White
+
+// --- Helper Function ---
+private fun formatPriceForSummary(price: Double): String {
+    return "RM ${String.format(Locale.US, "%.2f", price)}"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -359,156 +381,288 @@ fun OrderSummaryScreen(
     onCancelButtonClicked: () -> Unit,
     onFoodItemClicked: (MenuItem) -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    var selectedPaymentMethod by remember { mutableStateOf(0) } // 0: QR, 1: Cash, 2: Card
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            AppTopBar(
-                title = stringResource(R.string.order_summary),
-                onBackClick = onCancelButtonClicked,
-                scrollBehavior = scrollBehavior
+            TopAppBar(
+                title = { Text(text = "Order Summary", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onCancelButtonClicked) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
             )
-        }
+        },
+        containerColor = backgroundColor
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
+                .padding(horizontal = 16.dp)
                 .fillMaxSize()
         ) {
-            OrderSummaryBody(
-                orderUiState = orderUiState,
-                onFoodItemClicked = onFoodItemClicked,
-                modifier = Modifier.weight(1f)
-            )
-            OrderSummaryFooter(
-                orderUiState = orderUiState,
-                onNextButtonClicked = onNextButtonClicked,
-                onCancelButtonClicked = onCancelButtonClicked
-            )
-        }
-    }
-}
-
-@Composable
-fun OrderSummaryBody(
-    orderUiState: OrderUiState,
-    onFoodItemClicked: (MenuItem) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(modifier = modifier.padding(16.dp)) {
-        items(orderUiState.orderItems) { item ->
-            FoodItemCard(
-                item = item,
-                onItemClicked = { onFoodItemClicked(item) }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-fun FoodItemCard(
-    item: MenuItem,
-    onItemClicked: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onItemClicked),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = item.photo),
-                contentDescription = item.name,
-                contentScale = ContentScale.Crop,
+            // Main content area that scrolls
+            LazyColumn(
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = stringResource(R.string.quantity_display, item.quantity),
-                    style = MaterialTheme.typography.bodyMedium
+                    .fillMaxWidth()
+                    .padding(bottom = 120.dp), // Add padding at the bottom to avoid overlap with the footer
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // "Your Order" Card
+                item {
+                    YourOrderCard(
+                        orderItems = orderUiState.orderItems,
+                        subtotal = orderUiState.subtotal,
+                        tax = orderUiState.tax,
+                        onAddItemClick = onCancelButtonClicked, // "Add Items" goes back to the menu
+                        onEditItemClick = onFoodItemClicked
+                    )
+                }
+
+                // "Payment Details" Card
+                item {
+                    PaymentDetailsCard(
+                        selectedPaymentMethod = selectedPaymentMethod,
+                        onPaymentMethodSelect = { selectedPaymentMethod = it }
+                    )
+                }
+            }
+
+            // Bottom "Total and Place Order" Card - Stays at the bottom
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            ) {
+                TotalFooterCard(
+                    total = orderUiState.total,
+                    onPlaceOrderClick = onNextButtonClicked
                 )
             }
-            Text(
-                text = formatPrice(item.price * item.quantity),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold
-            )
         }
     }
 }
 
 @Composable
-fun OrderSummaryFooter(
-    orderUiState: OrderUiState,
-    onNextButtonClicked: () -> Unit,
-    onCancelButtonClicked: () -> Unit,
-    modifier: Modifier = Modifier
+private fun YourOrderCard(
+    orderItems: List<MenuItem>,
+    subtotal: Double,
+    tax: Double,
+    onAddItemClick: () -> Unit,
+    onEditItemClick: (MenuItem) -> Unit
 ) {
     Column(
-        modifier = modifier
-            .padding(16.dp)
+        modifier = Modifier
             .fillMaxWidth()
+            .background(cardColor, shape = RoundedCornerShape(8.dp))
+            .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
+            .padding(16.dp)
     ) {
-        // Price Details
-        PriceRow(label = stringResource(R.string.subtotal), price = formatPrice(orderUiState.subtotal))
-        PriceRow(label = stringResource(R.string.tax), price = formatPrice(orderUiState.tax))
-        Divider(thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-        PriceRow(
-            label = stringResource(R.string.total),
-            price = formatPrice(orderUiState.total),
-            isTotal = true
-        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Your Order", style = MaterialTheme.typography.titleMedium)
+            Button(
+                onClick = onAddItemClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF236cb2),
+                    contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .height(30.dp)
+                    .width(105.dp)
+            ) {
+                Text(
+                    text = "Add Items",
+                    fontSize = 12.sp,
+                    fontStyle = FontStyle.Normal
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Action Buttons
+        // List of items in the order
+        orderItems.forEach { item ->
+            SummaryItemRow(
+                item = item,
+                onEditClick = { onEditItemClick(item) }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Subtotal and Tax
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Button(
-                onClick = onCancelButtonClicked,
-                modifier = Modifier.weight(1f),
+            Text(text = "Subtotal:")
+            Text(text = formatPriceForSummary(subtotal))
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "SST (6%):")
+            Text(text = formatPriceForSummary(tax))
+        }
+    }
+}
+
+@Composable
+private fun SummaryItemRow(item: MenuItem, onEditClick: () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.clickable(onClick = onEditClick)) {
+            Text(text = item.name)
+            Text(
+                text = "Edit",
+                fontSize = 12.sp,
+                color = Color(0xFF236cb2)
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(text = formatPriceForSummary(item.price))
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .border(1.dp, Color.Gray, shape = CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.cancel))
-            }
-            Button(
-                onClick = onNextButtonClicked,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(stringResource(R.string.next))
+                Text(text = item.quantity.toString())
             }
         }
     }
 }
 
 @Composable
-fun PriceRow(label: String, price: String, isTotal: Boolean = false) {
-    val textStyle = if (isTotal) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge
-    val textColor = if (isTotal) MaterialTheme.colorScheme.onSurface else Color.Gray
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+private fun PaymentDetailsCard(
+    selectedPaymentMethod: Int,
+    onPaymentMethodSelect: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(cardColor, shape = RoundedCornerShape(8.dp))
+            .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
+            .padding(16.dp)
     ) {
-        Text(text = label, style = textStyle, color = textColor)
-        Text(text = price, style = textStyle, fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal)
+        Text(text = "Payment Details", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        RadioButtonRow(
+            text = "QR Scan",
+            icon = Icons.Default.QrCodeScanner,
+            selected = selectedPaymentMethod == 0,
+            onClick = { onPaymentMethodSelect(0) }
+        )
+        RadioButtonRow(
+            text = "Cash",
+            icon = Icons.Default.Money,
+            selected = selectedPaymentMethod == 1,
+            onClick = { onPaymentMethodSelect(1) }
+        )
+        RadioButtonRow(
+            text = "Card",
+            icon = Icons.Default.CreditCard,
+            selected = selectedPaymentMethod == 2,
+            onClick = { onPaymentMethodSelect(2) }
+        )
+    }
+}
+
+@Composable
+private fun RadioButtonRow(
+    text: String,
+    icon: ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(
+                        Color.LightGray, shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = text,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        RadioButton(
+            selected = selected,
+            onClick = null,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+@Composable
+private fun TotalFooterCard(total: Double, onPlaceOrderClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Total", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = formatPriceForSummary(total),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onPlaceOrderClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50),
+                    contentColor = Color.White
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Place Order")
+            }
+        }
     }
 }

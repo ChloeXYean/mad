@@ -177,6 +177,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.rasago.order.OrderViewModel
+import com.example.rasago.theme.menu.AddMenuItemScreen
+import com.example.rasago.theme.menu.EditMenuItemScreen
 import com.example.rasago.theme.menu.FoodDetailScreen
 import com.example.rasago.theme.menu.LoginScreen
 import com.example.rasago.theme.menu.MenuScreen
@@ -236,16 +238,42 @@ fun AppNavigation(
             MenuScreen(
                 isStaff = true,
                 foodList = menuItems,
-                cartItemCount = 0, // Staff does not have a cart
+                cartItemCount = 0,
                 onNavigateToStaffProfile = { navController.navigate("staff_profile") },
                 onLogout = {
                     navController.navigate("login") { popUpTo("staff_menu") { inclusive = true } }
                 },
                 onFoodItemClicked = { menuItem ->
-                    // Also allow staff to view item details
                     menuViewModel.selectMenuItem(menuItem.id)
                     navController.navigate("foodDetail/${menuItem.id}")
+                },
+                onAddMenuItemClicked = {
+                    navController.navigate("add_menu_item")
                 }
+            )
+        }
+
+        composable("add_menu_item") {
+            AddMenuItemScreen(
+                onAddItemClicked = { name, description, price, category, imageUri ->
+                    menuViewModel.addMenuItem(name, description, price, category, imageUri)
+                    navController.popBackStack()
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "edit_menu_item/{menuItemId}",
+            arguments = listOf(navArgument("menuItemId") { type = NavType.IntType })
+        ) {
+            EditMenuItemScreen(
+                menuItem = selectedMenuItem,
+                onUpdateItemClicked = { id, name, description, price, category, imageUri ->
+                    menuViewModel.updateMenuItem(id, name, description, price, category, imageUri)
+                    navController.popBackStack() // Go back to the detail screen
+                },
+                onBackClick = { navController.popBackStack() }
             )
         }
 
@@ -262,18 +290,29 @@ fun AppNavigation(
         }
 
         composable(
-            route = "foodDetail/{menuItemId}",
-            arguments = listOf(navArgument("menuItemId") { type = NavType.IntType })
-        ) {
+            route = "foodDetail/{menuItemId}/{isStaff}",
+            arguments = listOf(
+                navArgument("menuItemId") { type = NavType.IntType },
+                navArgument("isStaff") { type = NavType.BoolType }
+            )
+        ) { backStackEntry ->
+            val isStaff = backStackEntry.arguments?.getBoolean("isStaff") ?: false
             FoodDetailScreen(
                 menuViewModel = menuViewModel,
+                isStaff = isStaff,
                 onBackClick = { navController.popBackStack() },
                 onAddToCart = {
                     selectedMenuItem?.let { item ->
                         orderViewModel.addItemToOrder(item)
-                        // Go back to the menu after adding the item
                         navController.popBackStack()
                     }
+                },
+                onEditClick = {
+                    navController.navigate("edit_menu_item/${it.id}")
+                },
+                onDeleteClick = {
+                    menuViewModel.deleteMenuItem(it)
+                    navController.popBackStack()
                 }
             )
         }

@@ -625,6 +625,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.rasago.R
 import com.example.rasago.data.model.MenuItem
 import com.example.rasago.theme.navigation.CustomerBottomNavigationBar
@@ -640,7 +641,8 @@ fun MenuScreen(
     onNavigateToProfile: () -> Unit = {},
     onNavigateToStaffProfile: () -> Unit = {},
     onLogout: () -> Unit = {},
-    onFoodItemClicked: (MenuItem) -> Unit
+    onFoodItemClicked: (MenuItem) -> Unit,
+    onAddMenuItemClicked: () -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
@@ -664,7 +666,7 @@ fun MenuScreen(
                 )
             } else {
                 CustomerBottomNavigationBar(
-                    cartItemCount = cartItemCount, // Use the passed-in value
+                    cartItemCount = cartItemCount,
                     selectedNavItem = "Menu",
                     onNavItemSelect = { title ->
                         when (title) {
@@ -674,6 +676,14 @@ fun MenuScreen(
                         }
                     }
                 )
+            }
+        },
+        floatingActionButton = {
+            // Only show the Floating Action Button for staff
+            if (isStaff) {
+                FloatingActionButton(onClick = onAddMenuItemClicked) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Menu Item")
+                }
             }
         }
     ) { innerPadding ->
@@ -867,8 +877,8 @@ fun MenuItemCard(
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.LightGray)
         ) {
-            Image(
-                painter = painterResource(food.photo),
+            AsyncImage(
+                model = food.photo,
                 contentDescription = food.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

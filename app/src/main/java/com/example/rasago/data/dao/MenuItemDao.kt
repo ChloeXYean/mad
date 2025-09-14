@@ -44,9 +44,11 @@
 package com.example.rasago.data.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.rasago.data.entity.MenuItemEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -66,5 +68,14 @@ interface MenuItemDao {
 
     @Query("SELECT COUNT(*) FROM menu_items")
     suspend fun getMenuItemCount(): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMenuItem(menuItem: MenuItemEntity)
+
+    @Update
+    suspend fun updateMenuItem(menuItem: MenuItemEntity)
+
+    @Delete
+    suspend fun deleteMenuItem(menuItem: MenuItemEntity)
 }
 

@@ -43,8 +43,10 @@
 //}
 package com.example.rasago.ui.theme.menu
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.rasago.R
 import com.example.rasago.data.model.MenuItem
 import com.example.rasago.data.repository.MenuRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -81,6 +83,42 @@ class MenuViewModel @Inject constructor(private val menuRepository: MenuReposito
             menuRepository.getMenuItemById(id).collect {
                 _selectedMenuItem.value = it
             }
+        }
+    }
+
+    /**
+     * Adds a new menu item to the database.
+     */
+    fun addMenuItem(name: String, description: String, price: String, category: String, imageUri: Uri?) {
+        viewModelScope.launch {
+            val priceDouble = price.toDoubleOrNull() ?: 0.0
+            // Convert Uri to a permanent string representation to store in the database
+            val photoString = imageUri?.toString() ?: ""
+            val isRecommended = false
+
+            menuRepository.addMenuItem(name, description, priceDouble, category, photoString, isRecommended)
+        }
+    }
+
+    fun updateMenuItem(id: Long, name: String, description: String, price: String, category: String, imageUri: String) {
+        viewModelScope.launch {
+            val priceDouble = price.toDoubleOrNull() ?: 0.0
+            val updatedMenuItem = MenuItem(
+                id = id,
+                name = name,
+                description = description,
+                price = priceDouble,
+                category = category,
+                photo = imageUri,
+                isRecommended = _selectedMenuItem.value?.isRecommended ?: false
+            )
+            menuRepository.updateMenuItem(updatedMenuItem)
+        }
+    }
+
+    fun deleteMenuItem(menuItem: MenuItem) {
+        viewModelScope.launch {
+            menuRepository.deleteMenuItem(menuItem)
         }
     }
 }

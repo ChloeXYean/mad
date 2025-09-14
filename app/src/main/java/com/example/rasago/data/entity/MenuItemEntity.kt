@@ -11,6 +11,6 @@ data class MenuItemEntity(
     val description: String,
     val price: Double,
     val category: String,
-    val photo: Int,
+    val photo: String,
     val isRecommended: Boolean = false
 )
