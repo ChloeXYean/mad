@@ -1,6 +1,6 @@
 package com.example.rasago.theme.menu
 
-import OrderViewModel
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -17,21 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
-import com.example.rasago.R
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.foundation.Image
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rasago.data.model.MenuItem
 import com.example.rasago.data.model.OrderItem
 import com.example.rasago.theme.navigation.CustomerBottomNavigationBar
@@ -39,6 +26,7 @@ import com.example.rasago.theme.navigation.StaffBottomNavigationBar
 import com.example.rasago.theme.profile.UserRole
 import com.example.rasago.ui.theme.menu.MenuViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.rasago.order.OrderViewModel
 
 @Composable
 fun MenuScreen(

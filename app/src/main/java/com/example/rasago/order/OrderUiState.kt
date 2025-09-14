@@ -1,4 +1,4 @@
-package com.example.rasago.ui.theme.order
+package com.example.rasago.order
 
 import com.example.rasago.data.model.Order
 import com.example.rasago.data.model.OrderItem
