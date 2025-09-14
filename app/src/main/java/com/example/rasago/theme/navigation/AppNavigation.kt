@@ -22,8 +22,8 @@ import com.example.rasago.ui.theme.order.OrderViewModel
 
 @Composable
 fun AppNavigation(
-    menuViewModel: MenuViewModel = hiltViewModel(),
-    orderViewModel: OrderViewModel = hiltViewModel()
+    menuViewModel: MenuViewModel = viewModel(),
+    orderViewModel: OrderViewModel = viewModel()
 ) {
     val navController = rememberNavController()
 
@@ -74,7 +74,7 @@ fun AppNavigation(
             }
 
             composable("cart") {
-                OrderSummaryScreen(navController = navController, viewModel = menuViewModel)
+//                OrderSummaryScreen(navController = navController, viewModel = menuViewModel)
             }
         }
 
