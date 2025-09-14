@@ -58,16 +58,10 @@ interface MenuItemDao {
     fun getAllMenuItems(): Flow<List<MenuItemEntity>>
 
     @Query("SELECT * FROM menu_items WHERE id = :id")
-    fun getMenuItemById(id: Long): Flow<MenuItemEntity?>
+    fun getMenuItemById(id: Int): Flow<MenuItemEntity?>
 
     @Query("SELECT * FROM menu_items WHERE id IN (:ids)")
-    fun getMenuItemsByIds(ids: List<Long?>): Flow<List<MenuItemEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(menuItems: List<MenuItemEntity>)
-
-    @Query("SELECT COUNT(*) FROM menu_items")
-    suspend fun getMenuItemCount(): Int
+    fun getMenuItemsByIds(ids: List<Int>): Flow<List<MenuItemEntity>> // Corrected to Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMenuItem(menuItem: MenuItemEntity)
@@ -77,5 +71,11 @@ interface MenuItemDao {
 
     @Delete
     suspend fun deleteMenuItem(menuItem: MenuItemEntity)
+
+    @Query("SELECT COUNT(*) FROM menu_items")
+    suspend fun getCount(): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(menuItems: List<MenuItemEntity>)
 }
 

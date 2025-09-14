@@ -70,11 +70,17 @@ import com.example.rasago.data.model.Order
  */
 fun OrderEntity.toOrder(): Order {
     return Order(
-        id = this.orderId,
+        orderId = this.orderId,
         orderNo = this.orderNo,
         orderTime = this.orderTime,
-        status = this.foodStatus
-        // Note: The list of items is handled separately in the OrderRepository
-        // to build the complete OrderDetails object.
+        subtotal = this.subtotal,
+        serviceCharge = this.serviceCharge,
+        sst = this.sst,
+        totalPayment = this.totalPayment,
+        paymentMethod = this.paymentMethod,
+        remarks = this.remarks,
+        orderType = this.orderType,
+        foodStatus = this.foodStatus,
+        customerId = this.customerId
     )
 }

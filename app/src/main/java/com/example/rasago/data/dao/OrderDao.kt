@@ -59,11 +59,15 @@ import kotlinx.coroutines.flow.Flow
 interface OrderDao {
     @Transaction
     @Query("SELECT * FROM orders WHERE orderId = :orderId")
-    fun getOrderWithItems(orderId: Long): Flow<OrderWithItems?>
+    fun getOrderWithItems(orderId: Int): Flow<OrderWithItems?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrder(order: OrderEntity): Long
+    suspend fun insertOrder(order: OrderEntity)
 
     @Query("SELECT COUNT(*) FROM orders")
     suspend fun getOrderCount(): Int
+
+    @Transaction
+    @Query("SELECT * FROM orders ORDER BY orderTime DESC")
+    fun getAllOrdersWithItems(): Flow<List<OrderWithItems>>
 }

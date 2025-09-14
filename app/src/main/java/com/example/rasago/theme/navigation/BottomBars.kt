@@ -3,7 +3,7 @@ package com.example.rasago.theme.navigation
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
@@ -23,7 +23,8 @@ data class NavItem(
     val title: String,
     val icon: ImageVector
 )
-// 顾客底部导航栏
+
+// Customer Bottom Navigation Bar
 @Composable
 fun CustomerBottomNavigationBar(
     cartItemCount: Int,
@@ -36,18 +37,18 @@ fun CustomerBottomNavigationBar(
         containerColor = Color.White,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
+        // "Log Out" has been removed and "Cart" and "Orders" are now separate
         val navItems = listOf(
             NavItem("Menu", Icons.Default.Home),
-            NavItem("Orders", Icons.Default.ShoppingCart),
-            NavItem("Log Out", Icons.Default.Logout),
+            NavItem("Cart", Icons.Default.ShoppingCart),
+            NavItem("Orders", Icons.Default.ListAlt),
             NavItem("Profile", Icons.Default.Person)
         )
 
         navItems.forEach { item ->
             NavigationBarItem(
                 icon = {
-                    // 订单项显示购物车数量徽章
-                    if (item.title == "Orders") {
+                    if (item.title == "Cart") {
                         BadgedBox(
                             badge = {
                                 if (cartItemCount > 0) {
@@ -84,7 +85,7 @@ fun CustomerBottomNavigationBar(
     }
 }
 
-// 员工底部导航栏
+// Staff Bottom Navigation Bar
 @Composable
 fun StaffBottomNavigationBar(
     selectedNavItem: String,
@@ -96,10 +97,10 @@ fun StaffBottomNavigationBar(
         containerColor = Color.White,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
+        // "Log Out" has been removed from this list
         val navItems = listOf(
             NavItem("Menu", Icons.Default.Home),
-            NavItem("Staff", Icons.Default.Person),  // 员工专属页面
-            NavItem("Log Out", Icons.Default.Logout)
+            NavItem("Staff", Icons.Default.Person)
         )
 
         navItems.forEach { item ->
@@ -123,3 +124,4 @@ fun StaffBottomNavigationBar(
         }
     }
 }
+

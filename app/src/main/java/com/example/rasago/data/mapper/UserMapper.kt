@@ -5,7 +5,7 @@ import com.example.rasago.data.entity.StaffEntity
 import com.example.rasago.data.model.CustomerProfile
 import com.example.rasago.data.model.StaffProfile
 
-fun CustomerProfile.toEntity(id: Long): CustomerEntity {
+fun CustomerProfile.toEntity(id: Int): CustomerEntity {
     return CustomerEntity(
         customerId = id,
         name = this.name,

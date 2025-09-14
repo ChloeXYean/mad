@@ -26,7 +26,7 @@ import com.example.rasago.theme.navigation.AppTopBar
 @Composable
 fun EditMenuItemScreen(
     menuItem: MenuItem?,
-    onUpdateItemClicked: (id: Long, name: String, description: String, price: String, category: String, imageUri: String) -> Unit,
+    onUpdateItemClicked: (id: Int, name: String, description: String, price: String, category: String, imageUri: String) -> Unit,
     onBackClick: () -> Unit
 ) {
     // If the menuItem is null, we can't edit, so we can show a loading or error state,

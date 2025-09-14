@@ -3,7 +3,7 @@ package com.example.rasago.data.model
 import androidx.annotation.DrawableRes
 
 data class CustomerProfile(
-    val id: Long,
+    val id: Int,
     val name: String,
     val email: String,
     val phone: String,

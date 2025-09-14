@@ -22,21 +22,17 @@
 //}
 package com.example.rasago.data.model
 
-/**
- * Represents the core details of a customer's order.
- *
- * This data class holds the metadata for an order, such as its unique number and status.
- * The actual items within the order are managed separately in the OrderUiState to keep
- * the active cart flexible.
- *
- * @param id The unique identifier for the order in the database.
- * @param orderNo The user-facing order number (e.g., "T01").
- * @param orderTime The time the order was placed.
- * @param status The current status of the order (e.g., "Pending", "Preparing").
- */
 data class Order(
-    val id: Long,
+    val orderId: Int,
     val orderNo: String,
     val orderTime: String,
-    val status: String
+    val subtotal: Double,
+    val serviceCharge: Double,
+    val sst: Double,
+    val totalPayment: Double,
+    val paymentMethod: String,
+    val remarks: String?,
+    val orderType: String,
+    val foodStatus: String,
+    val customerId: Int
 )

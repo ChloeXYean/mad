@@ -11,13 +11,13 @@ import com.example.rasago.data.entity.StaffEntity
 @Dao
 interface StaffDao {
     @Query("SELECT * FROM staff WHERE staffId = :id LIMIT 1")
-    suspend fun getById(id: Long): StaffEntity
+    suspend fun getById(id: Int): StaffEntity
 
     @Update
     suspend fun update(staff: StaffEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(staff: StaffEntity): Long
+    suspend fun insert(staff: StaffEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(staff: List<StaffEntity>)

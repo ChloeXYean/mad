@@ -1,124 +1,111 @@
-//package com.example.rasago.data.repository
-//
-//
-//import com.example.rasago.DummyData
-//import com.example.rasago.data.dao.OrderDao
-//import com.example.rasago.data.dao.OrderItemDao
-//import com.example.rasago.data.entity.OrderItemEntity
-//import com.example.rasago.data.mapper.toEntity
-//import com.example.rasago.data.mapper.toOrder
-//import com.example.rasago.data.model.Order
-//import kotlinx.coroutines.flow.Flow
-//import kotlinx.coroutines.flow.map
-//import javax.inject.Inject
-//import javax.inject.Singleton
-//
-//@Singleton
-//class OrderRepository @Inject constructor(
-//    private val orderDao: OrderDao,
-//    private val orderItemDao: OrderItemDao
-//) {
-//
-//    suspend fun insertOrder(order: Order, orderItems: List<OrderItemEntity>): Long {
-//        val orderEntity = order.toEntity()
-//        val orderId = orderDao.insertOrder(orderEntity)
-//
-//        val itemsWithOrderId = orderItems.map { it.copy(orderId = orderId) }
-//
-//        orderItemDao.insertAll(itemsWithOrderId)
-//
-//        return orderId
-//    }
-//
-//    suspend fun getOrderById(orderId: Long): Order? {
-//        val orderWithItems = orderDao.getOrderWithItems(orderId)
-//        return orderWithItems.toOrder() // convert to your Order model
-//    }
-//
-//    suspend fun updateOrderStatus(orderNo: String, newStatus: String) {
-//        orderDao.updateStatus(orderNo, newStatus)
-//    }
-//
-//    fun getAllOrders(): Flow<List<Order>> {
-//        return orderDao.getAllOrdersWithItems()
-//            .map { list -> list.map { it.toOrder() } }
-//    }
-//
-//    suspend fun prepopulateDatabase() {
-//        if (orderDao.getOrderCount() == 0) {
-//            DummyData.orders.forEach { orderModel ->
-//                val orderEntity = orderModel.toEntity()
-//                val newOrderId = orderDao.insertOrder(orderEntity)
-//                val itemEntities = orderModel.orderItems.map { orderItemModel ->
-//                    orderItemModel.toEntity(orderId = newOrderId)
-//                }
-//                // 6. Insert all the items for this order into the database.
-//                orderItemDao.insertAll(itemEntities)
-//            }
-//        }
-//    }
-//}
-
-
 package com.example.rasago.data.repository
 
 import com.example.rasago.data.dao.MenuItemDao
 import com.example.rasago.data.dao.OrderDao
+import com.example.rasago.data.dao.OrderItemDao
+import com.example.rasago.data.entity.OrderEntity
+import com.example.rasago.data.entity.OrderItemEntity
 import com.example.rasago.data.mapper.toOrder
 import com.example.rasago.data.model.MenuItem
+import com.example.rasago.data.model.Order
 import com.example.rasago.data.model.OrderDetails
+import com.example.rasago.data.model.OrderWithItems
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 class OrderRepository @Inject constructor(
     private val orderDao: OrderDao,
     private val menuItemDao: MenuItemDao,
+    private val orderItemDao: OrderItemDao
 ) {
 
-    /**
-     * This function now fetches the complete order details. It gets the order,
-     * its associated item IDs, then fetches the details for each item,
-     * and combines everything into an `OrderDetails` object.
-     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getOrderDetails(orderId: Long): Flow<OrderDetails?> {
+    fun getOrderDetails(orderId: Int): Flow<OrderDetails?> {
         return orderDao.getOrderWithItems(orderId).flatMapLatest { orderWithItems ->
             if (orderWithItems == null) {
-                // If no order is found, emit null
                 flowOf(null)
             } else {
-                // Get the list of menu item IDs from the order
-                val menuItemIds = orderWithItems.items.map { it.menuItemId }
+                val menuItemIds = orderWithItems.items.mapNotNull { it.menuItemId }
                 if (menuItemIds.isEmpty()) {
-                    // If order has no items, return order details with an empty list
                     flowOf(OrderDetails(order = orderWithItems.order.toOrder(), items = emptyList()))
                 } else {
-                    // Fetch the corresponding menu item details from the database
                     menuItemDao.getMenuItemsByIds(menuItemIds).map { menuItemEntities ->
-                        // Map the database entities to the UI models, including the correct quantity
-                        val detailedItems = orderWithItems.items.mapNotNull { orderItemEntity ->
-                            menuItemEntities.find { it.id == orderItemEntity.menuItemId }?.let { menuItemEntity ->
-                                MenuItem(
-                                    id = menuItemEntity.id,
-                                    name = menuItemEntity.name,
-                                    description = menuItemEntity.description, // Ensure description is mapped
-                                    price = menuItemEntity.price,
-                                    category = menuItemEntity.category,
-                                    photo = menuItemEntity.photo,
-                                    isRecommended = menuItemEntity.isRecommended,
-                                    quantity = orderItemEntity.quantity
-                                )
+                        // Group the individual items from the DB to display them with quantities in the UI
+                        val detailedItems = orderWithItems.items
+                            .groupBy { it.menuItemId }
+                            .mapNotNull { (menuItemId, items) ->
+                                val menuItemEntity = menuItemEntities.find { it.id == menuItemId }
+                                menuItemEntity?.let {
+                                    com.example.rasago.data.model.OrderItem(
+                                        id = items.first().id,
+                                        menuItemId = menuItemId,
+                                        name = it.name,
+                                        photo = it.photo,
+                                        price = it.price,
+                                        quantity = items.size, // The quantity is now the count of grouped items
+                                        status = items.first().status // Can be enhanced to show multiple statuses
+                                    )
+                                }
                             }
-                        }
                         OrderDetails(order = orderWithItems.order.toOrder(), items = detailedItems)
                     }
                 }
             }
         }
     }
-}
+    fun getAllOrders(): Flow<List<Order>> {
+        return orderDao.getAllOrdersWithItems().map { list ->
+            list.map { it.toOrder() }
+        }
+    }
 
+    suspend fun saveOrder(
+        items: List<MenuItem>,
+        subtotal: Double,
+        serviceCharge: Double,
+        tax: Double,
+        total: Double,
+        orderType: String,
+        paymentMethod: String,
+        customerId: Int
+    ) {
+        val orderEntity = OrderEntity(
+            orderNo = "T${System.currentTimeMillis()}",
+            orderTime = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date()),
+            subtotal = subtotal,
+            serviceCharge = serviceCharge,
+            sst = tax,
+            totalPayment = total,
+            paymentMethod = paymentMethod,
+            remarks = "",
+            orderType = orderType,
+            foodStatus = "Preparing",
+            customerId = customerId
+        )
+        val newOrderId = orderDao.insertOrder(orderEntity)
+
+        // Create a list of individual item entities.
+        val orderItemEntities = mutableListOf<OrderItemEntity>()
+        items.forEach { menuItem ->
+            // Loop for the quantity of each menu item to create separate rows
+            repeat(menuItem.quantity) {
+                orderItemEntities.add(
+                    OrderItemEntity(
+                        orderId = newOrderId.toInt(),
+                        menuItemId = menuItem.id,
+                        price = menuItem.price,
+                        status = "Preparing"
+                    )
+                )
+            }
+        }
+        orderItemDao.insertAll(orderItemEntities)
+    }
+}

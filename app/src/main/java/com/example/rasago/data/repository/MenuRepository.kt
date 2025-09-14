@@ -42,7 +42,7 @@ class MenuRepository @Inject constructor(private val menuItemDao: MenuItemDao) {
         }
     }
 
-    fun getMenuItemById(id: Long): Flow<MenuItem?> {
+    fun getMenuItemById(id: Int): Flow<MenuItem?> {
         return menuItemDao.getMenuItemById(id).map { it?.toMenuItem() }
     }
 

@@ -12,7 +12,7 @@ import com.example.rasago.data.entity.CustomerEntity
 interface CustomerDao {
 
     @Query("SELECT * FROM customers WHERE customerId = :id LIMIT 1")
-    suspend fun getById(id: Long): CustomerEntity?
+    suspend fun getById(id: Int): CustomerEntity?
 
     @Update
     suspend fun update(customer: CustomerEntity)

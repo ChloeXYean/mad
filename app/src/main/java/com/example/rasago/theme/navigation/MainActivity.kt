@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.rasago.ui.theme.RasagoApp
 import dagger.hilt.android.AndroidEntryPoint
+import com.example.rasago.theme.navigation.AppNavigation
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

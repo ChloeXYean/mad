@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 //Main Transaction -> Payment?
 @Entity(tableName = "orders")
 data class OrderEntity(
-    @PrimaryKey(autoGenerate = true) val orderId: Long = 0L, //like int orderId = 0, but it is long, because onConflict returns long, not int
+    @PrimaryKey(autoGenerate = true) val orderId: Int = 0,
     val orderNo: String,
     val orderTime: String,
     val subtotal: Double,
@@ -17,5 +17,5 @@ data class OrderEntity(
     val remarks: String?,
     val orderType: String,           // dine-in / takeaway
     val foodStatus: String,           // preparing / done / cancelled
-    val customerId: String
+    val customerId: Int
 )

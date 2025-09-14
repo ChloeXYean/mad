@@ -242,21 +242,28 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -306,78 +313,90 @@ fun AccountStatusBadge(status: AccountStatus) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(onBackClick: () -> Unit){
-    Scaffold(
-        topBar = {
-            AppTopBar(title = "Profile", onBackClick = onBackClick)
-        }
-    ) { innerPadding ->
-        Column(
+fun ProfileScreen(onBackClick: () -> Unit, onLogout: () -> Unit){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ){
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+                .fillMaxWidth()
+                .height(160.dp)
         ){
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-            ){
-                Image(
-                    painter = painterResource(R.drawable.background_image),
-                    contentDescription = stringResource(R.string.background),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-                Column(modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 16.dp, end = 16.dp)) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(R.string.edit),
-                        modifier = Modifier
-                            .clickable { /*TODO*/ }
-                            .size(32.dp)
-
-                    )
-                    Text(
-                        text = stringResource(R.string.edit),
-                        fontSize = 16.sp,
-                        fontFamily = Baloo2,
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
-                }
-                Image(
-                    painter = painterResource(id = R.drawable.default_profile_picture),
-                    contentDescription = stringResource(R.string.default_profile_picture),
+            Image(
+                painter = painterResource(R.drawable.background_image),
+                contentDescription = stringResource(R.string.background),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            Column(modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 16.dp, end = 16.dp)) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.edit),
                     modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .align(Alignment.Center),
-                    contentScale = ContentScale.Crop
+                        .clickable {
+                            //TODO: Click the profile picture and select profile picture
+                        }
+                        .size(32.dp),
+                    tint = Color.White
                 )
             }
-            Card(modifier = Modifier
+            Image(
+                painter = painterResource(id = R.drawable.default_profile_picture),
+                contentDescription = stringResource(R.string.default_profile_picture),
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .align(Alignment.Center),
+                contentScale = ContentScale.Crop
+            )
+        }
+        Card(
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(LightGreen)
-            ) {
-                Column (modifier = Modifier.padding(16.dp)){
-                    Text(
-                        text = stringResource(id = R.string.personal_information),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = DarkGreen,
-                        fontFamily = Baloo2
-                    )
-                }
+            shape = RoundedCornerShape(8.dp),
+            colors = CardDefaults.cardColors(LightGreen)
+        ) {
+            Column (modifier = Modifier.padding(16.dp)){
+                Text(
+                    text = stringResource(id = R.string.personal_information),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = DarkGreen,
+                    fontFamily = Baloo2
+                )
             }
-            ProfileItem(label = R.string.name, value = "Testing")
-            ProfileStatus(label = R.string.status)
-            ProfileItem(label = R.string.mobile_number, value = "012-2322323")
-            ProfileItem(label = R.string.email, value = "testing@gmail.com")
-            ProfileItem(label = R.string.dob, value = "25-12-2006")
-            ProfileItem(label = R.string.gender, value = "Female")
+        }
+        ProfileItem(label = R.string.name, value = "Testing")
+        ProfileStatus(label = R.string.status)
+        ProfileItem(label = R.string.mobile_number, value = "012-2322323")
+        ProfileItem(label = R.string.email, value = "testing@gmail.com")
+        ProfileItem(label = R.string.dob, value = "25-12-2006")
+        ProfileItem(label = R.string.gender, value = "Female")
+
+        // Log Out Button
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clickable(onClick = onLogout),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(Icons.Default.Logout, contentDescription = "Log Out", tint = MaterialTheme.colorScheme.onErrorContainer)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Log Out", color = MaterialTheme.colorScheme.onErrorContainer, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -426,10 +445,4 @@ fun ProfileStatus(@StringRes label:Int){
         AccountStatusBadge(AccountStatus.Active)
     }
     Divider(modifier = Modifier.padding(start = 16.dp, end = 16.dp))
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewProfile(){
-    ProfileScreen(onBackClick = {})
 }

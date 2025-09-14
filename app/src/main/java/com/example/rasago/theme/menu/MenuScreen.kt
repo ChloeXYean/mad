@@ -636,13 +636,12 @@ import com.example.rasago.theme.navigation.StaffBottomNavigationBar
 fun MenuScreen(
     isStaff: Boolean = false,
     foodList: List<MenuItem>,
-    cartItemCount: Int, // Accept cart count as a parameter
+    cartItemCount: Int,
+    onNavigateToCart: () -> Unit = {},
     onNavigateToOrders: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToStaffProfile: () -> Unit = {},
-    onLogout: () -> Unit = {},
     onFoodItemClicked: (MenuItem) -> Unit,
-    onAddMenuItemClicked: () -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
@@ -660,7 +659,6 @@ fun MenuScreen(
                     onNavItemSelect = { title ->
                         when (title) {
                             "Staff" -> onNavigateToStaffProfile()
-                            "Log Out" -> onLogout()
                         }
                     }
                 )
@@ -672,18 +670,9 @@ fun MenuScreen(
                         when (title) {
                             "Orders" -> onNavigateToOrders()
                             "Profile" -> onNavigateToProfile()
-                            "Log Out" -> onLogout()
                         }
                     }
                 )
-            }
-        },
-        floatingActionButton = {
-            // Only show the Floating Action Button for staff
-            if (isStaff) {
-                FloatingActionButton(onClick = onAddMenuItemClicked) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Menu Item")
-                }
             }
         }
     ) { innerPadding ->

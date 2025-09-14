@@ -8,6 +8,7 @@ import com.example.rasago.data.dao.OrderDao
 import com.example.rasago.data.dao.OrderItemDao
 import com.example.rasago.data.dao.StaffDao
 import com.example.rasago.data.database.AppDatabase
+import com.example.rasago.data.repository.ImageRepository
 import com.example.rasago.data.repository.MenuRepository
 import com.example.rasago.data.repository.OrderRepository
 import com.example.rasago.data.repository.UserRepository
@@ -24,11 +25,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(
-        @ApplicationContext appContext: Context
-    ): AppDatabase {
-        // The database creation is now simplified, with no callback.
-        // Pre-population will be handled by the Application class.
+    fun provideDatabase(@ApplicationContext appContext: Context): AppDatabase {
         return Room.databaseBuilder(
             appContext,
             AppDatabase::class.java,
@@ -60,7 +57,6 @@ object AppModule {
         menuItemDao: MenuItemDao,
         orderItemDao: OrderItemDao
     ): OrderRepository {
-        // Pass all required DAOs to the repository constructor in the correct order
         return OrderRepository(orderDao, menuItemDao)
     }
 
@@ -78,5 +74,7 @@ object AppModule {
     ): UserRepository {
         return UserRepository(customerDao, staffDao)
     }
+
+    // No need to explicitly provide ImageRepository if it has @Inject constructor
 }
 

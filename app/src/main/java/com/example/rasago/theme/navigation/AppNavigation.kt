@@ -1,188 +1,26 @@
-////package com.example.rasago.theme.navigation
-////
-////import LoginScreen
-////import MenuScreen
-////import androidx.compose.runtime.Composable
-////import androidx.compose.runtime.getValue
-////import androidx.compose.runtime.mutableStateOf
-////import androidx.compose.runtime.remember
-////import androidx.compose.runtime.setValue
-////import androidx.hilt.navigation.compose.hiltViewModel
-////import androidx.navigation.NavType
-////import androidx.navigation.compose.NavHost
-////import androidx.navigation.compose.composable
-////import androidx.navigation.compose.navigation
-////import androidx.navigation.compose.rememberNavController
-////import androidx.navigation.navArgument
-////import com.example.rasago.order.OrderViewModel
-////import com.example.rasago.theme.order.OrderManagementScreen
-////import com.example.rasago.ui.theme.menu.MenuViewModel
-////
-////
-////@Composable
-////fun AppNavigation(
-////    menuViewModel: MenuViewModel = hiltViewModel(),
-////    orderViewModel: OrderViewModel = hiltViewModel()
-////) {
-////    val navController = rememberNavController()
-////
-////    // track user role selection in local state
-////    var isStaff by remember { mutableStateOf(false) }
-////
-////    NavHost(
-////        navController = navController,
-////        startDestination = "login"
-////    ) {
-////        // --- Login Flow ---
-////        navigation(startDestination = "login", route = "login_flow") {
-////            composable("login") {
-////                LoginScreen(
-////                    onLoginAsCustomer = {
-////                        isStaff = false
-////                        navController.navigate("customer_app") {
-////                            popUpTo("login") { inclusive = true } // optional: remove login from back stack
-////                        }
-////                    },
-////                    onLoginAsStaff = {
-////                        isStaff = true
-////                        navController.navigate("staff_app") {
-////                            popUpTo("login") { inclusive = true }
-////                        }
-////                    }
-////                )
-////            }
-////        }
-////
-////        // --- Customer App Flow ---
-////        navigation(startDestination = "menu", route = "customer_app") {
-////            composable("menu") {
-////                MenuScreen(
-////                    navController = navController,
-////                    menuViewModel = menuViewModel,
-////                    orderViewModel = orderViewModel
-////                )
-////            }
-////
-////            composable(
-////                route = "foodDetail/{menuItemId}",
-////                arguments = listOf(navArgument("menuItemId") { type = NavType.IntType })
-////            ) { backStackEntry ->
-////                val menuItemId = backStackEntry.arguments?.getInt("menuItemId") ?: 0
-//////                FoodDetailScreen(
-//////                    navController = navController,
-//////                    menuItemId = menuItemId,
-//////                    viewModel = menuViewModel
-//////                )
-////            }
-////
-////            composable("cart") {
-//////                OrderSummaryScreen(navController = navController, viewModel = menuViewModel)
-////            }
-////        }
-////
-////        // --- Staff App Flow ---
-////        navigation(startDestination = "order_management", route = "staff_app") {
-////            composable("order_management") {
-////                OrderManagementScreen(
-////                    orderViewModel = orderViewModel,
-////                    onBackClick = { navController.popBackStack() }
-////                )
-////            }
-////        }
-////    }
-////}
-//package com.example.rasago.theme.navigation
-//
-//import androidx.compose.material3.ExperimentalMaterial3Api
-//import androidx.compose.material3.Scaffold
-//import androidx.compose.runtime.Composable
-//import androidx.navigation.compose.NavHost
-//import androidx.navigation.compose.composable
-//import androidx.navigation.compose.rememberNavController
-//import com.example.rasago.theme.menu.LoginScreen
-//import com.example.rasago.theme.menu.MenuScreen
-//import com.example.rasago.theme.order.OrderHistoryScreen
-//import com.example.rasago.theme.profile.ProfileScreen
-//import com.example.rasago.theme.profile.StaffProfileScreen
-//
-//@Composable
-//fun AppNavigation() {
-//    val navController = rememberNavController()
-//
-//    NavHost(
-//        navController = navController,
-//        startDestination = "login"
-//    ) {
-//        composable("login") {
-//            LoginScreen(
-//                onLoginAsCustomer = {
-//                    navController.navigate("menu") {
-//                        popUpTo("login") { inclusive = true }
-//                    }
-//                },
-//                onLoginAsStaff = {
-//                    navController.navigate("staff_menu") {
-//                        popUpTo("login") { inclusive = true }
-//                    }
-//                }
-//            )
-//        }
-//
-//        composable("menu") {
-//            MenuScreen(
-//                onNavigateToOrders = { navController.navigate("orders") },
-//                onNavigateToProfile = { navController.navigate("profile") },
-//                onLogout = {
-//                    navController.navigate("login") {
-//                        popUpTo("menu") { inclusive = true }
-//                    }
-//                }
-//            )
-//        }
-//
-//        composable("staff_menu") {
-//            MenuScreen(
-//                isStaff = true,
-//                onNavigateToStaffProfile = { navController.navigate("staff_profile")},
-//                onLogout = {
-//                    navController.navigate("login") {
-//                        popUpTo("staff_menu") { inclusive = true }
-//                    }
-//                }
-//            )
-//        }
-//
-//        composable("orders") {
-//            OrderHistoryScreen(onBackClick = { navController.popBackStack() })
-//        }
-//
-//        composable("profile") {
-//            ProfileScreen(onBackClick = { navController.popBackStack() })
-//        }
-//
-//        composable("staff_profile") {
-//            StaffProfileScreen(onBackClick = { navController.popBackStack() })
-//        }
-//    }
-//}
 package com.example.rasago.theme.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.rasago.order.OrderHistoryViewModel
 import com.example.rasago.order.OrderViewModel
 import com.example.rasago.theme.menu.AddMenuItemScreen
 import com.example.rasago.theme.menu.EditMenuItemScreen
 import com.example.rasago.theme.menu.FoodDetailScreen
 import com.example.rasago.theme.menu.LoginScreen
+import com.example.rasago.theme.menu.MenuManagementScreen
 import com.example.rasago.theme.menu.MenuScreen
 import com.example.rasago.theme.order.OrderConfirmationScreen
+import com.example.rasago.theme.order.FoodStatusScreen
 import com.example.rasago.theme.order.OrderHistoryScreen
 import com.example.rasago.theme.order.OrderSummaryScreen
 import com.example.rasago.theme.profile.ProfileScreen
@@ -221,12 +59,10 @@ fun AppNavigation(
         composable("menu") {
             MenuScreen(
                 foodList = menuItems,
-                cartItemCount = orderState.orderItems.size, // Pass the live cart count
-                onNavigateToOrders = { navController.navigate("order_summary") },
+                cartItemCount = orderState.orderItems.size,
+                onNavigateToCart = { navController.navigate("order_summary") },
+                onNavigateToOrders = { navController.navigate("orders") },
                 onNavigateToProfile = { navController.navigate("profile") },
-                onLogout = {
-                    navController.navigate("login") { popUpTo("menu") { inclusive = true } }
-                },
                 onFoodItemClicked = { menuItem ->
                     menuViewModel.selectMenuItem(menuItem.id)
                     navController.navigate("foodDetail/${menuItem.id}")
@@ -238,17 +74,12 @@ fun AppNavigation(
             MenuScreen(
                 isStaff = true,
                 foodList = menuItems,
-                cartItemCount = 0,
+                cartItemCount = orderState.orderItems.size,
+                onNavigateToCart = { navController.navigate("order_summary") },
                 onNavigateToStaffProfile = { navController.navigate("staff_profile") },
-                onLogout = {
-                    navController.navigate("login") { popUpTo("staff_menu") { inclusive = true } }
-                },
                 onFoodItemClicked = { menuItem ->
                     menuViewModel.selectMenuItem(menuItem.id)
                     navController.navigate("foodDetail/${menuItem.id}")
-                },
-                onAddMenuItemClicked = {
-                    navController.navigate("add_menu_item")
                 }
             )
         }
@@ -271,73 +102,119 @@ fun AppNavigation(
                 menuItem = selectedMenuItem,
                 onUpdateItemClicked = { id, name, description, price, category, imageUri ->
                     menuViewModel.updateMenuItem(id, name, description, price, category, imageUri)
-                    navController.popBackStack() // Go back to the detail screen
+                    navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }
             )
         }
 
         composable("orders") {
-            OrderHistoryScreen(onBackClick = { navController.popBackStack() })
-        }
-
-        composable("profile") {
-            ProfileScreen(onBackClick = { navController.popBackStack() })
-        }
-
-        composable("staff_profile") {
-            StaffProfileScreen(onBackClick = { navController.popBackStack() })
+            OrderHistoryScreen(
+                onBackClick = { navController.popBackStack() },
+                onViewOrder = { orderId ->
+                    navController.navigate("food_status/$orderId")
+                }
+            )
         }
 
         composable(
-            route = "foodDetail/{menuItemId}/{isStaff}",
-            arguments = listOf(
-                navArgument("menuItemId") { type = NavType.IntType },
-                navArgument("isStaff") { type = NavType.BoolType }
-            )
+            route = "food_status/{orderId}",
+            arguments = listOf(navArgument("orderId") { type = NavType.IntType })
         ) { backStackEntry ->
-            val isStaff = backStackEntry.arguments?.getBoolean("isStaff") ?: false
+            val orderId = backStackEntry.arguments?.getInt("orderId") ?: 0
+            val historyViewModel: OrderHistoryViewModel = hiltViewModel()
+
+            LaunchedEffect(orderId) {
+                historyViewModel.loadOrderDetails(orderId)
+            }
+
+            FoodStatusScreen(
+                historyViewModel = historyViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("profile") {
+            ProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
+        composable("staff_profile") {
+            StaffProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onManageMenuClicked = { navController.navigate("menu_management") },
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
+        composable("menu_management") {
+            MenuManagementScreen(
+                menuItems = menuItems,
+                onAddItemClicked = { navController.navigate("add_menu_item") },
+                onEditItemClicked = {
+                    menuViewModel.selectMenuItem(it.id)
+                    navController.navigate("edit_menu_item/${it.id}")
+                },
+                onDeleteItemClicked = {
+                    menuViewModel.deleteMenuItem(it)
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "foodDetail/{menuItemId}",
+            arguments = listOf(navArgument("menuItemId") { type = NavType.IntType })
+        ) {
             FoodDetailScreen(
                 menuViewModel = menuViewModel,
-                isStaff = isStaff,
                 onBackClick = { navController.popBackStack() },
                 onAddToCart = {
                     selectedMenuItem?.let { item ->
                         orderViewModel.addItemToOrder(item)
                         navController.popBackStack()
                     }
-                },
-                onEditClick = {
-                    navController.navigate("edit_menu_item/${it.id}")
-                },
-                onDeleteClick = {
-                    menuViewModel.deleteMenuItem(it)
-                    navController.popBackStack()
                 }
             )
         }
 
         composable("order_summary") {
             OrderSummaryScreen(
-                orderUiState = orderState, // Corrected parameter name
+                orderUiState = orderState,
                 onNextButtonClicked = { navController.navigate("order_confirmation") },
                 onCancelButtonClicked = { navController.popBackStack() },
-                onFoodItemClicked = {
-                    // Navigate to the detail screen for the clicked item
-                    menuViewModel.selectMenuItem(it.id)
-                    navController.navigate("foodDetail/${it.id}")
-                }
+                onAddItemClick = { navController.popBackStack() },
+                onIncreaseItem = { orderViewModel.increaseItemQuantity(it) },
+                onDecreaseItem = { orderViewModel.decreaseItemQuantity(it) },
+                onRemoveItem = { orderViewModel.removeItemFromOrder(it) }
             )
         }
 
         composable("order_confirmation") {
             OrderConfirmationScreen(
-                orderState = orderState, // Pass the live order state to the screen
+                orderState = orderState,
                 onBackButtonClicked = { navController.popBackStack() },
                 onConfirmButtonClicked = {
-                    // When the user confirms, clear the cart...
+                    orderViewModel.saveOrder(
+                        orderType = "Dine-In",
+                        paymentMethod = "Cash",
+                        customerId = 1
+                    )
                     orderViewModel.clearOrder()
-                    // ...and navigate back to the main menu, clearing the back stack.
                     navController.navigate("menu") {
                         popUpTo("menu") { inclusive = true }
                     }
@@ -346,5 +223,4 @@ fun AppNavigation(
         }
     }
 }
-
 
