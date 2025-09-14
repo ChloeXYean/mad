@@ -37,6 +37,7 @@ fun AppNavigation(
                     onLoginAsCustomer = {
                         isStaff = false
                         navController.navigate("customer_app") {
+
                             popUpTo("login") { inclusive = true }
                         }
                     },
@@ -56,6 +57,7 @@ fun AppNavigation(
                 MenuScreen(
                     navController = navController,
                     menuViewModel = menuViewModel
+
                 )
             }
 
@@ -64,6 +66,7 @@ fun AppNavigation(
                 arguments = listOf(navArgument("menuItemId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val menuItemId = backStackEntry.arguments?.getInt("menuItemId") ?: 0
+
                 // Uncomment when FoodDetailScreen is ready
                 // FoodDetailScreen(
                 //     navController = navController,
@@ -90,6 +93,7 @@ fun AppNavigation(
                         navController.popBackStack()
                     }
                 )
+
             }
         }
 
@@ -98,9 +102,11 @@ fun AppNavigation(
             composable("order_management") {
                 OrderManagementScreen(
                     orderViewModel = orderViewModel,
+
                     onViewStatusClick = { order ->
                         // TODO: handle order status click
                     },
+
                     onBackClick = { navController.popBackStack() }
                 )
             }
