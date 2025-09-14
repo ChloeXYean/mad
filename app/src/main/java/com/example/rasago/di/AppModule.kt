@@ -2,6 +2,8 @@ package com.example.rasago.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.rasago.data.dao.CustomerDao
 import com.example.rasago.data.dao.MenuItemDao
 import com.example.rasago.data.dao.OrderDao
@@ -14,31 +16,52 @@ import com.example.rasago.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule{
+object AppModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(appContext: Context): AppDatabase {
+    fun provideDatabase(
+        @ApplicationContext appContext: Context,
+        orderRepositoryProvider: Provider<OrderRepository>,
+        menuRepositoryProvider: Provider<MenuRepository>,
+        userRepositoryProvider: Provider<UserRepository>
+    ): AppDatabase {
         return Room.databaseBuilder(
             appContext,
             AppDatabase::class.java,
-            "rasago_db"
-        ).build()
+            "rasago_database"
+        ).addCallback(object : RoomDatabase.Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                // Prepopulate all data on a background thread when the DB is first created.
+                CoroutineScope(Dispatchers.IO).launch {
+                    orderRepositoryProvider.get().prepopulateDatabase()
+                    menuRepositoryProvider.get().prepopulateMenu()
+                    userRepositoryProvider.get().prepopulateUsers()
+                }
+            }
+        }).build()
     }
 
-    @Provides
-    fun provideMenuDao(db: AppDatabase): MenuItemDao = db.menuItemDao()
-
+    // --- DAO Providers ---
     @Provides
     fun provideOrderDao(db: AppDatabase): OrderDao = db.orderDao()
 
     @Provides
-    fun provideOrderItemDao (db: AppDatabase): OrderItemDao = db.orderItemDao()
+    fun provideOrderItemDao(db: AppDatabase): OrderItemDao = db.orderItemDao()
+
+    @Provides
+    fun provideMenuDao(db: AppDatabase): MenuItemDao = db.menuItemDao()
 
     @Provides
     fun provideCustomerDao(db: AppDatabase): CustomerDao = db.customerDao()
@@ -46,21 +69,29 @@ object AppModule{
     @Provides
     fun provideStaffDao(db: AppDatabase): StaffDao = db.staffDao()
 
+    // --- Repository Providers ---
     @Provides
     @Singleton
-    fun provideMenuRepository(menuDao: MenuItemDao): MenuRepository{
-        return MenuRepository(menuDao)
-    }
-
-    @Provides
-    @Singleton
-    fun provideOrderRepository(orderDao: OrderDao, orderItemDao: OrderItemDao): OrderRepository {
+    fun provideOrderRepository(
+        orderDao: OrderDao,
+        orderItemDao: OrderItemDao
+    ): OrderRepository {
         return OrderRepository(orderDao, orderItemDao)
     }
 
     @Provides
     @Singleton
-    fun provideUserRepository(customerDao: CustomerDao, staffDao: StaffDao): UserRepository {
+    fun provideMenuRepository(menuDao: MenuItemDao): MenuRepository {
+        return MenuRepository(menuDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        customerDao: CustomerDao,
+        staffDao: StaffDao
+    ): UserRepository {
         return UserRepository(customerDao, staffDao)
     }
 }
+

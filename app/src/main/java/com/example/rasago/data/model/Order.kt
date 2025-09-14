@@ -14,7 +14,7 @@ data class Order(
     var type: String,        // Dine-In or Takeaway
     val time: String,        // Order time as string
     var status: String,      // Preparing, Done, Cancelled
-    val orderItems: List<OrderItem> = emptyList()
+    val orderItems: List<OrderItem>
 ) {
     val subtotal: Double
         get() = orderItems.sumOf { it.price * it.quantity }

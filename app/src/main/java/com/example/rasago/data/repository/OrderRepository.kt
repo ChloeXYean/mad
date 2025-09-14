@@ -1,6 +1,7 @@
 package com.example.rasago.data.repository
 
 
+import com.example.rasago.DummyData
 import com.example.rasago.data.dao.OrderDao
 import com.example.rasago.data.dao.OrderItemDao
 import com.example.rasago.data.entity.OrderItemEntity
@@ -19,10 +20,13 @@ class OrderRepository @Inject constructor(
 ) {
 
     suspend fun insertOrder(order: Order, orderItems: List<OrderItemEntity>): Long {
-        val orderEntity = order.toEntity() // assume you have mapping extension
+        val orderEntity = order.toEntity()
         val orderId = orderDao.insertOrder(orderEntity)
+
         val itemsWithOrderId = orderItems.map { it.copy(orderId = orderId) }
-        orderItemDao.insertItem(itemsWithOrderId)
+
+        orderItemDao.insertAll(itemsWithOrderId)
+
         return orderId
     }
 
@@ -38,5 +42,19 @@ class OrderRepository @Inject constructor(
     fun getAllOrders(): Flow<List<Order>> {
         return orderDao.getAllOrdersWithItems()
             .map { list -> list.map { it.toOrder() } }
+    }
+
+    suspend fun prepopulateDatabase() {
+        if (orderDao.getOrderCount() == 0) {
+            DummyData.orders.forEach { orderModel ->
+                val orderEntity = orderModel.toEntity()
+                val newOrderId = orderDao.insertOrder(orderEntity)
+                val itemEntities = orderModel.orderItems.map { orderItemModel ->
+                    orderItemModel.toEntity(orderId = newOrderId)
+                }
+                // 6. Insert all the items for this order into the database.
+                orderItemDao.insertAll(itemEntities)
+            }
+        }
     }
 }

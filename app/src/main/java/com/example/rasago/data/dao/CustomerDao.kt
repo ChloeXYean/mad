@@ -12,7 +12,7 @@ import com.example.rasago.data.entity.CustomerEntity
 interface CustomerDao {
 
     @Query("SELECT * FROM customers WHERE customerId = :id LIMIT 1")
-    suspend fun getById(id: Int): CustomerEntity?
+    suspend fun getById(id: Long): CustomerEntity?
 
     @Update
     suspend fun update(customer: CustomerEntity)
@@ -20,11 +20,12 @@ interface CustomerDao {
     @Query("SELECT * FROM customers")
     suspend fun getAll(): List<CustomerEntity>
 
-    @Query("SELECT * FROM customers WHERE phoneNumber = :phone LIMIT 1")
+    @Query("SELECT * FROM customers WHERE phone = :phone LIMIT 1")
     suspend fun getByPhone(phone: String): CustomerEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(customer: CustomerEntity): Long
 
-
+    @Query("SELECT COUNT(*) FROM customers")
+    suspend fun getCount(): Int
 }

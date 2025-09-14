@@ -22,13 +22,13 @@ class ProfileViewModel @Inject constructor(
     private val _staff = MutableLiveData<StaffEntity?>()
     val staff: LiveData<StaffEntity?> = _staff
 
-    fun loadCustomerById(customerId: Int) {
+    fun loadCustomerById(customerId: Long) {
         viewModelScope.launch {
             _customer.value = userRepository.getCustomerById(customerId)
         }
     }
 
-    fun loadStaffById(staffId: Int) {
+    fun loadStaffById(staffId: Long) {
         viewModelScope.launch {
             _staff.value = userRepository.getStaffById(staffId)
         }

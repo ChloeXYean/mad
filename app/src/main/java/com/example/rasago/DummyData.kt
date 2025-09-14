@@ -4,6 +4,7 @@ import com.example.rasago.data.model.CustomerProfile
 import com.example.rasago.data.model.MenuItem
 import com.example.rasago.data.model.Order
 import com.example.rasago.data.model.OrderItem
+import com.example.rasago.data.model.StaffProfile
 
 object DummyData {
     val orders = listOf(
@@ -30,10 +31,13 @@ object DummyData {
     )
 
     val customerProfile = CustomerProfile(
+        id = 2,
         name = "John Doe",
-        email = "john.c.calhoun@examplepetstore.com",
-        phone = "123-456-7890",
-        profileImageRes = R.drawable.default_profile_picture
+        email = "william.henry.moody@my-own-personal-domain.com",
+        phone = "1234567890",
+        gender = "Male",
+        profileImageRes = R.drawable.default_profile_picture,
+        password = "password"
     )
 
     val menuItems = listOf(
@@ -52,6 +56,29 @@ object DummyData {
             price = 2.0,
             category = "Drinks",
             imageRes = R.drawable.drink_tehtarik
+        )
+    )
+
+    val staffProfiles = listOf(
+        StaffProfile(
+            id = 1,
+            name = "John Doe",
+            gender = "Male",
+            email = "william.henry.moody@my-own-personal-domain.com",
+            phone = "1",
+            role = "MANAGER", //TODO: Need change to userRole
+            status = "Active",
+            jobTime = 1234567890
+        ),
+        StaffProfile(
+            id = 2,
+            name = "Jane Smith",
+            gender = "Female",
+            email = "william.henry.harrison@example-pet-store.com",
+            phone = "2",
+            role = "WAITER",
+            status = "Active",
+            jobTime = 1234567890
         )
     )
 }

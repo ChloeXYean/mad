@@ -5,10 +5,11 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "customers")
 data class CustomerEntity(
-    @PrimaryKey(autoGenerate = true) val customerId: Int = 0,
+    @PrimaryKey(autoGenerate = true) val customerId: Long = 0,
     val name: String,
-    val phoneNumber: String,
+    val phone: String,
     val email: String,
-    val dob: Long?,                   // nullable
-    val gender: String
+    val gender: String,
+    val profileImageRes: Int,
+    val password: String
 )
