@@ -4,21 +4,13 @@ import com.example.rasago.data.entity.OrderItemEntity
 import com.example.rasago.data.model.Order
 import com.example.rasago.data.model.OrderItem
 import com.example.rasago.data.repository.OrderRepository
+import com.example.rasago.ui.theme.order.OrderUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-
-data class OrderUiState(
-    val orders: List<Order> = emptyList(),
-    val cartItems: List<OrderItem> = emptyList(),
-    val selectedOrder: Order? = null,
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
 
 @HiltViewModel
 class OrderViewModel @Inject constructor(
