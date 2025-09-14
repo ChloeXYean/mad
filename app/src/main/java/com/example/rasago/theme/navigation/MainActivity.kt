@@ -12,18 +12,12 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val menuViewModel: MenuViewModel by viewModels()
-    private val orderViewModel: OrderViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             RasagoApp {
-                AppNavigation(
-                    menuViewModel = menuViewModel,
-                    orderViewModel = orderViewModel
-                )
+                AppNavigation()
 
             }
         }

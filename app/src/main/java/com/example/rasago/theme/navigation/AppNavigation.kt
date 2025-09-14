@@ -1,5 +1,7 @@
 package com.example.rasago.theme.navigation
 
+import LoginScreen
+import MenuScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,8 +15,6 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.rasago.order.OrderViewModel
-import com.example.rasago.theme.menu.LoginScreen
-import com.example.rasago.theme.menu.MenuScreen
 import com.example.rasago.theme.order.OrderManagementScreen
 import com.example.rasago.ui.theme.menu.MenuViewModel
 
@@ -56,7 +56,11 @@ fun AppNavigation(
         // --- Customer App Flow ---
         navigation(startDestination = "menu", route = "customer_app") {
             composable("menu") {
-                MenuScreen(navController = navController, menuViewModel = menuViewModel)
+                MenuScreen(
+                    navController = navController,
+                    menuViewModel = menuViewModel,
+                    orderViewModel = orderViewModel
+                )
             }
 
             composable(

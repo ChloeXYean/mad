@@ -14,7 +14,8 @@ import javax.inject.Inject
 class MenuViewModel @Inject constructor(private val menuRepository: MenuRepository) : ViewModel() {
 
     private val _menuItems = mutableStateListOf<MenuItem>()
-    val menuItems: List<MenuItem> = _menuItems
+
+    val menuItems: List<MenuItem> get() = _menuItems
 
     init {
         loadMenuItems()
