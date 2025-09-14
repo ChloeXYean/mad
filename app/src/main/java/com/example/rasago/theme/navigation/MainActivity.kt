@@ -4,10 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
-import com.example.rasago.order.OrderViewModel
 import com.example.rasago.ui.theme.RasagoApp
-import com.example.rasago.ui.theme.menu.MenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -18,7 +15,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             RasagoApp {
                 AppNavigation()
-
             }
         }
     }

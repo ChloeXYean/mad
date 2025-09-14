@@ -27,5 +27,6 @@
     <string name="ready">Ready</string>
     <string name="defaultStatus">Default</string>
     <string name="placeholder">Placeholder</string>
+    <string name="role">Role</string>
 
 </resources>
