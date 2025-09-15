@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -48,6 +49,7 @@ fun ProfileScreen(
     onEditProfileClick: () -> Unit,
     onManageMenuClicked: () -> Unit,
     onNavigateToOrders: () -> Unit,
+    onStaffManagementClicked: () -> Unit = {},
     onLogout: () -> Unit
 ) {
     val isStaff = staff != null
@@ -167,16 +169,39 @@ fun ProfileScreen(
 
         // Action buttons based on role
         if (isStaff) {
-            ProfileActionButton(
-                text = "Manage Menu",
-                icon = Icons.Default.MenuBook,
-                onClick = onManageMenuClicked
-            )
-            ProfileActionButton(
-                text = "Orders History",
-                icon = Icons.Default.ReceiptLong,
-                onClick = onNavigateToOrders
-            )
+            val staffRole = staff?.role ?: ""
+            
+            // Kitchen and Cashier have same permissions
+            if (staffRole == "kitchen" || staffRole == "cashier") {
+                ProfileActionButton(
+                    text = "Manage Menu",
+                    icon = Icons.Default.MenuBook,
+                    onClick = onManageMenuClicked
+                )
+                ProfileActionButton(
+                    text = "Orders History",
+                    icon = Icons.Default.ReceiptLong,
+                    onClick = onNavigateToOrders
+                )
+            }
+            // Manager has additional staff management
+            else if (staffRole == "manager") {
+                ProfileActionButton(
+                    text = "Manage Menu",
+                    icon = Icons.Default.MenuBook,
+                    onClick = onManageMenuClicked
+                )
+                ProfileActionButton(
+                    text = "Orders History",
+                    icon = Icons.Default.ReceiptLong,
+                    onClick = onNavigateToOrders
+                )
+                ProfileActionButton(
+                    text = "Staff Management",
+                    icon = Icons.Default.People,
+                    onClick = onStaffManagementClicked
+                )
+            }
         } else {
             ProfileActionButton(
                 text = "My Orders",

@@ -6,12 +6,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,14 +40,57 @@ fun OrderHistoryScreen(
     var dateExpanded by remember { mutableStateOf(false) }
     var statusExpanded by remember { mutableStateOf(false) }
 
-    val dateOptions = listOf("Today", "This Week", "This Month", "All Time")
-    val statusOptions = listOf("All", "Preparing", "Done", "Cancelled")
+    val dateOptions = listOf("Today", "This Week", "This Month", "Last 3 Months", "All Time")
+    val statusOptions = listOf("All", "Pending", "Preparing", "Ready", "Done", "Cancelled")
 
     val filteredOrders = orders.filter { order ->
         val matchesSearch = searchQuery.isEmpty() || order.orderNo.contains(searchQuery, ignoreCase = true)
         val matchesStatus = selectedStatus == "All" || order.foodStatus.equals(selectedStatus, ignoreCase = true)
-        // Date filtering logic would need to be more complex, this is a basic implementation
-        val matchesDate = selectedDate == "All Time" // Simplified for now
+        
+        // Date filtering logic
+        val matchesDate = when (selectedDate) {
+            "Today" -> {
+                val today = java.time.LocalDate.now()
+                val orderDate = try {
+                    java.time.LocalDate.parse(order.orderTime.substringBefore(" "))
+                } catch (e: Exception) {
+                    java.time.LocalDate.now()
+                }
+                orderDate.isEqual(today)
+            }
+            "This Week" -> {
+                val now = java.time.LocalDate.now()
+                val weekStart = now.minusDays(now.dayOfWeek.value.toLong() - 1)
+                val orderDate = try {
+                    java.time.LocalDate.parse(order.orderTime.substringBefore(" "))
+                } catch (e: Exception) {
+                    java.time.LocalDate.now()
+                }
+                orderDate.isAfter(weekStart.minusDays(1)) && orderDate.isBefore(now.plusDays(1))
+            }
+            "This Month" -> {
+                val now = java.time.LocalDate.now()
+                val orderDate = try {
+                    java.time.LocalDate.parse(order.orderTime.substringBefore(" "))
+                } catch (e: Exception) {
+                    java.time.LocalDate.now()
+                }
+                orderDate.year == now.year && orderDate.month == now.month
+            }
+            "Last 3 Months" -> {
+                val now = java.time.LocalDate.now()
+                val threeMonthsAgo = now.minusMonths(3)
+                val orderDate = try {
+                    java.time.LocalDate.parse(order.orderTime.substringBefore(" "))
+                } catch (e: Exception) {
+                    java.time.LocalDate.now()
+                }
+                orderDate.isAfter(threeMonthsAgo.minusDays(1)) && orderDate.isBefore(now.plusDays(1))
+            }
+            "All Time" -> true
+            else -> true
+        }
+        
         matchesSearch && matchesStatus && matchesDate
     }
 
@@ -80,64 +129,32 @@ fun OrderHistoryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Date Filter
-                ExposedDropdownMenuBox(
+                ModernDropdownMenu(
+                    selectedValue = selectedDate,
+                    options = dateOptions,
                     expanded = dateExpanded,
-                    onExpandedChange = { dateExpanded = !it },
+                    onExpandedChange = { dateExpanded = it },
+                    onOptionSelected = { selectedDate = it; dateExpanded = false },
+                    icon = Icons.Default.CalendarToday,
+                    label = "Time Duration",
                     modifier = Modifier.weight(1f)
-                ) {
-                    OutlinedTextField(
-                        value = selectedDate,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Date", style = MaterialTheme.typography.bodySmall) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dateExpanded) },
-                        modifier = Modifier.menuAnchor(),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    ExposedDropdownMenu(expanded = dateExpanded, onDismissRequest = { dateExpanded = false }) {
-                        dateOptions.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option) },
-                                onClick = {
-                                    selectedDate = option
-                                    dateExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.width(16.dp))
+                )
+
                 // Status Filter
-                ExposedDropdownMenuBox(
+                ModernDropdownMenu(
+                    selectedValue = selectedStatus,
+                    options = statusOptions,
                     expanded = statusExpanded,
-                    onExpandedChange = { statusExpanded = !it },
+                    onExpandedChange = { statusExpanded = it },
+                    onOptionSelected = { selectedStatus = it; statusExpanded = false },
+                    icon = Icons.Default.FilterList,
+                    label = "Orders Status",
                     modifier = Modifier.weight(1f)
-                ) {
-                    OutlinedTextField(
-                        value = selectedStatus,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Status", style = MaterialTheme.typography.bodySmall) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusExpanded) },
-                        modifier = Modifier.menuAnchor(),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    ExposedDropdownMenu(expanded = statusExpanded, onDismissRequest = { statusExpanded = false }) {
-                        statusOptions.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option) },
-                                onClick = {
-                                    selectedStatus = option
-                                    statusExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
+                )
             }
 
             // Order List or Empty State
@@ -234,6 +251,109 @@ fun OrderHistoryItem(order: Order, onViewClick: () -> Unit) {
                 colors = ButtonDefaults.textButtonColors(contentColor = Color.Gray)
             ) {
                 Text("View Status", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ModernDropdownMenu(
+    selectedValue: String,
+    options: List<String>,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onOptionSelected: (String) -> Unit,
+    icon: ImageVector,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        modifier = modifier
+    ) {
+        Card(
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFF8F9FA)
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = if (expanded) 8.dp else 2.dp
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color(0xFF6C757D),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Column {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF6C757D),
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            text = selectedValue,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    tint = Color(0xFF6C757D),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .rotate(if (expanded) 180f else 0f)
+                )
+            }
+        }
+        
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+            modifier = Modifier.background(
+                color = Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { 
+                        Text(
+                            text = option,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (option == selectedValue) Color(0xFF1976D2) else Color.Black,
+                            fontWeight = if (option == selectedValue) FontWeight.SemiBold else FontWeight.Normal
+                        )
+                    },
+                    onClick = { onOptionSelected(option) },
+                    colors = MenuDefaults.itemColors(
+                        textColor = if (option == selectedValue) Color(0xFF1976D2) else Color.Black
+                    ),
+                    modifier = Modifier.background(
+                        color = if (option == selectedValue) Color(0xFFE3F2FD) else Color.Transparent
+                    )
+                )
             }
         }
     }

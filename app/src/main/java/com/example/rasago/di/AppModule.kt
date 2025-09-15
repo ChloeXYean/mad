@@ -102,7 +102,7 @@ class PrepopulateCallback(
 
             // Pre-populate staff if the table is empty
             if (staffDao.getCount() == 0) {
-                staffDao.insert(getPredefinedStaff().first())
+                staffDao.insertAll(getPredefinedStaff())
             }
         }
     }

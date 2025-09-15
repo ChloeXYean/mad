@@ -26,6 +26,8 @@ import com.example.rasago.theme.payment.customer.CashPaymentScreen
 import com.example.rasago.theme.payment.customer.DebitCreditCardPaymentScreen
 import com.example.rasago.theme.profile.EditProfileScreen
 import com.example.rasago.theme.profile.ProfileScreen
+import com.example.rasago.theme.staff.StaffScheduleScreen
+import com.example.rasago.theme.staff.StaffScheduleViewModel
 import com.example.rasago.theme.utils.RoleDetector
 import com.example.rasago.ui.theme.menu.MenuViewModel
 import java.text.SimpleDateFormat
@@ -300,6 +302,7 @@ fun AppNavigation(
                 onEditProfileClick = { navController.navigate("edit_profile") },
                 onManageMenuClicked = { navController.navigate("menu_management") },
                 onNavigateToOrders = { navController.navigate("orders") }, // Staff see all orders
+                onStaffManagementClicked = { navController.navigate("staff_management") },
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate("auth_flow") {
@@ -314,7 +317,11 @@ fun AppNavigation(
                 customer = loginState.customer,
                 staff = loginState.staff,
                 onBackClick = { navController.popBackStack() },
-                onSaveSuccess = { navController.popBackStack() }
+                onSaveSuccess = { 
+                    // Refresh user info in AuthViewModel after successful save
+                    authViewModel.refreshUserInfo()
+                    navController.popBackStack() 
+                }
             )
         }
 
@@ -328,6 +335,14 @@ fun AppNavigation(
                 },
                 onDeleteItemClicked = { menuViewModel.deleteMenuItem(it) },
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("staff_management") {
+            val staffScheduleViewModel: StaffScheduleViewModel = hiltViewModel()
+            StaffScheduleScreen(
+                navController = navController,
+                viewModel = staffScheduleViewModel
             )
         }
 
