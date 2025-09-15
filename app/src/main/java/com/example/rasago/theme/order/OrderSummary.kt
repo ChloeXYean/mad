@@ -70,7 +70,7 @@ fun OrderSummaryScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 120.dp), // Space for the floating footer
+                    .padding(bottom = 140.dp), // Increased space for the floating footer
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
@@ -173,7 +173,13 @@ private fun YourOrderCard(
                 onQuantityChange = { change -> onQuantityChange(cartItem, change) },
                 onEditItem = { onEditItem(cartItem, index) }
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            if (index < cartItems.size - 1) {
+                Divider(
+                    color = Color.LightGray,
+                    thickness = 0.5.dp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -194,17 +200,22 @@ private fun SummaryItemRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = cartItem.menuItem.name)
+            Text(
+                text = cartItem.menuItem.name,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
             if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
                 cartItem.selectedAddOns.filter { it.quantity > 0 }.forEach { addOn ->
                     Text(
-                        text = "+ ${addOn.name} (x${addOn.quantity})",
-                        fontSize = 10.sp,
+                        text = "+ ${addOn.name} x${addOn.quantity}",
+                        fontSize = 11.sp,
                         color = Color.Gray,
                         modifier = Modifier.padding(vertical = 1.dp)
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Edit",
                 fontSize = 12.sp,
@@ -220,7 +231,12 @@ private fun SummaryItemRow(
                 verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "RM ${String.format("%.2f", cartItem.calculateTotalPrice())}")
+                Text(
+                    text = "RM ${String.format("%.2f", cartItem.calculateTotalPrice())}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2E7D32)
+                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -234,7 +250,11 @@ private fun SummaryItemRow(
                     ) {
                         Text(text = "-", color = Color(0xFF4CAF50))
                     }
-                    Text(text = cartItem.quantity.toString())
+                    Text(
+                        text = cartItem.quantity.toString(),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                     Box(
                         modifier = Modifier
                             .size(32.dp)

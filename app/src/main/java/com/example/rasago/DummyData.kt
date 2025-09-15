@@ -85,7 +85,7 @@ fun getPredefinedCustomers(): List<CustomerEntity> {
         CustomerEntity(
             name = "John Doe",
             phone = "0123456789",
-            email = "customer@rasago.com",
+            email = "customer@gmail.com",
             password = "password123",
             gender = "Male"
         )
@@ -99,7 +99,7 @@ fun getPredefinedStaff(): List<StaffEntity> {
     return listOf(
         StaffEntity(
             name = "Ali the Cashier",
-            email = "cas_ali@rasago.com",
+            email = "cas_ali@gmail.com",
             password = "password123",
             phone = "0198765432",
             role = "cashier",

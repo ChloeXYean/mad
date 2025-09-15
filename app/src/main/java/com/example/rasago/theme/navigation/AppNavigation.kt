@@ -74,7 +74,7 @@ fun AppNavigation(
                 navController = navController
             )
             // Handle successful login navigation
-            LaunchedEffect(loginState) {
+            LaunchedEffect(loginState.isLoginSuccess) {
                 if (loginState.isLoginSuccess) {
                     val destination = if (loginState.isStaff) "staff_menu" else "menu"
                     navController.navigate(destination) {
@@ -86,6 +86,7 @@ fun AppNavigation(
         composable("register") {
             RegisterScreen(
                 navController = navController,
+                authViewModel = authViewModel,
                 onRegisterSuccess = { navController.popBackStack() }
             )
         }
@@ -231,8 +232,8 @@ fun AppNavigation(
             val receiptItems = orderState.orderItems.map { cartItem ->
                 val itemName = cartItem.menuItem.name
                 val addOnText = if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
-                    " + " + cartItem.selectedAddOns.filter { it.quantity > 0 }
-                        .joinToString(", ") { "${it.name} x${it.quantity}" }
+                    "\n+ " + cartItem.selectedAddOns.filter { it.quantity > 0 }
+                        .joinToString("\n+ ") { "${it.name} x${it.quantity}" }
                 } else ""
                 val fullItemName = "$itemName$addOnText"
                 fullItemName to cartItem.calculateTotalPrice()
@@ -398,7 +399,7 @@ fun AppNavigation(
                 )
             }
 
-            composable("staff_order_history") {
+            composable("staff_orders") {
                 OrderHistoryScreen(
                     onBackClick = { navController.popBackStack() },
                     onViewOrder = { orderId ->

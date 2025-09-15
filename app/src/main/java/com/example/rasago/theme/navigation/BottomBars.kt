@@ -1,6 +1,8 @@
 package com.example.rasago.theme.navigation
 
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ListAlt
@@ -33,7 +35,7 @@ fun CustomerBottomNavigationBar(
     modifier: Modifier = Modifier
 ) {
     NavigationBar(
-        modifier = modifier.height(64.dp),
+        modifier = modifier,
         containerColor = Color.White,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
@@ -93,7 +95,7 @@ fun StaffBottomNavigationBar(
     modifier: Modifier = Modifier
 ) {
     NavigationBar(
-        modifier = modifier.height(64.dp),
+        modifier = modifier,
         containerColor = Color.White,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {

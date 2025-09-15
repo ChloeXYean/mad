@@ -38,6 +38,9 @@ interface CustomerDao {
     @Query("SELECT EXISTS(SELECT 1 FROM customers WHERE email = :email)")
     suspend fun isEmailExists(email: String): Boolean
 
+    @Query("SELECT EXISTS(SELECT 1 FROM customers WHERE name = :name)")
+    suspend fun isNameExists(name: String): Boolean
+
     @Query("SELECT * FROM customers WHERE isActive = 1")
     suspend fun getAllActive(): List<CustomerEntity>
 }
