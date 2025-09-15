@@ -91,6 +91,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:$lifecycle_version")
     testImplementation("androidx.arch.core:core-testing:$arch_version")
     testImplementation("androidx.lifecycle:lifecycle-runtime-testing:$lifecycle_version")
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     // --- Testing ---
     testImplementation(libs.junit)

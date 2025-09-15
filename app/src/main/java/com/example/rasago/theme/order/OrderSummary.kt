@@ -19,12 +19,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.rasago.R
 import com.example.rasago.data.model.CartItem
 import com.example.rasago.order.OrderViewModel
@@ -193,25 +198,82 @@ private fun SummaryItemRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = cartItem.menuItem.name)
-            if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
-                cartItem.selectedAddOns.filter { it.quantity > 0 }.forEach { addOn ->
-                    Text(
-                        text = "+ ${addOn.name} (x${addOn.quantity})",
-                        fontSize = 10.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(vertical = 1.dp)
-                    )
+        // 左侧：图片 + 菜品信息
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.weight(1f)
+        ) {
+            // 使用与MenuScreen相同的图片加载逻辑
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(12.dp)) // 与MenuScreen相同的圆角
+                    .background(Color.LightGray) // 相同的背景色
+            ) {
+                // 与MenuScreen相同的智能图片加载逻辑
+                val imageModel = remember(cartItem.menuItem.photo) {
+                    // 尝试将图片字符串解析为资源ID，如果失败则作为URL处理
+                    cartItem.menuItem.photo.toIntOrNull() ?: cartItem.menuItem.photo
+                }
+
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageModel)
+                        .crossfade(true) // 淡入淡出动画，与MenuScreen一致
+                        .placeholder(R.drawable.ic_launcher_background) // 相同的占位图
+                        .error(R.drawable.ic_launcher_foreground) // 相同的错误图
+                        .build(),
+                    contentDescription = cartItem.menuItem.name,
+                    contentScale = ContentScale.Crop, // 相同的裁剪方式
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // 显示推荐标签，与MenuScreen一致
+                if (cartItem.menuItem.isRecommended) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(4.dp)
+                            .background(Color(0xFFE65100), RoundedCornerShape(20.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "Recommend",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
-            Text(
-                text = "Edit",
-                fontSize = 12.sp,
-                color = Color(0xFF236cb2),
-                modifier = Modifier.clickable(onClick = onEditItem)
-            )
+
+            // 菜品信息
+            Column {
+                Text(
+                    text = cartItem.menuItem.name,
+                    fontWeight = FontWeight.Medium
+                )
+                if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
+                    cartItem.selectedAddOns.filter { it.quantity > 0 }.forEach { addOn ->
+                        Text(
+                            text = "+ ${addOn.name} (x${addOn.quantity})",
+                            fontSize = 10.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(vertical = 1.dp)
+                        )
+                    }
+                }
+                Text(
+                    text = "Edit",
+                    fontSize = 12.sp,
+                    color = Color(0xFF236cb2),
+                    modifier = Modifier.clickable(onClick = onEditItem)
+                )
+            }
         }
+
+        // 右侧：价格 + 数量控制
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -446,4 +508,3 @@ private fun TotalFooterCard(total: Double, onPlaceOrderClick: () -> Unit) {
         }
     }
 }
-
