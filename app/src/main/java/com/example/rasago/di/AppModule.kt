@@ -2,21 +2,27 @@ package com.example.rasago.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.rasago.data.dao.CustomerDao
 import com.example.rasago.data.dao.MenuItemDao
 import com.example.rasago.data.dao.OrderDao
 import com.example.rasago.data.dao.OrderItemDao
 import com.example.rasago.data.dao.StaffDao
 import com.example.rasago.data.database.AppDatabase
-import com.example.rasago.data.repository.ImageRepository
-import com.example.rasago.data.repository.MenuRepository
-import com.example.rasago.data.repository.OrderRepository
-import com.example.rasago.data.repository.UserRepository
+import com.example.rasago.getPredefinedCustomers
+import com.example.rasago.getPredefinedMenuItems
+import com.example.rasago.getPredefinedStaff
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -25,15 +31,42 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext appContext: Context): AppDatabase {
+    fun provideAppDatabase(
+        @ApplicationContext context: Context,
+        prepopulateCallback: PrepopulateCallback
+    ): AppDatabase {
         return Room.databaseBuilder(
-            appContext,
+            context,
             AppDatabase::class.java,
-            "rasago_database"
-        ).build()
+            "rasago_db"
+        )
+            .addCallback(prepopulateCallback)
+            .fallbackToDestructiveMigration() // Add this line
+            .build()
     }
 
-    // --- DAO Providers ---
+    @Provides
+    @Singleton
+    fun providePrepopulateCallback(
+        dbProvider: Provider<AppDatabase>,
+        coroutineScope: CoroutineScope
+    ): PrepopulateCallback {
+        return PrepopulateCallback(dbProvider, coroutineScope)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCoroutineScope(): CoroutineScope {
+        return CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    }
+
+    // DAO Providers
+    @Provides
+    fun provideCustomerDao(db: AppDatabase): CustomerDao = db.customerDao()
+
+    @Provides
+    fun provideStaffDao(db: AppDatabase): StaffDao = db.staffDao()
+
     @Provides
     fun provideOrderDao(db: AppDatabase): OrderDao = db.orderDao()
 
@@ -41,40 +74,37 @@ object AppModule {
     fun provideOrderItemDao(db: AppDatabase): OrderItemDao = db.orderItemDao()
 
     @Provides
-    fun provideMenuDao(db: AppDatabase): MenuItemDao = db.menuItemDao()
+    fun provideMenuItemDao(db: AppDatabase): MenuItemDao = db.menuItemDao()
+}
 
-    @Provides
-    fun provideCustomerDao(db: AppDatabase): CustomerDao = db.customerDao()
+class PrepopulateCallback(
+    private val dbProvider: Provider<AppDatabase>,
+    private val scope: CoroutineScope
+) : RoomDatabase.Callback() {
+    override fun onCreate(db: SupportSQLiteDatabase) {
+        super.onCreate(db)
+        scope.launch {
+            // Get DAOs from the database provider
+            val database = dbProvider.get()
+            val menuItemDao = database.menuItemDao()
+            val customerDao = database.customerDao()
+            val staffDao = database.staffDao()
 
-    @Provides
-    fun provideStaffDao(db: AppDatabase): StaffDao = db.staffDao()
+            // Pre-populate menu items if the table is empty
+            if (menuItemDao.getCount() == 0) {
+                menuItemDao.insertAll(getPredefinedMenuItems())
+            }
 
-    // --- Repository Providers ---
-    @Provides
-    @Singleton
-    fun provideOrderRepository(
-        orderDao: OrderDao,
-        menuItemDao: MenuItemDao,
-        orderItemDao: OrderItemDao
-    ): OrderRepository {
-        return OrderRepository(orderDao, menuItemDao, orderItemDao)
+            // Pre-populate customers if the table is empty
+            if (customerDao.getCount() == 0) {
+                customerDao.insert(getPredefinedCustomers().first())
+            }
+
+            // Pre-populate staff if the table is empty
+            if (staffDao.getCount() == 0) {
+                staffDao.insert(getPredefinedStaff().first())
+            }
+        }
     }
-
-    @Provides
-    @Singleton
-    fun provideMenuRepository(menuDao: MenuItemDao): MenuRepository {
-        return MenuRepository(menuDao)
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserRepository(
-        customerDao: CustomerDao,
-        staffDao: StaffDao
-    ): UserRepository {
-        return UserRepository(customerDao, staffDao)
-    }
-
-    // No need to explicitly provide ImageRepository if it has @Inject constructor
 }
 

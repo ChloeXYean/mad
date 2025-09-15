@@ -1,126 +1,112 @@
-//package com.example.rasago
-//
-//import com.example.rasago.data.model.CustomerProfile
-//import com.example.rasago.data.model.MenuItem
-//import com.example.rasago.data.model.Order
-//import com.example.rasago.data.model.OrderItem
-//import com.example.rasago.data.model.StaffProfile
-//
-//object DummyData {
-//    /**
-//     * Provides a list of `MenuItem` UI models for database pre-population.
-//     * The repository will convert these into `MenuItemEntity` objects.
-//     */
-//    val menuItems: List<MenuItem> = listOf(
-//        MenuItem(
-//            id = 1,
-//            name = "Nasi Lemak",
-//            description = "A fragrant rice dish cooked in coconut milk and pandan leaf, served with a spicy sambal, fried anchovies, peanuts, and a hard-boiled egg.",
-//            price = 8.5,
-//            category = "Rice",
-//            photo = R.drawable.rice_nasilemak,
-//            isRecommended = true
-//        ),
-//        MenuItem(
-//            id = 2,
-//            name = "Asam Laksa",
-//            description = "A sour and spicy fish-based noodle soup. Its unique flavour comes from tamarind (asam), chili, and shredded fish.",
-//            price = 10.0,
-//            category = "Noodles",
-//            photo = R.drawable.noodle_asamlaksa,
-//            isRecommended = true
-//        ),
-//        MenuItem(
-//            id = 3,
-//            name = "Curry Mee",
-//            description = "A rich and flavorful noodle soup with a coconut-based curry broth, served with tofu puffs, chicken, and bean sprouts.",
-//            price = 9.5,
-//            category = "Noodles",
-//            photo = R.drawable.noodle_currymee
-//        ),
-//        MenuItem(id = 4, name = "Teh Tarik", description = "A hot milk tea beverage.", price = 3.5, category = "Drinks", photo = R.drawable.drink_tehtarik),
-//        MenuItem(id = 5, name = "Milo Ais", description = "A cold chocolate malt drink.", price = 4.0, category = "Drinks", photo = R.drawable.drink_miloais),
-//        MenuItem(id = 6, name = "Chicken Rice", description = "Poached chicken and seasoned rice.", price = 9.0, category = "Rice", photo = R.drawable.rice_chickenrice),
-//        MenuItem(id = 7, name = "Satay", description = "Seasoned, skewered and grilled meat, served with a delicious peanut sauce.", price = 12.0, category = "Side Dishes", photo = R.drawable.side_chickensatay),
-//        MenuItem(id = 8, name = "Keropok Lekor", description = "A traditional Malay fish cracker snack.", price = 4.0, category = "Side Dishes", photo = R.drawable.side_lekor),
-//        MenuItem(id = 9, name = "Cendol", description = "An iced sweet dessert with green rice flour jelly, coconut milk and palm sugar syrup.", price = 5.0, category = "Desserts", photo = R.drawable.dessert_cendol),
-//        MenuItem(id = 10, name = "Ais Kacang (ABC)", description = "A Malaysian dessert of shaved ice, red beans, sweet corn, and grass jelly.", price = 5.0, category = "Desserts", photo = R.drawable.dessert_abc)
-//    )
-//
-//    /**
-//     * Provides a list of `Order` UI models for database pre-population.
-//     * The repository will use mappers to convert these into `OrderEntity` and `OrderItemEntity` objects.
-//     */
-//    val orders: List<Order> = listOf(
-//        Order(
-//            id = 1,
-//            no = "T01",
-//            type = "Dine-In",
-//            time = "2025-09-15 09:30",
-//            status = "Preparing",
-//            customerId = "1",
-//            orderItems = listOf(
-//                OrderItem(id = 1, name = "Nasi Lemak", price = 8.5, quantity = 2),
-//                OrderItem(id = 4, name = "Teh Tarik", price = 3.5, quantity = 1)
-//            )
-//        ),
-//        Order(
-//            id = 2,
-//            no = "T02",
-//            type = "Takeaway",
-//            time = "2025-09-15 10:15",
-//            status = "Done",
-//            customerId = "1",
-//            orderItems = listOf(
-//                OrderItem(id = 3, name = "Curry Mee", price = 9.5, quantity = 1),
-//                OrderItem(id = 5, name = "Milo Ais", price = 4.0, quantity = 2)
-//            )
-//        ),
-//        Order(
-//            id = 3,
-//            no = "T03",
-//            type = "Dine-In",
-//            time = "2025-09-15 11:05",
-//            status = "Cancelled",
-//            customerId = "1",
-//            orderItems = listOf(
-//                OrderItem(id = 7, name = "Satay", price = 12.0, quantity = 1),
-//                OrderItem(id = 9, name = "Cendol", price = 5.0, quantity = 2)
-//            )
-//        )
-//    )
-//
-//    val customerProfile = CustomerProfile(
-//        id = 1,
-//        name = "John Doe",
-//        email = "john.doe@example.com",
-//        phone = "0123456789",
-//        gender = "Male",
-//        profileImageRes = R.drawable.default_profile_picture,
-//        password = "password"
-//    )
-//
-//    val staffProfiles = listOf(
-//        StaffProfile(
-//            id = 1,
-//            name = "Jane Smith (Manager)",
-//            gender = "Female",
-//            email = "jane.smith@rasago.com",
-//            phone = "0198765432",
-//            role = "MANAGER",
-//            status = "Active",
-//            jobTime = System.currentTimeMillis()
-//        ),
-//        StaffProfile(
-//            id = 2,
-//            name = "David Chen (Waiter)",
-//            gender = "Male",
-//            email = "david.chen@rasago.com",
-//            phone = "0161234567",
-//            role = "WAITER",
-//            status = "Active",
-//            jobTime = System.currentTimeMillis()
-//        )
-//    )
-//}
-//
+package com.example.rasago
+
+import com.example.rasago.data.entity.CustomerEntity
+import com.example.rasago.data.entity.MenuItemEntity
+import com.example.rasago.data.entity.StaffEntity
+
+/**
+ * Provides a pre-defined list of menu items to populate the database on its first creation.
+ */
+fun getPredefinedMenuItems(): List<MenuItemEntity> {
+    return listOf(
+        MenuItemEntity(
+            name = "Nasi Lemak",
+            description = "A traditional Malaysian fragrant rice dish cooked in coconut milk and pandan leaf.",
+            price = 8.50,
+            category = "Rice",
+            photo = R.drawable.rice_nasilemak.toString(),
+            isRecommended = true
+        ),
+        MenuItemEntity(
+            name = "Asam Laksa",
+            description = "A spicy and sour fish-based noodle soup.",
+            price = 10.00,
+            category = "Noodles",
+            photo = R.drawable.noodle_asamlaksa.toString(),
+            isRecommended = true
+        ),
+        MenuItemEntity(
+            name = "Curry Mee",
+            description = "A rich and spicy curry noodle soup with coconut milk.",
+            price = 9.50,
+            category = "Noodles",
+            photo = R.drawable.noodle_currymee.toString()
+        ),
+        MenuItemEntity(
+            name = "Otak-Otak",
+            description = "Grilled fish cake made of ground fish meat mixed with tapioca starch and spices.",
+            price = 7.00,
+            category = "Side Dishes",
+            photo = R.drawable.side_otakotak.toString()
+        ),
+        MenuItemEntity(
+            name = "Chicken Rice",
+            description = "Poached chicken and seasoned rice, served with chili sauce and cucumber garnishes.",
+            price = 9.00,
+            category = "Rice",
+            photo = R.drawable.rice_chickenrice.toString()
+        ),
+        MenuItemEntity(
+            name = "Char Kuey Teow",
+            description = "Stir-fried rice noodles with shrimp, cockles, bean sprouts, and chives in a soy sauce mixture.",
+            price = 11.00,
+            category = "Noodles",
+            photo = R.drawable.noodle_charkueyteow.toString()
+        ),
+        MenuItemEntity(
+            name = "Chicken Satay",
+            description = "Grilled marinated chicken skewers served with a peanut sauce.",
+            price = 12.00,
+            category = "Side Dishes",
+            photo = R.drawable.side_chickensatay.toString()
+        ),
+        MenuItemEntity(
+            name = "Cendol",
+            description = "An iced sweet dessert that contains droplets of green rice flour jelly, coconut milk and palm sugar syrup.",
+            price = 5.00,
+            category = "Desserts",
+            photo = R.drawable.dessert_cendol.toString()
+        ),
+        MenuItemEntity(
+            name = "Teh Tarik",
+            description = "A popular hot milk tea beverage most commonly found in restaurants, outdoor stalls and kopitiams.",
+            price = 3.50,
+            category = "Drinks",
+            photo = R.drawable.drink_tehtarik.toString()
+        )
+    )
+}
+
+/**
+ * Provides a pre-defined list of customers for database seeding.
+ */
+fun getPredefinedCustomers(): List<CustomerEntity> {
+    return listOf(
+        CustomerEntity(
+            name = "John Doe",
+            phone = "0123456789",
+            email = "customer@rasago.com",
+            password = "password123",
+            gender = "Male"
+        )
+    )
+}
+
+/**
+ * Provides a pre-defined list of staff members for database seeding.
+ */
+//TODO: Why Staff login error
+fun getPredefinedStaff(): List<StaffEntity> {
+    return listOf(
+        StaffEntity(
+            name = "Ali the Cashier",
+            email = "cas_ali@rasago.com",
+            password = "password123",
+            phone = "0198765432",
+            role = "cashier",
+            status = "active",
+            jobTime = System.currentTimeMillis()
+        )
+    )
+}
+

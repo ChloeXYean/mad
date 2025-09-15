@@ -8,15 +8,6 @@ import com.example.rasago.theme.utils.RoleDetector
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// 登录结果数据类
-data class LoginResult(
-    val isSuccess: Boolean,
-    val isStaff: Boolean,
-    val customer: CustomerEntity? = null,
-    val staff: StaffEntity? = null,
-    val message: String = ""
-)
-
 @Singleton
 class UserRepository @Inject constructor(
     private val customerDao: CustomerDao,
@@ -24,16 +15,36 @@ class UserRepository @Inject constructor(
 ) {
 
     /**
+     * Attempts to log in a customer by checking their credentials against the database.
+     * @param email The customer's email.
+     * @param password The customer's password.
+     * @return A CustomerEntity if successful, otherwise null.
+     */
+    suspend fun loginCustomer(email: String, password: String): CustomerEntity? {
+        return customerDao.login(email, password)
+    }
+
+    /**
+     * Attempts to log in a staff member by checking their credentials against the database.
+     * @param email The staff member's email.
+     * @param password The staff member's password.
+     * @return A StaffEntity if successful, otherwise null.
+     */
+    suspend fun loginStaff(email: String, password: String): StaffEntity? {
+        return staffDao.login(email, password)
+    }
+
+    /**
      * @param email
      * @param password
      * @return
      */
     suspend fun smartLogin(email: String, password: String): LoginResult {
-        // 首先检测邮箱是否为员工邮箱
+        // First, detect if the email belongs to a staff member
         val isStaffEmail = RoleDetector.isStaffEmail(email)
 
         if (isStaffEmail) {
-            // 尝试员工登录
+            // Attempt staff login
             val staff = staffDao.login(email, password)
             if (staff != null) {
                 return LoginResult(
@@ -44,23 +55,23 @@ class UserRepository @Inject constructor(
                 )
             }
 
-            // 员工登录失败
+            // Staff login failed
             val existingStaff = staffDao.getByEmail(email)
-            if (existingStaff == null) {
-                return LoginResult(
+            return if (existingStaff == null) {
+                LoginResult(
                     isSuccess = false,
                     isStaff = true,
-                    message = "Staff doesn't exitst, please contact manager"
+                    message = "Staff doesn't exist, please contact manager"
                 )
             } else {
-                return LoginResult(
+                LoginResult(
                     isSuccess = false,
                     isStaff = true,
                     message = "Wrong password"
                 )
             }
         } else {
-            // 尝试顾客登录
+            // Attempt customer login
             val customer = customerDao.login(email, password)
             if (customer != null) {
                 return LoginResult(
@@ -69,15 +80,16 @@ class UserRepository @Inject constructor(
                     customer = customer,
                     message = "Login Successful"
                 )
+
             }
 
-            // 顾客登录失败，检查是否需要自动创建顾客账户
+            // Customer login failed, check if we should auto-create an account
             val existingCustomer = customerDao.getByEmail(email)
-            if (existingCustomer == null) {
-                // 自动创建顾客账户（演示用途）
+            return if (existingCustomer == null) {
+                // Auto-create customer account (for demonstration)
                 val newCustomer = CustomerEntity(
                     name = email.substringBefore("@"),
-                    phone = "",
+                    phone = "", // Phone number is now required
                     email = email,
                     password = password,
                     gender = "N/A"
@@ -85,21 +97,21 @@ class UserRepository @Inject constructor(
 
                 try {
                     val customerId = customerDao.insert(newCustomer)
-                    return LoginResult(
+                    LoginResult(
                         isSuccess = true,
                         isStaff = false,
                         customer = newCustomer.copy(customerId = customerId.toInt()),
                         message = "Account created and already login"
                     )
                 } catch (e: Exception) {
-                    return LoginResult(
+                    LoginResult(
                         isSuccess = false,
                         isStaff = false,
                         message = "Fail to create account"
                     )
                 }
             } else {
-                return LoginResult(
+                LoginResult(
                     isSuccess = false,
                     isStaff = false,
                     message = "Wrong Password"
@@ -109,7 +121,7 @@ class UserRepository @Inject constructor(
     }
 
     /**
-     * 顾客注册
+     * Customer Registration
      */
     suspend fun registerCustomer(
         name: String,
@@ -118,9 +130,9 @@ class UserRepository @Inject constructor(
         phoneNumber: String,
         gender: String = "N/A"
     ): Long? {
-        // 检查邮箱是否已存在
+        // Check if email already exists
         if (customerDao.isEmailExists(email)) {
-            return null // 邮箱已存在
+            return null // Email already exists
         }
 
         val newCustomer = CustomerEntity(
@@ -138,44 +150,43 @@ class UserRepository @Inject constructor(
         }
     }
 
-
     /**
-     * 根据邮箱获取顾客
+     * Get customer by email
      */
     suspend fun getCustomerByEmail(email: String): CustomerEntity? {
         return customerDao.getByEmail(email)
     }
 
     /**
-     * 根据邮箱获取员工
+     * Get staff by email
      */
     suspend fun getStaffByEmail(email: String): StaffEntity? {
         return staffDao.getByEmail(email)
     }
 
     /**
-     * 获取所有活跃顾客
+     * Get all active customers
      */
     suspend fun getAllActiveCustomers(): List<CustomerEntity> {
         return customerDao.getAllActive()
     }
 
     /**
-     * 获取所有活跃员工
+     * Get all active staff
      */
     suspend fun getAllActiveStaff(): List<StaffEntity> {
         return staffDao.getAllActive()
     }
 
     /**
-     * 更新员工状态（仅管理员可操作）
+     * Update staff status (Manager only)
      */
     suspend fun updateStaffStatus(
         adminStaff: StaffEntity,
         targetEmail: String,
         newStatus: String
     ): Boolean {
-        // 检查执行者是否有管理权限
+        // Check if the executor has management permission
         if (!RoleDetector.hasManagementPermission(adminStaff.role)) {
             return false
         }
@@ -193,3 +204,12 @@ class UserRepository @Inject constructor(
         }
     }
 }
+
+// Data class for login result, moved to UserRepository for better organization
+data class LoginResult(
+    val isSuccess: Boolean,
+    val isStaff: Boolean,
+    val customer: CustomerEntity? = null,
+    val staff: StaffEntity? = null,
+    val message: String = ""
+)

@@ -1,6 +1,5 @@
 package com.example.rasago.theme.auth
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,142 +19,154 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.rasago.R
-import com.example.rasago.ui.theme.RasagoApp
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navController: NavController,
-    onLoginSuccess: (isStaff: Boolean) -> Unit = { _ -> }
+    onLoginSuccess: (isStaff: Boolean) -> Unit = { _ -> },
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     var loginEmail by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val loginResult by authViewModel.loginResult.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Background image
-        Image(
-            painter = painterResource(id = R.drawable.login_background),
-            contentDescription = "Background",
-            modifier = Modifier.fillMaxSize(),
-            alpha = 0.5f,
-            contentScale = ContentScale.Crop
-        )
+    // Observe the login result and navigate on success or show error on failure.
+    LaunchedEffect(loginResult) {
+        loginResult?.let {
+            if (it.success) {
+                onLoginSuccess(it.isStaff)
+            } else if (it.error != null) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(it.error)
+                }
+            }
+            // Reset the result to prevent re-processing on configuration change
+            authViewModel.resetLoginResult()
+        }
+    }
 
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0x90000000))
-        )
-
-        // Foreground content
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(40.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(innerPadding)
         ) {
-            // Logo + caption
             Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Rasa Go",
+                painter = painterResource(id = R.drawable.login_background),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                alpha = 0.5f,
+                contentScale = ContentScale.Crop
+            )
+
+            Box(
                 modifier = Modifier
-                    .size(180.dp)
-                    .padding(bottom = 16.dp)
-            )
-            Text(
-                text = "Order Fast, Rasa Best!",
-                fontSize = 20.sp,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 24.dp, top = 8.dp),
-                color = Color.White
+                    .fillMaxSize()
+                    .background(Color(0x90000000))
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
-
-            // Login form
-            Text(
-                text = "Login to your account",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.ExtraBold,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 24.dp),
-                color = Color.White
-            )
-
-            AuthTextField(
-                label = "Email Address",
-                value = loginEmail,
-                onValueChange = { loginEmail = it },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
-                )
-            )
-
-            AuthPasswordField(
-                label = "Password",
-                value = password,
-                onValueChange = { password = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                )
-            )
-
-            Button(
-                onClick = {
-                    // TODO: 实际登录逻辑
-                    // 默认登录为顾客
-                    onLoginSuccess(false)
-                },
-                modifier = Modifier
-                    .width(150.dp)
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50),
-                    contentColor = Color.White
-                )
+                    .fillMaxSize()
+                    .padding(40.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Login",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Rasa Go",
+                    modifier = Modifier
+                        .size(180.dp)
+                        .padding(bottom = 16.dp)
                 )
-            }
-
-            // Sign up prompt
-            Row(modifier = Modifier.padding(top = 16.dp)) {
                 Text(
-                    text = "Don't have an account? ",
-                    fontSize = 16.sp,
+                    text = "Order Fast, Rasa Best!",
+                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 24.dp, top = 8.dp),
                     color = Color.White
                 )
+                Spacer(modifier = Modifier.height(40.dp))
                 Text(
-                    text = "Sign Up",
-                    fontSize = 16.sp,
-                    color = Color(0xFF2196F3),
-                    fontWeight = FontWeight.Bold,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable {
-                        navController.navigate("register")
-                    }
+                    text = "Login to your account",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 24.dp),
+                    color = Color.White
                 )
+                AuthTextField(
+                    label = "Email Address",
+                    value = loginEmail,
+                    onValueChange = { loginEmail = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    )
+                )
+                AuthPasswordField(
+                    label = "Password",
+                    value = password,
+                    onValueChange = { password = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    )
+                )
+                Button(
+                    onClick = { authViewModel.loginUser(loginEmail, password) },
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "Login",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Row(modifier = Modifier.padding(top = 16.dp)) {
+                    Text(
+                        text = "Don't have an account? ",
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Sign Up",
+                        fontSize = 16.sp,
+                        color = Color(0xFF2196F3),
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable {
+                            navController.navigate("register")
+                        }
+                    )
+                }
             }
         }
     }
@@ -191,7 +202,6 @@ fun RegisterScreen(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Background image
             Image(
                 painter = painterResource(id = R.drawable.login_background),
                 contentDescription = "Background",
@@ -199,14 +209,11 @@ fun RegisterScreen(
                 alpha = 0.5f,
                 contentScale = ContentScale.Crop
             )
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0x90000000))
             )
-
-            // Foreground content
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -216,7 +223,6 @@ fun RegisterScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Logo + caption
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Rasa Go",
@@ -231,7 +237,6 @@ fun RegisterScreen(
                     modifier = Modifier.padding(bottom = 24.dp),
                     color = Color.White
                 )
-
                 AuthTextField(
                     label = "Username",
                     value = registerUsername,
@@ -244,7 +249,6 @@ fun RegisterScreen(
                         imeAction = ImeAction.Next
                     )
                 )
-
                 AuthTextField(
                     label = "Email Address",
                     value = registerEmail,
@@ -257,7 +261,6 @@ fun RegisterScreen(
                         imeAction = ImeAction.Next
                     )
                 )
-
                 AuthTextField(
                     label = "Phone Number",
                     value = registerPhoneNo,
@@ -270,7 +273,6 @@ fun RegisterScreen(
                         imeAction = ImeAction.Next
                     )
                 )
-
                 AuthPasswordField(
                     label = "Password",
                     value = registerPassword,
@@ -283,7 +285,6 @@ fun RegisterScreen(
                         imeAction = ImeAction.Next
                     )
                 )
-
                 AuthPasswordField(
                     label = "Confirm Password",
                     value = registerConfirmPassword,
@@ -296,7 +297,6 @@ fun RegisterScreen(
                         imeAction = ImeAction.Done
                     )
                 )
-
                 Button(
                     onClick = {
                         // TODO: 实际注册逻辑
@@ -316,7 +316,6 @@ fun RegisterScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
-
                 Row(modifier = Modifier.padding(top = 16.dp)) {
                     Text(
                         text = "Already have an account? ",
@@ -406,24 +405,3 @@ fun AuthPasswordField(
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    RasagoApp {
-        LoginScreen(
-            navController = rememberNavController(),
-            onLoginSuccess = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RegisterScreenPreview() {
-    RasagoApp {
-        RegisterScreen(
-            navController = rememberNavController(),
-            onRegisterSuccess = {}
-        )
-    }
-}
