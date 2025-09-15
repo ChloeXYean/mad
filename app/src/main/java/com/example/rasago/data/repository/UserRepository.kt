@@ -8,6 +8,12 @@ import com.example.rasago.theme.utils.RoleDetector
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class RegistrationResult(
+    val isSuccess: Boolean,
+    val message: String,
+    val customerId: Long?
+)
+
 @Singleton
 class UserRepository @Inject constructor(
     private val customerDao: CustomerDao,
@@ -83,33 +89,14 @@ class UserRepository @Inject constructor(
 
             }
 
-            // Customer login failed, check if we should auto-create an account
+            // Customer login failed
             val existingCustomer = customerDao.getByEmail(email)
             return if (existingCustomer == null) {
-                // Auto-create customer account (for demonstration)
-                val newCustomer = CustomerEntity(
-                    name = email.substringBefore("@"),
-                    phone = "", // Phone number is now required
-                    email = email,
-                    password = password,
-                    gender = "N/A"
+                LoginResult(
+                    isSuccess = false,
+                    isStaff = false,
+                    message = "Account not found. Please register first."
                 )
-
-                try {
-                    val customerId = customerDao.insert(newCustomer)
-                    LoginResult(
-                        isSuccess = true,
-                        isStaff = false,
-                        customer = newCustomer.copy(customerId = customerId.toInt()),
-                        message = "Account created and already login"
-                    )
-                } catch (e: Exception) {
-                    LoginResult(
-                        isSuccess = false,
-                        isStaff = false,
-                        message = "Fail to create account"
-                    )
-                }
             } else {
                 LoginResult(
                     isSuccess = false,
@@ -129,10 +116,23 @@ class UserRepository @Inject constructor(
         password: String,
         phoneNumber: String,
         gender: String = "N/A"
-    ): Long? {
+    ): RegistrationResult {
+        // Check if username already exists
+        if (customerDao.isNameExists(name)) {
+            return RegistrationResult(
+                isSuccess = false,
+                message = "Username already taken. Please choose a different one.",
+                customerId = null
+            )
+        }
+        
         // Check if email already exists
         if (customerDao.isEmailExists(email)) {
-            return null // Email already exists
+            return RegistrationResult(
+                isSuccess = false,
+                message = "Email already exists. Please use a different email.",
+                customerId = null
+            )
         }
 
         val newCustomer = CustomerEntity(
@@ -144,9 +144,18 @@ class UserRepository @Inject constructor(
         )
 
         return try {
-            customerDao.insert(newCustomer)
+            val customerId = customerDao.insert(newCustomer)
+            RegistrationResult(
+                isSuccess = true,
+                message = "Registration successful!",
+                customerId = customerId
+            )
         } catch (e: Exception) {
-            null
+            RegistrationResult(
+                isSuccess = false,
+                message = "Registration failed. Please try again.",
+                customerId = null
+            )
         }
     }
 

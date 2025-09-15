@@ -120,7 +120,7 @@ fun MenuScreen(
                     count = cartItemCount,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 80.dp), // Adjust padding to sit above the nav bar
+                        .padding(bottom = 120.dp), // Move cart button higher
                     onClick = onNavigateToCart
                 )
             }

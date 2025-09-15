@@ -37,6 +37,22 @@ class AuthViewModel @Inject constructor(
     var password by mutableStateOf("")
 
     fun loginUser() {
+        // 输入验证
+        when {
+            email.isBlank() && password.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your email and password") }
+                return
+            }
+            email.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your email") }
+                return
+            }
+            password.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your password") }
+                return
+            }
+        }
+
         viewModelScope.launch {
             _loginState.update { it.copy(isLoading = true, error = null) }
             val result = userRepository.smartLogin(email, password)
@@ -67,6 +83,79 @@ class AuthViewModel @Inject constructor(
 
     fun clearError() {
         _loginState.update { it.copy(error = null) }
+    }
+
+    fun registerCustomer(
+        name: String,
+        email: String,
+        password: String,
+        phoneNumber: String,
+        confirmPassword: String,
+        gender: String = "N/A"
+    ) {
+        when {
+            name.isBlank() && email.isBlank() && phoneNumber.isBlank() && password.isBlank() && confirmPassword.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your details") }
+                return
+            }
+            name.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your username") }
+                return
+            }
+            email.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your email") }
+                return
+            }
+            phoneNumber.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your phone number") }
+                return
+            }
+            password.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your password") }
+                return
+            }
+            confirmPassword.isBlank() -> {
+                _loginState.update { it.copy(error = "Please confirm your password") }
+                return
+            }
+            password != confirmPassword -> {
+                _loginState.update { it.copy(error = "Passwords do not match") }
+                return
+            }
+            password.length < 6 -> {
+                _loginState.update { it.copy(error = "Password must be at least 6 characters") }
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            _loginState.update { it.copy(isLoading = true, error = null) }
+            val result = userRepository.registerCustomer(name, email, password, phoneNumber, gender)
+            if (result.isSuccess && result.customerId != null) {
+                _loginState.update {
+                    it.copy(
+                        isLoginSuccess = true,
+                        isStaff = false,
+                        customer = com.example.rasago.data.entity.CustomerEntity(
+                            customerId = result.customerId.toInt(),
+                            name = name,
+                            email = email,
+                            password = password,
+                            phone = phoneNumber,
+                            gender = gender
+                        ),
+                        isLoading = false
+                    )
+                }
+            } else {
+                _loginState.update {
+                    it.copy(
+                        error = result.message,
+                        isLoading = false
+                    )
+                }
+            }
+        }
     }
 }
 

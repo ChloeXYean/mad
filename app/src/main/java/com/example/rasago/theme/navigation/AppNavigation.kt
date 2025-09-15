@@ -55,7 +55,7 @@ fun AppNavigation(
                 navController = navController
             )
             // Handle successful login navigation
-            LaunchedEffect(loginState) {
+            LaunchedEffect(loginState.isLoginSuccess) {
                 if (loginState.isLoginSuccess) {
                     val destination = if (loginState.isStaff) "staff_main" else "menu"
                     navController.navigate(destination) {
@@ -67,6 +67,7 @@ fun AppNavigation(
         composable("register") {
             RegisterScreen(
                 navController = navController,
+                authViewModel = authViewModel,
                 onRegisterSuccess = { navController.popBackStack() }
             )
         }
@@ -227,7 +228,8 @@ fun AppNavigation(
             val receiptItems = orderState.orderItems.map { cartItem ->
                 val itemName = cartItem.menuItem.name
                 val addOnText = if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
-                    " + " + cartItem.selectedAddOns.filter { it.quantity > 0 }.joinToString(", ") { "${it.name} x${it.quantity}" }
+                    "\n+ " + cartItem.selectedAddOns.filter { it.quantity > 0 }
+                        .joinToString("\n+ ") { "${it.name} x${it.quantity}" }
                 } else ""
                 val fullItemName = "$itemName$addOnText"
                 fullItemName to cartItem.calculateTotalPrice()
@@ -373,6 +375,32 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() }
             )
         }
+
+        // --- Staff App Flow ---
+        navigation(startDestination = "staff_main", route = "staff_app") {
+            composable("staff_main") {
+                StaffMain(
+                    staff = staffData,
+                    onMenuClick = { navController.navigate("menu") },
+                    onLogoutClick = {
+                        navController.navigate("auth_flow") {
+                            popUpTo("staff_app") { inclusive = true }
+                        }
+                    },
+                    navController = navController
+                )
+            }
+
+            composable("staff_orders") {
+                OrderHistoryScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onViewOrder = { orderId ->
+                        navController.navigate("food_status/$orderId")
+                    }
+                )
+            }
+        }
+
     }
 }
 

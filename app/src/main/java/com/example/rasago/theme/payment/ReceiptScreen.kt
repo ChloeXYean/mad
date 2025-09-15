@@ -41,18 +41,15 @@ fun ReceiptScreen(
             )
         }
     ) { innerPadding ->
-        Box(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFFF5F5F5))
+                .background(Color(0xFFF5F5F5)),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -72,6 +69,9 @@ fun ReceiptScreen(
                         PaymentMethodSection(paymentMethod)
                     }
                 }
+            }
+            
+            item {
                 Button(
                     onClick = onProceedClick,
                     modifier = Modifier
@@ -80,7 +80,7 @@ fun ReceiptScreen(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        "Continue Shopping",
+                        "Continue",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -105,7 +105,7 @@ private fun OrderItemsSection(orderItems: List<Pair<String, Float>>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Order Items", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF424242))
         LazyColumn(
-            modifier = Modifier.heightIn(max = 200.dp),
+            modifier = Modifier.heightIn(max = 300.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(orderItems) { item ->
@@ -114,15 +114,30 @@ private fun OrderItemsSection(orderItems: List<Pair<String, Float>>) {
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA))
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(12.dp)
                     ) {
-                        Text(item.first, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFF424242))
-                        Text("RM ${String.format("%.2f", item.second)}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Text(
+                                text = item.first,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF424242),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "RM ${String.format("%.2f", item.second)}",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF2E7D32)
+                            )
+                        }
                     }
                 }
             }
