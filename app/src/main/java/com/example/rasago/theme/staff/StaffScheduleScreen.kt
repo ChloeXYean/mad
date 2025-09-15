@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +42,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rasago.R
 import com.example.rasago.data.entity.StaffEntity
+import com.example.rasago.data.model.Order
 import com.example.rasago.data.repository.UserRepository
 import com.example.rasago.theme.utils.RoleDetector
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -100,6 +102,9 @@ fun AppNavHost(navController: NavHostController) {
         composable("staffSchedule") {
             StaffScheduleScreen()
         }
+        composable("staffOrders") {
+            StaffOrderManagementScreen()
+        }
     }
 }
 
@@ -108,7 +113,8 @@ fun AppNavHost(navController: NavHostController) {
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         BottomNavItem("Main Menu", "mainMenu", Icons.Default.Home),
-        BottomNavItem("Staff", "staffSchedule", Icons.Default.People)
+        BottomNavItem("Staff", "staffSchedule", Icons.Default.People),
+        BottomNavItem("Orders", "staffOrders", Icons.Default.Edit)
     )
     NavigationBar {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -404,7 +410,7 @@ fun StaffScheduleScreen(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val filteredList = staffList.filter { staffEntity ->
+            val filteredList = staffList.filter { staffEntity: StaffEntity ->
                 val matchesRole = when (selectedRole) {
                     null -> true // All Roles
                     "active" -> staffEntity.status == "active"
@@ -432,7 +438,7 @@ fun StaffScheduleScreen(
                     }
                 }
             } else {
-                items(filteredList) { staffEntity ->
+                items(filteredList) { staffEntity: StaffEntity ->
                     RealStaffItem(
                         staff = staffEntity,
                         onStatusChange = { newStatus ->
@@ -876,6 +882,324 @@ fun DatePickerDialog(
             }
         }
     )
+}
+
+// -------------------- Staff Order Management Screen --------------------
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StaffOrderManagementScreen(
+    navController: NavController? = null,
+    viewModel: StaffOrderViewModel = hiltViewModel()
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedStatus by remember { mutableStateOf("All") }
+    var statusExpanded by remember { mutableStateOf(false) }
+    
+    val orders by viewModel.allOrders.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    
+    val statusOptions = listOf("All", "Preparing", "Ready", "Done", "Cancelled")
+    
+    val filteredOrders = orders.filter { order: Order ->
+        val matchesSearch = searchQuery.isEmpty() || order.orderNo.contains(searchQuery, ignoreCase = true)
+        val matchesStatus = selectedStatus == "All" || order.foodStatus.equals(selectedStatus, ignoreCase = true)
+        matchesSearch && matchesStatus
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFFAFAFA))
+            .padding(16.dp)
+    ) {
+        // Top bar
+        Row(
+            verticalAlignment = Alignment.CenterVertically, 
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = { navController?.navigateUp() }
+                ) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.Black,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Text("Order Management", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            }
+            
+            // 刷新按钮
+            IconButton(
+                onClick = { viewModel.loadOrders() }
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Refresh",
+                    tint = Color(0xFF1976D2),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+        HorizontalDivider(color = Color.LightGray, thickness = 2.dp, modifier = Modifier.padding(vertical = 10.dp))
+
+        // 搜索栏
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            placeholder = { Text("Search by order number...") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // 状态筛选器
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
+            elevation = CardDefaults.cardElevation(2.dp)
+        ) {
+            ExposedDropdownMenuBox(
+                expanded = statusExpanded,
+                onExpandedChange = { statusExpanded = it }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Status: $selectedStatus",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Icon(
+                        Icons.Default.FilterList,
+                        contentDescription = "Filter Status",
+                        tint = Color(0xFF6C757D),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                ExposedDropdownMenu(
+                    expanded = statusExpanded,
+                    onDismissRequest = { statusExpanded = false }
+                ) {
+                    statusOptions.forEach { status ->
+                        DropdownMenuItem(
+                            text = { Text(status) },
+                            onClick = {
+                                selectedStatus = status
+                                statusExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // 显示加载状态和错误信息
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (uiState.error != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))
+            ) {
+                Text(
+                    text = uiState.error ?: "",
+                    color = Color(0xFFD32F2F),
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        } else if (uiState.message != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E8))
+            ) {
+                Text(
+                    text = uiState.message ?: "",
+                    color = Color(0xFF2E7D32),
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+
+        // 显示订单数量信息
+        Text(
+            text = "Total orders: ${orders.size}",
+            fontSize = 12.sp,
+            color = Color.Gray,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
+        // 订单列表
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (filteredOrders.isEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                    ) {
+                        Text(
+                            text = if (orders.isEmpty()) "No orders found" else "No orders match the current filter",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Gray
+                        )
+                    }
+                }
+            } else {
+                items(filteredOrders) { order: Order ->
+                    StaffOrderItem(
+                        order = order,
+                        onStatusUpdate = { newStatus ->
+                            viewModel.updateOrderStatus(order.orderId, newStatus)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+// -------------------- Staff Order Item --------------------
+@Composable
+fun StaffOrderItem(
+    order: Order,
+    onStatusUpdate: (String) -> Unit
+) {
+    var statusMenuExpanded by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // 订单头部信息
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Order #${order.orderNo}",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Text(
+                        text = order.orderTime,
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+                
+                // 状态标签和更新按钮
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val statusColor = when (order.foodStatus.lowercase()) {
+                        "preparing" -> Color(0xFFFF9800)
+                        "ready" -> Color(0xFF4CAF50)
+                        "done" -> Color(0xFF2196F3)
+                        "cancelled" -> Color(0xFFF44336)
+                        else -> Color(0xFF9E9E9E)
+                    }
+                    
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = statusColor.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = order.foodStatus,
+                            color = statusColor,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.width(8.dp))
+                    
+                    IconButton(
+                        onClick = { statusMenuExpanded = true },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Update Status",
+                            tint = Color(0xFF1976D2),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    
+                    DropdownMenu(
+                        expanded = statusMenuExpanded,
+                        onDismissRequest = { statusMenuExpanded = false }
+                    ) {
+                        listOf("Preparing", "Ready", "Done", "Cancelled").forEach { status ->
+                            DropdownMenuItem(
+                                text = { Text(status) },
+                                onClick = {
+                                    onStatusUpdate(status)
+                                    statusMenuExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // 订单详情
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text("Type", fontSize = 12.sp, color = Color.Gray)
+                    Text(order.orderType, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                }
+                Column {
+                    Text("Payment", fontSize = 12.sp, color = Color.Gray)
+                    Text(order.paymentMethod, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                }
+                Column {
+                    Text("Total", fontSize = 12.sp, color = Color.Gray)
+                    Text("RM ${String.format("%.2f", order.totalPayment)}", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)

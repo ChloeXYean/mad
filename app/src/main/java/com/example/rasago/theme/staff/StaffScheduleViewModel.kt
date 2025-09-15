@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rasago.data.entity.StaffEntity
 import com.example.rasago.data.repository.UserRepository
+import com.example.rasago.data.repository.OrderRepository
+import com.example.rasago.data.model.Order
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -128,5 +130,74 @@ class StaffScheduleViewModel @Inject constructor(
                 )
             }
         }
+    }
+}
+
+// -------------------- Staff Order ViewModel --------------------
+@HiltViewModel
+class StaffOrderViewModel @Inject constructor(
+    private val orderRepository: OrderRepository
+) : ViewModel() {
+
+    private val _allOrders = MutableStateFlow<List<Order>>(emptyList())
+    val allOrders: StateFlow<List<Order>> = _allOrders.asStateFlow()
+
+    private val _uiState = MutableStateFlow(StaffScheduleUiState())
+    val uiState: StateFlow<StaffScheduleUiState> = _uiState.asStateFlow()
+
+    init {
+        loadOrders()
+    }
+
+    /**
+     * 加载所有订单
+     */
+    fun loadOrders() {
+        viewModelScope.launch {
+            try {
+                _uiState.value = _uiState.value.copy(isLoading = true)
+                orderRepository.getAllOrders().collect { orders ->
+                    println("DEBUG: Loaded ${orders.size} orders")
+                    orders.forEach { order: Order ->
+                        println("DEBUG: Order - ID: ${order.orderId}, No: ${order.orderNo}, Status: ${order.foodStatus}")
+                    }
+                    _allOrders.value = orders
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        message = "Loaded ${orders.size} orders"
+                    )
+                }
+            } catch (e: Exception) {
+                println("DEBUG: Error loading orders: ${e.message}")
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "加载订单失败: ${e.message}"
+                )
+            }
+        }
+    }
+
+    /**
+     * 更新订单状态
+     */
+    fun updateOrderStatus(orderId: Int, newStatus: String) {
+        viewModelScope.launch {
+            try {
+                orderRepository.updateOrderStatus(orderId, newStatus)
+                loadOrders() // 重新加载订单列表
+                _uiState.value = _uiState.value.copy(
+                    message = "Order status updated to $newStatus"
+                )
+            } catch (e: Exception) {
+                println("DEBUG: Error updating order status: ${e.message}")
+                _uiState.value = _uiState.value.copy(
+                    error = "更新订单状态失败: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun clearMessage() {
+        _uiState.value = _uiState.value.copy(message = null, error = null)
     }
 }

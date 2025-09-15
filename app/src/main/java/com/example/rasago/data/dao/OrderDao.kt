@@ -32,5 +32,8 @@ interface OrderDao {
     @Transaction
     @Query("SELECT * FROM orders WHERE customerId = :customerId ORDER BY orderId DESC LIMIT 1")
     suspend fun getMostRecentOrderForCustomer(customerId: Int): OrderWithItems?
+
+    @Query("UPDATE orders SET foodStatus = :newStatus WHERE orderId = :orderId")
+    suspend fun updateOrderStatus(orderId: Int, newStatus: String)
 }
 
