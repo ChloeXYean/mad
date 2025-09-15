@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +73,21 @@ fun FoodStatusScreen(
     onBackClick: () -> Unit = {},
     onViewReceipt: () -> Unit
 ) {
+    // Debug: Print role information
+    LaunchedEffect(role) {
+        println("DEBUG: FoodStatusScreen - Role: $role")
+        println("DEBUG: FoodStatusScreen - Can update status: ${role != "customer"}")
+    }
+    
     val orderDetails by historyViewModel.selectedOrderDetails.collectAsState()
+    
+    // Debug: Print order details changes
+    LaunchedEffect(orderDetails) {
+        println("DEBUG: FoodStatusScreen - Order details updated: ${orderDetails?.order?.orderNo}")
+        orderDetails?.items?.forEach { item ->
+            println("DEBUG: FoodStatusScreen - Item ${item.id}: ${item.name} - ${item.status}")
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -169,6 +184,7 @@ fun FoodStatusScreen(
                                 item = orderItem,
                                 role = role,
                                 onStatusChange = { itemId, newStatus ->
+                                    println("DEBUG: FoodStatusScreen - Updating status for item $itemId to $newStatus")
                                     historyViewModel.updateOrderItemStatus(itemId, newStatus)
                                 }
                             )
@@ -228,7 +244,7 @@ fun FoodItemRow(
         StatusDropdown(
             itemId = item.id,
             status = item.status,
-            enabled = RoleDetector.canHandleKitchen(role),
+            enabled = role != "customer",
             onStatusChange = onStatusChange
         )
     }
@@ -311,6 +327,11 @@ fun StatusDropdown(
     enabled: Boolean,
     onStatusChange: (itemId: Int, newStatus: String) -> Unit
 ) {
+    // Debug: Print status dropdown information
+    LaunchedEffect(enabled) {
+        println("DEBUG: StatusDropdown - ItemId: $itemId, Status: $status, Enabled: $enabled")
+    }
+    
     var expanded by remember { mutableStateOf(false) }
     val currentStatus = status.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 

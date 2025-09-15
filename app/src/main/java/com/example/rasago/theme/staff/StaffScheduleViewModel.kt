@@ -51,15 +51,15 @@ class StaffScheduleViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true)
-                val staffList = userRepository.getAllActiveStaff()
-                println("DEBUG: Loaded ${staffList.size} staff members")
-                staffList.forEach { staff: StaffEntity ->
+                val allStaff = userRepository.getAllStaff()
+                println("DEBUG: Loaded ${allStaff.size} staff members (including inactive)")
+                allStaff.forEach { staff: StaffEntity ->
                     println("DEBUG: Staff - Name: ${staff.name}, Role: ${staff.role}, Status: ${staff.status}")
                 }
-                _staffList.value = staffList
+                _staffList.value = allStaff
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    message = "Loaded ${staffList.size} staff members"
+                    message = "Loaded ${allStaff.size} staff members"
                 )
             } catch (e: Exception) {
                 println("DEBUG: Error loading staff list: ${e.message}")

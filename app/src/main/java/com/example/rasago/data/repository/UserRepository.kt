@@ -179,6 +179,13 @@ class UserRepository @Inject constructor(
     }
 
     /**
+     * Get all staff (including inactive)
+     */
+    suspend fun getAllStaff(): List<StaffEntity> {
+        return staffDao.getAll()
+    }
+
+    /**
      * Update staff status (Manager only)
      */
     suspend fun updateStaffStatus(

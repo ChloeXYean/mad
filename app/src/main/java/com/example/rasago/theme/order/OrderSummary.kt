@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,9 +28,6 @@ import com.example.rasago.R
 import com.example.rasago.data.model.CartItem
 import com.example.rasago.order.OrderViewModel
 import com.example.rasago.ui.theme.GreenTheme
-
-private val backgroundColor = Color(0xFFF0F0F0)
-private val cardColor = Color.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +55,7 @@ fun OrderSummaryScreen(
                 }
             )
         },
-        containerColor = backgroundColor
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -70,26 +66,11 @@ fun OrderSummaryScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 120.dp), // Space for the floating footer
+                    .padding(bottom = 120.dp), // 留出底部空间
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
-                    YourOrderCard(
-                        cartItems = cartItems,
-                        onAddItemClick = onAddItemClick,
-                        onQuantityChange = { item, change ->
-                            if (change > 0) {
-                                orderViewModel.increaseItemQuantity(item)
-                            } else {
-                                orderViewModel.decreaseItemQuantity(item)
-                            }
-                        },
-                        onEditItem = onEditItem,
-                        subtotal = orderState.subtotal,
-                        serviceCharge = orderState.serviceCharge,
-                        tax = orderState.tax,
-                        takeAwayCharge = orderState.takeAwayCharge
-                    )
+                    YourOrderCard(cartItems = cartItems)
                 }
 
                 item {
@@ -124,150 +105,45 @@ fun OrderSummaryScreen(
 }
 
 @Composable
-private fun YourOrderCard(
-    cartItems: List<CartItem>,
-    onAddItemClick: () -> Unit,
-    onQuantityChange: (CartItem, Int) -> Unit,
-    onEditItem: (CartItem, Int) -> Unit,
-    subtotal: Double,
-    serviceCharge: Double,
-    tax: Double,
-    takeAwayCharge: Double
-) {
-    Column(
+fun YourOrderCard(cartItems: List<CartItem>) {
+    val cardColor = MaterialTheme.colorScheme.surface
+    val textColor = MaterialTheme.colorScheme.onSurface
+
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .background(cardColor, shape = RoundedCornerShape(8.dp))
-            .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
-            .padding(16.dp)
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Your Order", style = MaterialTheme.typography.titleMedium)
-            Button(
-                onClick = onAddItemClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF236cb2),
-                    contentColor = Color.White
-                ),
-                modifier = Modifier
-                    .height(30.dp)
-                    .width(105.dp)
-            ) {
-                Text(
-                    text = "Add Items",
-                    fontSize = 12.sp,
-                    fontStyle = FontStyle.Normal
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        cartItems.forEachIndexed { index, cartItem ->
-            SummaryItemRow(
-                cartItem = cartItem,
-                onQuantityChange = { change -> onQuantityChange(cartItem, change) },
-                onEditItem = { onEditItem(cartItem, index) }
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Your Order",
+                style = MaterialTheme.typography.titleMedium,
+                color = textColor
             )
+
             Spacer(modifier = Modifier.height(8.dp))
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        PriceDetails(subtotal = subtotal, serviceCharge = serviceCharge, tax = tax, takeAwayCharge = takeAwayCharge)
-    }
-}
-
-@Composable
-private fun SummaryItemRow(
-    cartItem: CartItem,
-    onQuantityChange: (Int) -> Unit,
-    onEditItem: () -> Unit
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = cartItem.menuItem.name)
-            if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
-                cartItem.selectedAddOns.filter { it.quantity > 0 }.forEach { addOn ->
+            cartItems.forEach { item ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
-                        text = "+ ${addOn.name} (x${addOn.quantity})",
-                        fontSize = 10.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(vertical = 1.dp)
+                        text = item.menuItem.name,
+                        color = textColor,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "RM ${String.format("%.2f", item.menuItem.price)}",
+                        color = textColor,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
-            }
-            Text(
-                text = "Edit",
-                fontSize = 12.sp,
-                color = Color(0xFF236cb2),
-                modifier = Modifier.clickable(onClick = onEditItem)
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "RM ${String.format("%.2f", cartItem.calculateTotalPrice())}")
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .border(1.dp, Color(0xFF4CAF50), shape = CircleShape)
-                            .clickable { onQuantityChange(-1) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "-", color = Color(0xFF4CAF50))
-                    }
-                    Text(text = cartItem.quantity.toString())
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .border(1.dp, Color(0xFF4CAF50), shape = CircleShape)
-                            .clickable { onQuantityChange(1) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "+", color = Color(0xFF4CAF50))
-                    }
-                }
+                Spacer(modifier = Modifier.height(4.dp))
             }
         }
-    }
-}
-
-@Composable
-private fun PriceDetails(subtotal: Double, serviceCharge: Double, tax: Double, takeAwayCharge: Double) {
-    PriceDetailRow(label = "Subtotal:", amount = subtotal)
-    PriceDetailRow(label = "Service Charge (10%):", amount = serviceCharge)
-    if (takeAwayCharge > 0) {
-        PriceDetailRow(label = "Take-away Charge:", amount = takeAwayCharge)
-    }
-    PriceDetailRow(label = "SST (6%):", amount = tax)
-}
-
-@Composable
-private fun PriceDetailRow(label: String, amount: Double) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(text = label)
-        Text(text = "RM ${String.format("%.2f", amount)}")
     }
 }
 
@@ -279,8 +155,8 @@ private fun OrderTypeSelectionCard(selectedType: String, onTypeSelected: (String
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(cardColor, shape = RoundedCornerShape(8.dp))
-            .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(8.dp))
             .padding(16.dp)
     ) {
         Text(text = "Order Type", style = MaterialTheme.typography.titleMedium)
@@ -314,7 +190,7 @@ fun OrderTypeButton(text: String, iconRes: Int, isSelected: Boolean, onClick: ()
             .width(100.dp)
             .height(80.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(color = if (isSelected) GreenTheme else Color.White)
+            .background(color = if (isSelected) GreenTheme else MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -323,13 +199,13 @@ fun OrderTypeButton(text: String, iconRes: Int, isSelected: Boolean, onClick: ()
                 painter = painterResource(id = iconRes),
                 contentDescription = text,
                 modifier = Modifier.size(24.dp),
-                tint = if (isSelected) Color.White else Color.Black
+                tint = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = text,
                 fontSize = 16.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) Color.White else Color.Black,
+                color = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurface,
             )
         }
     }
@@ -337,7 +213,7 @@ fun OrderTypeButton(text: String, iconRes: Int, isSelected: Boolean, onClick: ()
 
 @Composable
 private fun PaymentDetailsCard(selectedPaymentMethod: String, onPaymentMethodSelect: (Int) -> Unit) {
-    val selectedIndex = when(selectedPaymentMethod) {
+    val selectedIndex = when (selectedPaymentMethod) {
         "QR Scan" -> 0
         "Cash" -> 1
         "Card" -> 2
@@ -347,8 +223,8 @@ private fun PaymentDetailsCard(selectedPaymentMethod: String, onPaymentMethodSel
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(cardColor, shape = RoundedCornerShape(8.dp))
-            .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
+            .background(color = MaterialTheme.colorScheme.background, shape = RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.background, shape = RoundedCornerShape(8.dp))
             .padding(16.dp)
     ) {
         Text(text = "Payment Details", style = MaterialTheme.typography.titleMedium)
@@ -395,9 +271,7 @@ fun RadioButtonRow(
         ) {
             Box(
                 modifier = Modifier
-                    .background(
-                        Color.LightGray, shape = RoundedCornerShape(20.dp)
-                    )
+                    .background(MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(20.dp))
                     .padding(4.dp)
             ) {
                 Icon(
@@ -422,7 +296,7 @@ private fun TotalFooterCard(total: Double, onPlaceOrderClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -437,7 +311,7 @@ private fun TotalFooterCard(total: Double, onPlaceOrderClick: () -> Unit) {
                 onClick = onPlaceOrderClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF4CAF50),
-                    contentColor = Color.White
+                    contentColor = MaterialTheme.colorScheme.surface
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -446,4 +320,3 @@ private fun TotalFooterCard(total: Double, onPlaceOrderClick: () -> Unit) {
         }
     }
 }
-

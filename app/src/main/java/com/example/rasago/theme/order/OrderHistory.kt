@@ -34,6 +34,14 @@ fun OrderHistoryScreen(
     onBackClick: () -> Unit
 ) {
     val orders by historyViewModel.allOrders.collectAsState()
+    
+    // Debug: Print orders information
+    LaunchedEffect(orders) {
+        println("DEBUG: OrderHistoryScreen - Loaded ${orders.size} orders")
+        orders.forEach { order ->
+            println("DEBUG: Order - ID: ${order.orderId}, No: ${order.orderNo}, Status: ${order.foodStatus}")
+        }
+    }
     var searchQuery by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("All Time") }
     var selectedStatus by remember { mutableStateOf("All") }
