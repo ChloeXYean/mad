@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.rasago.R
 import com.example.rasago.data.model.MenuItem
 import com.example.rasago.theme.navigation.CustomerBottomNavigationBar
@@ -118,7 +120,7 @@ fun MenuScreen(
                     count = cartItemCount,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 32.dp), // Adjust padding to sit above the nav bar
+                        .padding(bottom = 80.dp), // Adjust padding to sit above the nav bar
                     onClick = onNavigateToCart
                 )
             }
@@ -247,8 +249,18 @@ fun MenuItemCard(
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.LightGray)
         ) {
+            // Intelligent image loading logic
+            val imageModel = remember(food.photo) {
+                food.photo.toIntOrNull() ?: food.photo
+            }
+
             AsyncImage(
-                model = food.photo,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(imageModel)
+                    .crossfade(true)
+                    .placeholder(R.drawable.ic_launcher_background) // Placeholder while loading
+                    .error(R.drawable.ic_launcher_foreground) // Fallback image on error
+                    .build(),
                 contentDescription = food.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

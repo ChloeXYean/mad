@@ -95,7 +95,6 @@ fun getPredefinedCustomers(): List<CustomerEntity> {
 /**
  * Provides a pre-defined list of staff members for database seeding.
  */
-//TODO: Why Staff login error
 fun getPredefinedStaff(): List<StaffEntity> {
     return listOf(
         StaffEntity(
