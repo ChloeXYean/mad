@@ -34,6 +34,8 @@ import com.example.rasago.theme.payment.customer.CashPaymentScreen
 import com.example.rasago.theme.payment.customer.DebitCreditCardPaymentScreen
 import com.example.rasago.theme.profile.EditProfileScreen
 import com.example.rasago.theme.profile.ProfileScreen
+import com.example.rasago.theme.staff.StaffScheduleScreen
+import com.example.rasago.theme.staff.StaffScheduleViewModel
 import com.example.rasago.theme.utils.RoleDetector
 import com.example.rasago.ui.theme.menu.MenuViewModel
 import com.example.rasago.theme.profile.Staff
@@ -256,12 +258,20 @@ fun AppNavigation(
                         navController.popBackStack()
                     } else {
                         orderViewModel.clearOrder()
-                        navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                        if (loginState.isStaff) {
+                            navController.navigate("staff_menu") { popUpTo("staff_menu") { inclusive = true } }
+                        } else {
+                            navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                        }
                     }
                 },
                 onProceedClick = {
                     orderViewModel.clearOrder()
-                    navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                    if (loginState.isStaff) {
+                        navController.navigate("staff_menu") { popUpTo("staff_menu") { inclusive = true } }
+                    } else {
+                        navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                    }
                 }
             )
         }
@@ -327,7 +337,8 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() },
                 onEditProfileClick = { navController.navigate("edit_profile") },
                 onManageMenuClicked = { navController.navigate("menu_management") },
-                onNavigateToOrders = { navController.navigate("orders") }, // Staff see all orders
+                onNavigateToOrders = { navController.navigate("orders?customerId=-1") }, // Staff see all orders
+                onStaffManagementClicked = { navController.navigate("staff_management") },
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate("auth_flow") {
@@ -342,7 +353,11 @@ fun AppNavigation(
                 customer = loginState.customer,
                 staff = loginState.staff,
                 onBackClick = { navController.popBackStack() },
-                onSaveSuccess = { navController.popBackStack() }
+                onSaveSuccess = { 
+                    // Refresh user info in AuthViewModel after successful save
+                    authViewModel.refreshUserInfo()
+                    navController.popBackStack() 
+                }
             )
         }
 
@@ -356,6 +371,14 @@ fun AppNavigation(
                 },
                 onDeleteItemClicked = { menuViewModel.deleteMenuItem(it) },
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("staff_management") {
+            val staffScheduleViewModel: StaffScheduleViewModel = hiltViewModel()
+            StaffScheduleScreen(
+                navController = navController,
+                viewModel = staffScheduleViewModel
             )
         }
 

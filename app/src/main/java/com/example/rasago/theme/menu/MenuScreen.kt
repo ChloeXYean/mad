@@ -58,9 +58,11 @@ fun MenuScreen(
         bottomBar = {
             if (isStaff) {
                 StaffBottomNavigationBar(
+                    cartItemCount = cartItemCount,
                     selectedNavItem = "Menu",
                     onNavItemSelect = { title ->
                         when (title) {
+                            "Cart" -> onNavigateToCart()
                             "Staff" -> onNavigateToStaffProfile()
                         }
                     }
@@ -115,7 +117,7 @@ fun MenuScreen(
             }
 
             // Floating Cart View from friend's code
-            if (cartItemCount > 0 && !isStaff) {
+            if (cartItemCount > 0) {
                 CartFloatingView(
                     count = cartItemCount,
                     modifier = Modifier

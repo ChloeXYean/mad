@@ -87,5 +87,9 @@ class OrderRepository @Inject constructor(
     suspend fun updateOrderItemStatus(orderItemId: Int, newStatus: String) {
         orderItemDao.updateOrderItemStatus(orderItemId, newStatus)
     }
+
+    suspend fun updateOrderStatus(orderId: Int, newStatus: String) {
+        orderDao.updateOrderStatus(orderId, newStatus)
+    }
 }
 

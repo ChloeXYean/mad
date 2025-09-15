@@ -179,6 +179,13 @@ class UserRepository @Inject constructor(
     }
 
     /**
+     * Get all staff (including inactive)
+     */
+    suspend fun getAllStaff(): List<StaffEntity> {
+        return staffDao.getAll()
+    }
+
+    /**
      * Update staff status (Manager only)
      */
     suspend fun updateStaffStatus(
@@ -199,6 +206,40 @@ class UserRepository @Inject constructor(
             } else {
                 false
             }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Update staff status directly (for staff management screen)
+     */
+    suspend fun updateStaffStatusDirect(
+        targetEmail: String,
+        newStatus: String
+    ) {
+        staffDao.updateStatus(targetEmail, newStatus)
+    }
+
+    /**
+     * Update customer profile information
+     */
+    suspend fun updateCustomerProfile(customer: CustomerEntity): Boolean {
+        return try {
+            customerDao.update(customer)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Update staff profile information
+     */
+    suspend fun updateStaffProfile(staff: StaffEntity): Boolean {
+        return try {
+            staffDao.update(staff)
+            true
         } catch (e: Exception) {
             false
         }

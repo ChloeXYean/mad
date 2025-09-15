@@ -88,6 +88,7 @@ fun CustomerBottomNavigationBar(
 // Staff Bottom Navigation Bar
 @Composable
 fun StaffBottomNavigationBar(
+    cartItemCount: Int = 0,
     selectedNavItem: String,
     onNavItemSelect: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -100,17 +101,44 @@ fun StaffBottomNavigationBar(
         // "Log Out" has been removed from this list
         val navItems = listOf(
             NavItem("Menu", Icons.Default.Home),
+            NavItem("Cart", Icons.Default.ShoppingCart),
             NavItem("Staff", Icons.Default.Person)
         )
 
         navItems.forEach { item ->
             NavigationBarItem(
                 icon = {
+
                     Icon(
                         item.icon,
                         contentDescription = item.title,
                         tint = if (item.title == selectedNavItem) Color(0xFF00796B) else MaterialTheme.colorScheme.onBackground
                     )
+
+                    if (item.title == "Cart") {
+                        BadgedBox(
+                            badge = {
+                                if (cartItemCount > 0) {
+                                    Badge {
+                                        Text(cartItemCount.toString())
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                item.icon,
+                                contentDescription = item.title,
+                                tint = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
+                            )
+                        }
+                    } else {
+                        Icon(
+                            item.icon,
+                            contentDescription = item.title,
+                            tint = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
+                        )
+                    }
+
                 },
                 label = {
                     Text(
