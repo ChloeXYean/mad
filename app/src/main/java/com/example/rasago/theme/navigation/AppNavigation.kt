@@ -109,6 +109,7 @@ fun AppNavigation(
         composable("staff_main") {
             StaffMainScreen(
                 staff = loginState.staff,
+                onNavigateToMenu = { navController.navigate("menu") },
                 onNavigateToOrders = { navController.navigate("orders") },
                 onNavigateToStaffSchedule = { navController.navigate("staff_schedule") },
                 onNavigateToMenuManagement = { navController.navigate("menu_management") },
