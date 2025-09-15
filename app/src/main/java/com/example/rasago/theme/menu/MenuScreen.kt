@@ -174,9 +174,9 @@ fun SearchBar(
             .fillMaxWidth(),
         singleLine = true,
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            disabledContainerColor = Color.White,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
         )
     )
 }
@@ -249,7 +249,7 @@ fun MenuItemCard(
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color.LightGray)
+                .background(MaterialTheme.colorScheme.outline)
         ) {
             // Intelligent image loading logic
             val imageModel = remember(food.photo) {
@@ -278,7 +278,7 @@ fun MenuItemCard(
                 ) {
                     Text(
                         text = "Recommend",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.surface,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -296,7 +296,7 @@ fun MenuItemCard(
         Text(
             text = "RM ${String.format("%.2f", food.price)}",
             fontSize = 14.sp,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start
         )
@@ -322,14 +322,14 @@ fun CartFloatingView(
         ) {
             Text(
                 text = "View Cart (${count} item${if (count > 1) "s" else ""})",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 imageVector = Icons.Default.ShoppingCart,
                 contentDescription = "Cart",
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.size(18.dp)
             )
         }

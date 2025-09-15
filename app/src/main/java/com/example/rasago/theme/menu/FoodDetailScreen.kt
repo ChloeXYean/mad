@@ -79,7 +79,7 @@ fun FoodDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
                 // Food Image
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -113,7 +113,7 @@ fun FoodDetailScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(text = currentMenuItem.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                        Text(text = currentMenuItem.description, fontSize = 14.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
+                        Text(text = currentMenuItem.description, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
                     }
                     Text(text = "RM ${"%.2f".format(currentMenuItem.price)}", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4CAF50))
                 }
@@ -210,7 +210,7 @@ private fun AddOnRow(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -222,14 +222,14 @@ private fun AddOnRow(
             Image(painter = painterResource(id = addOn.imageRes), contentDescription = addOn.name, modifier = Modifier.size(40.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = addOn.name, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                Text(text = "RM ${"%.2f".format(addOn.price)}", fontSize = 14.sp, color = Color.Gray)
+                Text(text = addOn.name, fontSize = 16.sp, fontWeight = FontWeight.Medium,color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "RM ${"%.2f".format(addOn.price)}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(onClick = { onQuantityChange(-1) }, modifier = Modifier.size(32.dp), contentPadding = PaddingValues(0.dp)) {
                     Text("-", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
-                Text(text = addOn.quantity.toString(), modifier = Modifier.padding(horizontal = 12.dp), fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                Text(text = addOn.quantity.toString(), modifier = Modifier.padding(horizontal = 12.dp), fontSize = 16.sp, fontWeight = FontWeight.Medium,color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Button(onClick = { onQuantityChange(1) }, modifier = Modifier.size(32.dp), contentPadding = PaddingValues(0.dp)) {
                     Text("+", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }

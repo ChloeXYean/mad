@@ -223,8 +223,10 @@ private fun PaymentDetailsCard(selectedPaymentMethod: String, onPaymentMethodSel
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.background, shape = RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.background, shape = RoundedCornerShape(8.dp))
+
+            .background(color = MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(8.dp))
+
             .padding(16.dp)
     ) {
         Text(text = "Payment Details", style = MaterialTheme.typography.titleMedium)

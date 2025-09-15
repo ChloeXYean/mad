@@ -34,7 +34,7 @@ fun CustomerBottomNavigationBar(
 ) {
     NavigationBar(
         modifier = modifier.height(64.dp),
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         // "Log Out" has been removed and "Cart" and "Orders" are now separate
@@ -61,21 +61,21 @@ fun CustomerBottomNavigationBar(
                             Icon(
                                 item.icon,
                                 contentDescription = item.title,
-                                tint = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
+                                tint = if (item.title == selectedNavItem) Color(0xFF00796B) else MaterialTheme.colorScheme.onBackground
                             )
                         }
                     } else {
                         Icon(
                             item.icon,
                             contentDescription = item.title,
-                            tint = if (item.title == selectedNavItem) Color(0xFF4CAF50) else Color.Black
+                            tint = if (item.title == selectedNavItem) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
                 label = {
                     Text(
                         item.title,
-                        color = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
+                        color = if (item.title == selectedNavItem) Color(0xFF00796B) else MaterialTheme.colorScheme.onBackground
                     )
                 },
                 selected = item.title == selectedNavItem,
@@ -95,7 +95,7 @@ fun StaffBottomNavigationBar(
 ) {
     NavigationBar(
         modifier = modifier.height(64.dp),
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         // "Log Out" has been removed from this list
@@ -108,6 +108,13 @@ fun StaffBottomNavigationBar(
         navItems.forEach { item ->
             NavigationBarItem(
                 icon = {
+
+                    Icon(
+                        item.icon,
+                        contentDescription = item.title,
+                        tint = if (item.title == selectedNavItem) Color(0xFF00796B) else MaterialTheme.colorScheme.onBackground
+                    )
+
                     if (item.title == "Cart") {
                         BadgedBox(
                             badge = {
@@ -131,11 +138,12 @@ fun StaffBottomNavigationBar(
                             tint = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
                         )
                     }
+
                 },
                 label = {
                     Text(
                         item.title,
-                        color = if (item.title == selectedNavItem) Color(0xFF00796B) else Color.Black
+                        color = if (item.title == selectedNavItem) Color(0xFF00796B) else MaterialTheme.colorScheme.onBackground
                     )
                 },
                 selected = item.title == selectedNavItem,

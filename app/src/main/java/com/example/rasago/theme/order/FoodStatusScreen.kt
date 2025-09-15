@@ -29,6 +29,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -173,7 +174,7 @@ fun FoodStatusScreen(
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = Baloo2,
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -293,7 +294,7 @@ private fun OrderTypeButton(text: String, iconRes: Int, isSelected: Boolean) {
             .height(70.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(
-                color = if (isSelected) GreenTheme else Color.White
+                color = if (isSelected) GreenTheme else MaterialTheme.colorScheme.surface
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -305,14 +306,14 @@ private fun OrderTypeButton(text: String, iconRes: Int, isSelected: Boolean) {
                 painter = painterResource(id = iconRes),
                 contentDescription = text,
                 modifier = Modifier.size(24.dp),
-                tint = if (isSelected) Color.White else Color.Black
+                tint = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = text,
                 fontSize = 16.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) Color.White else Color.Black,
+                color = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onBackground,
                 fontFamily = Baloo2
             )
         }
@@ -339,7 +340,7 @@ fun StatusDropdown(
         "Preparing" -> YellowPrepare
         "Done" -> GreenDone
         "Cancelled" -> RedCancel
-        else -> Color.LightGray
+        else -> MaterialTheme.colorScheme.outline
     }
     val statusImage = when (currentStatus) {
         "Preparing" -> com.example.rasago.R.drawable.food_prepare
@@ -372,14 +373,14 @@ fun StatusDropdown(
                 fontSize = 16.sp,
                 fontFamily = Baloo2,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
             )
         }
 
         DropdownMenu(
             expanded = expanded && enabled,
             onDismissRequest = { if (enabled) expanded = false },
-            modifier = Modifier.background(Color.White)
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
         ) {
             DropdownMenuItem(
                 text = { Text("Preparing") },
@@ -405,4 +406,3 @@ fun StatusDropdown(
         }
     }
 }
-

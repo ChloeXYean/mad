@@ -41,7 +41,7 @@ fun OrderConfirmationScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(20.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -82,7 +82,7 @@ fun OrderConfirmationScreen(
                                     Text(
                                         text = "+ ${addOn.name} x${addOn.quantity}",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -118,7 +118,7 @@ fun OrderConfirmationScreen(
                     .padding(top = 16.dp)
                     .height(120.dp)
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(color = Color.White, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+                    .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Row(

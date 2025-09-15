@@ -72,9 +72,9 @@ fun EditMenuItemScreen(
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray)
+                    .background(MaterialTheme.colorScheme.outline)
                     .clickable { imagePickerLauncher.launch("image/*") }
-                    .border(2.dp, Color.Gray, CircleShape),
+                    .border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(

@@ -228,7 +228,7 @@
 //                            .background(if (order.type == "Dine-In") GreenTheme else MediumPurple, shape = RoundedCornerShape(8.dp))
 //                            .padding(horizontal = 8.dp, vertical = 4.dp)
 //                    ) {
-//                        Text(text = order.type, color = Color.White, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+//                        Text(text = order.type, color = MaterialTheme.colorScheme.surface, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
 //                    }
 //                }
 //                Row {
@@ -245,7 +245,7 @@
 //                                    "Done" -> GreenDone
 //                                    "Preparing" -> YellowPrepare
 //                                    "Cancelled" -> RedCancel
-//                                    else -> Color.Gray
+//                                    else -> MaterialTheme.ColorScheme.OnSurfaceVariant
 //                                },
 //                                shape = RoundedCornerShape(8.dp)
 //                            )
@@ -274,7 +274,7 @@
 //                if (isManagerOrCashier) {
 //                    Button(
 //                        onClick = { onCardClick() },
-//                        colors = ButtonDefaults.buttonColors(containerColor = GreenTheme, contentColor = Color.White),
+//                        colors = ButtonDefaults.buttonColors(containerColor = GreenTheme, contentColor = MaterialTheme.colorScheme.surface),
 //                        modifier = Modifier.height(36.dp)
 //                    ) {
 //                        Text("View Details", style = MaterialTheme.typography.bodyMedium, fontFamily = Baloo2)
@@ -292,7 +292,7 @@
 //                        ),
 //                        modifier = Modifier.height(36.dp)
 //                    ) {
-//                        Text(if (order.status == "Done") "Undo" else "Done", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+//                        Text(if (order.status == "Done") "Undo" else "Done", color = MaterialTheme.colorScheme.surface, style = MaterialTheme.typography.bodyMedium)
 //                    }
 //                }
 //            }
