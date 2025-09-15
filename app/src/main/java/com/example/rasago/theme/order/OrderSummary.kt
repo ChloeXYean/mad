@@ -16,14 +16,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.rasago.R
 import com.example.rasago.data.model.CartItem
 import com.example.rasago.order.OrderViewModel
+import com.example.rasago.ui.theme.GreenTheme
 
 private val backgroundColor = Color(0xFFF0F0F0)
 private val cardColor = Color.White
@@ -32,16 +37,13 @@ private val cardColor = Color.White
 @Composable
 fun OrderSummaryScreen(
     orderViewModel: OrderViewModel,
-    onNavigateToOrderConfirmation: () -> Unit,
+    onNavigateToPayment: () -> Unit,
     onNavigateBack: () -> Unit,
     onAddItemClick: () -> Unit,
-    onEditItem: (CartItem, Int) -> Unit,
-    selectedPaymentMethod: Int,
-    onPaymentMethodSelect: (Int) -> Unit
+    onEditItem: (CartItem, Int) -> Unit
 ) {
     val orderState by orderViewModel.uiState.collectAsState()
     val cartItems = orderState.orderItems
-    var selectedPaymentMethod by remember { mutableStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -85,14 +87,22 @@ fun OrderSummaryScreen(
                         onEditItem = onEditItem,
                         subtotal = orderState.subtotal,
                         serviceCharge = orderState.serviceCharge,
-                        tax = orderState.tax
+                        tax = orderState.tax,
+                        takeAwayCharge = orderState.takeAwayCharge
+                    )
+                }
+
+                item {
+                    OrderTypeSelectionCard(
+                        selectedType = orderState.orderType,
+                        onTypeSelected = { orderViewModel.setOrderType(it) }
                     )
                 }
 
                 item {
                     PaymentDetailsCard(
-                        selectedPaymentMethod = selectedPaymentMethod,
-                        onPaymentMethodSelect = { selectedPaymentMethod = it }
+                        selectedPaymentMethod = orderState.paymentMethod,
+                        onPaymentMethodSelect = { orderViewModel.setPaymentMethod(it) }
                     )
                 }
             }
@@ -106,7 +116,7 @@ fun OrderSummaryScreen(
             ) {
                 TotalFooterCard(
                     total = orderState.total,
-                    onPlaceOrderClick = onNavigateToOrderConfirmation
+                    onPlaceOrderClick = onNavigateToPayment
                 )
             }
         }
@@ -121,7 +131,8 @@ private fun YourOrderCard(
     onEditItem: (CartItem, Int) -> Unit,
     subtotal: Double,
     serviceCharge: Double,
-    tax: Double
+    tax: Double,
+    takeAwayCharge: Double
 ) {
     Column(
         modifier = Modifier
@@ -167,7 +178,7 @@ private fun YourOrderCard(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        PriceDetails(subtotal = subtotal, serviceCharge = serviceCharge, tax = tax)
+        PriceDetails(subtotal = subtotal, serviceCharge = serviceCharge, tax = tax, takeAwayCharge = takeAwayCharge)
     }
 }
 
@@ -240,35 +251,99 @@ private fun SummaryItemRow(
 }
 
 @Composable
-private fun PriceDetails(subtotal: Double, serviceCharge: Double, tax: Double) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(text = "Subtotal:")
-        Text(text = "RM ${String.format("%.2f", subtotal)}")
+private fun PriceDetails(subtotal: Double, serviceCharge: Double, tax: Double, takeAwayCharge: Double) {
+    PriceDetailRow(label = "Subtotal:", amount = subtotal)
+    PriceDetailRow(label = "Service Charge (10%):", amount = serviceCharge)
+    if (takeAwayCharge > 0) {
+        PriceDetailRow(label = "Take-away Charge:", amount = takeAwayCharge)
     }
+    PriceDetailRow(label = "SST (6%):", amount = tax)
+}
+
+@Composable
+private fun PriceDetailRow(label: String, amount: Double) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(text = "Service Charge (10%):")
-        Text(text = "RM ${String.format("%.2f", serviceCharge)}")
-    }
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(text = "SST (6%):")
-        Text(text = "RM ${String.format("%.2f", tax)}")
+        Text(text = label)
+        Text(text = "RM ${String.format("%.2f", amount)}")
     }
 }
 
 @Composable
-private fun PaymentDetailsCard(
-    selectedPaymentMethod: Int,
-    onPaymentMethodSelect: (Int) -> Unit
-) {
+private fun OrderTypeSelectionCard(selectedType: String, onTypeSelected: (String) -> Unit) {
+    val dineIn = stringResource(R.string.dine_in)
+    val takeAway = stringResource(R.string.take_away)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(cardColor, shape = RoundedCornerShape(8.dp))
+            .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
+            .padding(16.dp)
+    ) {
+        Text(text = "Order Type", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OrderTypeButton(
+                text = dineIn,
+                iconRes = if (selectedType == "Dine-In") R.drawable.dine_in_white else R.drawable.dine_in_black,
+                isSelected = selectedType == "Dine-In",
+                onClick = { onTypeSelected("Dine-In") }
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            OrderTypeButton(
+                text = takeAway,
+                iconRes = if (selectedType == "Take-away") R.drawable.take_away_white else R.drawable.take_away_black,
+                isSelected = selectedType == "Take-away",
+                onClick = { onTypeSelected("Take-away") }
+            )
+        }
+    }
+}
+
+@Composable
+fun OrderTypeButton(text: String, iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(100.dp)
+            .height(80.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(color = if (isSelected) GreenTheme else Color.White)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = text,
+                modifier = Modifier.size(24.dp),
+                tint = if (isSelected) Color.White else Color.Black
+            )
+            Text(
+                text = text,
+                fontSize = 16.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = if (isSelected) Color.White else Color.Black,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PaymentDetailsCard(selectedPaymentMethod: String, onPaymentMethodSelect: (Int) -> Unit) {
+    val selectedIndex = when(selectedPaymentMethod) {
+        "QR Scan" -> 0
+        "Cash" -> 1
+        "Card" -> 2
+        else -> 0
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -281,19 +356,19 @@ private fun PaymentDetailsCard(
         RadioButtonRow(
             text = "QR Scan",
             icon = Icons.Default.QrCodeScanner,
-            selected = selectedPaymentMethod == 0,
+            selected = selectedIndex == 0,
             onClick = { onPaymentMethodSelect(0) }
         )
         RadioButtonRow(
             text = "Cash",
             icon = Icons.Default.Money,
-            selected = selectedPaymentMethod == 1,
+            selected = selectedIndex == 1,
             onClick = { onPaymentMethodSelect(1) }
         )
         RadioButtonRow(
             text = "Card",
             icon = Icons.Default.CreditCard,
-            selected = selectedPaymentMethod == 2,
+            selected = selectedIndex == 2,
             onClick = { onPaymentMethodSelect(2) }
         )
     }

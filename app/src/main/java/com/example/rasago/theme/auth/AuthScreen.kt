@@ -1,6 +1,5 @@
 package com.example.rasago.theme.auth
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,28 +19,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.rasago.R
-import com.example.rasago.ui.theme.RasagoApp
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    onLoginSuccess: (isStaff: Boolean) -> Unit = { _ -> }
+    authViewModel: AuthViewModel
 ) {
-    var loginEmail by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val loginState by authViewModel.loginState.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background image
         Image(
             painter = painterResource(id = R.drawable.login_background),
             contentDescription = "Background",
@@ -56,15 +49,13 @@ fun LoginScreen(
                 .background(Color(0x90000000))
         )
 
-        // Foreground content
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(40.dp),
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo + caption
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Rasa Go",
@@ -82,7 +73,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Login form
             Text(
                 text = "Login to your account",
                 fontSize = 30.sp,
@@ -94,8 +84,8 @@ fun LoginScreen(
 
             AuthTextField(
                 label = "Email Address",
-                value = loginEmail,
-                onValueChange = { loginEmail = it },
+                value = authViewModel.email,
+                onValueChange = { authViewModel.email = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
@@ -107,8 +97,8 @@ fun LoginScreen(
 
             AuthPasswordField(
                 label = "Password",
-                value = password,
-                onValueChange = { password = it },
+                value = authViewModel.password,
+                onValueChange = { authViewModel.password = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp),
@@ -118,28 +108,35 @@ fun LoginScreen(
                 )
             )
 
-            Button(
-                onClick = {
-                    // TODO: 实际登录逻辑
-                    // 默认登录为顾客
-                    onLoginSuccess(false)
-                },
-                modifier = Modifier
-                    .width(150.dp)
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50),
-                    contentColor = Color.White
-                )
-            ) {
+            if (loginState.isLoading) {
+                CircularProgressIndicator()
+            } else {
+                Button(
+                    onClick = { authViewModel.loginUser() },
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "Login",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            loginState.error?.let { error ->
                 Text(
-                    text = "Login",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
 
-            // Sign up prompt
             Row(modifier = Modifier.padding(top = 16.dp)) {
                 Text(
                     text = "Don't have an account? ",
@@ -191,7 +188,6 @@ fun RegisterScreen(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Background image
             Image(
                 painter = painterResource(id = R.drawable.login_background),
                 contentDescription = "Background",
@@ -206,7 +202,6 @@ fun RegisterScreen(
                     .background(Color(0x90000000))
             )
 
-            // Foreground content
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -216,7 +211,6 @@ fun RegisterScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Logo + caption
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Rasa Go",
@@ -406,24 +400,3 @@ fun AuthPasswordField(
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    RasagoApp {
-        LoginScreen(
-            navController = rememberNavController(),
-            onLoginSuccess = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RegisterScreenPreview() {
-    RasagoApp {
-        RegisterScreen(
-            navController = rememberNavController(),
-            onRegisterSuccess = {}
-        )
-    }
-}

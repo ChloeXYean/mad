@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.rasago.data.entity.CustomerEntity
+import com.example.rasago.data.entity.StaffEntity
 import com.example.rasago.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +19,8 @@ import javax.inject.Inject
 data class LoginState(
     val isLoginSuccess: Boolean = false,
     val isStaff: Boolean = false,
+    val customer: CustomerEntity? = null,
+    val staff: StaffEntity? = null,
     val error: String? = null,
     val isLoading: Boolean = false
 )
@@ -35,13 +39,14 @@ class AuthViewModel @Inject constructor(
     fun loginUser() {
         viewModelScope.launch {
             _loginState.update { it.copy(isLoading = true, error = null) }
-            // Use the smartLogin function which handles both staff and customer logic
             val result = userRepository.smartLogin(email, password)
             if (result.isSuccess) {
                 _loginState.update {
                     it.copy(
                         isLoginSuccess = true,
                         isStaff = result.isStaff,
+                        customer = result.customer,
+                        staff = result.staff,
                         isLoading = false
                     )
                 }
@@ -54,6 +59,10 @@ class AuthViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun logout() {
+        _loginState.value = LoginState()
     }
 
     fun clearError() {

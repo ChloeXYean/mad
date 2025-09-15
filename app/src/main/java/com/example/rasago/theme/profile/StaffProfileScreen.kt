@@ -22,6 +22,7 @@ enum class StaffStatus {
 fun StaffProfileScreen(
     onBackClick: () -> Unit,
     onManageMenuClicked: () -> Unit,
+    onNavigateToOrders: () -> Unit, // Added for navigation
     onLogout: () -> Unit,
     // Placeholder data that would be provided by a ViewModel
     staffName: String = "Ali",
@@ -115,7 +116,7 @@ fun StaffProfileScreen(
                 }
 
                 Button(
-                    onClick = { /* TODO: Navigate to Order History for Staff */ },
+                    onClick = onNavigateToOrders,
                     modifier = Modifier
                         .width(250.dp)
                         .height(60.dp),
@@ -138,3 +139,4 @@ fun StaffProfileScreen(
         }
     }
 }
+

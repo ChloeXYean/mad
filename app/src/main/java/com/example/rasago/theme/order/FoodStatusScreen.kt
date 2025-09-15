@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.rasago.data.model.OrderItem
 import com.example.rasago.order.OrderHistoryViewModel
 import com.example.rasago.theme.navigation.AppTopBar
@@ -63,8 +68,9 @@ import java.util.Locale
 @Composable
 fun FoodStatusScreen(
     historyViewModel: OrderHistoryViewModel,
-    role: String, // Role is now a String to be used with RoleDetector
-    onBackClick: () -> Unit = {}
+    role: String,
+    onBackClick: () -> Unit = {},
+    onViewReceipt: () -> Unit
 ) {
     val orderDetails by historyViewModel.selectedOrderDetails.collectAsState()
 
@@ -104,20 +110,31 @@ fun FoodStatusScreen(
                     border = BorderStroke(width = 1.dp, color = DarkGreen)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Order No: ${order.orderNo}",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = Baloo2,
-                            color = DarkGreen
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Order Time: ${order.orderTime}",
-                            fontSize = 16.sp,
-                            fontFamily = Baloo2,
-                            color = DarkGreen
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Order No: ${order.orderNo}",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = Baloo2,
+                                    color = DarkGreen
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Order Time: ${order.orderTime}",
+                                    fontSize = 16.sp,
+                                    fontFamily = Baloo2,
+                                    color = DarkGreen
+                                )
+                            }
+                            TextButton(onClick = onViewReceipt) {
+                                Text("View Receipt")
+                            }
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -146,11 +163,14 @@ fun FoodStatusScreen(
                         )
                     }
                 } else {
-                    LazyColumn {
+                    LazyColumn(modifier = Modifier.weight(1f)) {
                         items(orderItems) { orderItem ->
                             FoodItemRow(
                                 item = orderItem,
-                                role = role
+                                role = role,
+                                onStatusChange = { itemId, newStatus ->
+                                    historyViewModel.updateOrderItemStatus(itemId, newStatus)
+                                }
                             )
                         }
                     }
@@ -161,7 +181,11 @@ fun FoodStatusScreen(
 }
 
 @Composable
-fun FoodItemRow(item: OrderItem, role: String) {
+fun FoodItemRow(
+    item: OrderItem,
+    role: String,
+    onStatusChange: (itemId: Int, newStatus: String) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -176,8 +200,16 @@ fun FoodItemRow(item: OrderItem, role: String) {
                     .background(color = Color(0xFFE9E7E7), shape = RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
+                val imageModel = remember(item.photo) {
+                    item.photo.toIntOrNull() ?: item.photo
+                }
                 AsyncImage(
-                    model = item.photo,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageModel)
+                        .crossfade(true)
+                        .placeholder(R.drawable.ic_menu_gallery)
+                        .error(R.drawable.ic_delete)
+                        .build(),
                     contentDescription = "Food Item",
                     modifier = Modifier
                         .size(60.dp)
@@ -194,8 +226,10 @@ fun FoodItemRow(item: OrderItem, role: String) {
         }
 
         StatusDropdown(
+            itemId = item.id,
             status = item.status,
-            enabled = RoleDetector.canHandleKitchen(role) // Using RoleDetector for permissions
+            enabled = RoleDetector.canHandleKitchen(role),
+            onStatusChange = onStatusChange
         )
     }
 }
@@ -206,86 +240,77 @@ fun OrderTypeSelection(orderType: String) {
     val takeAway = stringResource(com.example.rasago.R.string.take_away)
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .width(84.dp)
-                .height(64.dp)
-                .padding(end = 24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Order \nType:",
-                fontFamily = Baloo2,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                fontSize = 16.sp
-            )
-        }
+        Text(
+            text = "Order\nType:",
+            fontFamily = Baloo2,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            fontSize = 16.sp,
+            modifier = Modifier.width(80.dp)
+        )
         Spacer(modifier = Modifier.width(16.dp))
-        Box(
-            modifier = Modifier
-                .width(80.dp)
-                .height(64.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    color = if (orderType == "Dine-In") GreenTheme else Color.White
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                val isSelected = orderType == "Dine-In"
-                Icon(
-                    painter = painterResource(if (isSelected) com.example.rasago.R.drawable.dine_in_white else com.example.rasago.R.drawable.dine_in_black),
-                    contentDescription = dineIn,
-                    modifier = Modifier.size(24.dp),
-                    tint = if (isSelected) Color.White else Color.Black
-                )
-                Text(
-                    text = dineIn,
-                    fontSize = 16.sp,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) Color.White else Color.Black,
-                    fontFamily = Baloo2
-                )
-            }
-        }
-        Spacer(modifier = Modifier.width(4.dp))
-        Box(
-            modifier = Modifier
-                .width(80.dp)
-                .height(64.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    color = if (orderType == "Takeaway") GreenTheme else Color.White
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                val isSelected = orderType == "Takeaway"
-                Icon(
-                    painter = painterResource(if (isSelected) com.example.rasago.R.drawable.take_away_white else com.example.rasago.R.drawable.take_away_black),
-                    contentDescription = takeAway,
-                    modifier = Modifier.size(24.dp),
-                    tint = if (isSelected) Color.White else Color.Black
-                )
-                Text(
-                    text = takeAway,
-                    fontSize = 16.sp,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) Color.White else Color.Black,
-                    fontFamily = Baloo2
-                )
-            }
-        }
+        OrderTypeButton(
+            text = dineIn,
+            iconRes = if (orderType.equals("Dine-In", ignoreCase = true)) com.example.rasago.R.drawable.dine_in_white else com.example.rasago.R.drawable.dine_in_black,
+            isSelected = orderType.equals("Dine-In", ignoreCase = true)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        OrderTypeButton(
+            text = takeAway,
+            iconRes = if (orderType.equals("Take-away", ignoreCase = true)) com.example.rasago.R.drawable.take_away_white else com.example.rasago.R.drawable.take_away_black,
+            isSelected = orderType.equals("Take-away", ignoreCase = true)
+        )
     }
 }
 
 @Composable
-fun StatusDropdown(status: String, enabled: Boolean) {
+private fun OrderTypeButton(text: String, iconRes: Int, isSelected: Boolean) {
+    Box(
+        modifier = Modifier
+            .width(100.dp)
+            .height(70.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                color = if (isSelected) GreenTheme else Color.White
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = text,
+                modifier = Modifier.size(24.dp),
+                tint = if (isSelected) Color.White else Color.Black
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = text,
+                fontSize = 16.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = if (isSelected) Color.White else Color.Black,
+                fontFamily = Baloo2
+            )
+        }
+    }
+}
+
+
+@Composable
+fun StatusDropdown(
+    itemId: Int,
+    status: String,
+    enabled: Boolean,
+    onStatusChange: (itemId: Int, newStatus: String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
     val currentStatus = status.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
@@ -337,15 +362,24 @@ fun StatusDropdown(status: String, enabled: Boolean) {
         ) {
             DropdownMenuItem(
                 text = { Text("Preparing") },
-                onClick = { /* TODO: Update status in ViewModel */ expanded = false }
+                onClick = {
+                    onStatusChange(itemId, "Preparing")
+                    expanded = false
+                }
             )
             DropdownMenuItem(
                 text = { Text("Done") },
-                onClick = { /* TODO: Update status in ViewModel */ expanded = false }
+                onClick = {
+                    onStatusChange(itemId, "Done")
+                    expanded = false
+                }
             )
             DropdownMenuItem(
                 text = { Text("Cancelled") },
-                onClick = { /* TODO: Update status in ViewModel */ expanded = false }
+                onClick = {
+                    onStatusChange(itemId, "Cancelled")
+                    expanded = false
+                }
             )
         }
     }

@@ -4,44 +4,39 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.rasago.order.OrderViewModel
+import com.example.rasago.theme.navigation.AppTopBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CashPaymentScreen() {
-    Surface {
+fun CashPaymentScreen(
+    orderViewModel: OrderViewModel,
+    onBackClick: () -> Unit,
+    onPaymentSuccess: () -> Unit
+) {
+    val orderState by orderViewModel.uiState.collectAsState()
+
+    Scaffold(
+        topBar = {
+            AppTopBar(title = "Cash Payment", onBackClick = onBackClick)
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier.clickable { /* TODO: Implement back navigation */ }
-                )
-                Text(
-                    text = "Cash Payment",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-            }
-
             Spacer(modifier = Modifier.height(32.dp))
 
             // Order Details
@@ -50,7 +45,7 @@ fun CashPaymentScreen() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Order No :", style = MaterialTheme.typography.bodyLarge)
-                Text(text = "T01", style = MaterialTheme.typography.bodyLarge)
+                Text(text = "T${System.currentTimeMillis() % 10000}", style = MaterialTheme.typography.bodyLarge)
             }
 
             Row(
@@ -58,7 +53,7 @@ fun CashPaymentScreen() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Total Payment :", style = MaterialTheme.typography.bodyLarge)
-                Text(text = "RM 20.95", style = MaterialTheme.typography.bodyLarge)
+                Text(text = "RM ${String.format("%.2f", orderState.total)}", style = MaterialTheme.typography.bodyLarge)
             }
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -68,7 +63,7 @@ fun CashPaymentScreen() {
                 modifier = Modifier
                     .size(200.dp)
                     .border(2.dp, color = MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
-                    .clickable { /* TODO: Implement pay at counter action */ },
+                    .clickable { onPaymentSuccess() },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -82,20 +77,12 @@ fun CashPaymentScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Click anywhere to proceed",
+                text = "Click the box above to proceed",
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CashPaymentPreview() {
-    MaterialTheme {
-        CashPaymentScreen()
     }
 }

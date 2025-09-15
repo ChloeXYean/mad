@@ -7,5 +7,9 @@ data class OrderUiState(
     val subtotal: Double = 0.0,
     val serviceCharge: Double = 0.0,
     val tax: Double = 0.0,
+    val takeAwayCharge: Double = 0.0,
     val total: Double = 0.0,
+    val orderType: String = "Dine-In",
+    val paymentMethod: String = "QR Scan" // Added to manage payment method
 )
+

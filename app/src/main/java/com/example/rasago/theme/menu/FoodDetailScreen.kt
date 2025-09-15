@@ -13,11 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.rasago.R
 import com.example.rasago.data.model.AddOn
 import com.example.rasago.data.model.CartItem
@@ -36,46 +38,43 @@ fun FoodDetailScreen(
 ) {
     val menuItem by menuViewModel.selectedMenuItem.collectAsState()
 
-    // This check ensures that we don't proceed if the menu item data isn't loaded yet.
-    menuItem?.let { currentMenuItem ->
-        // State for quantity and add-ons, initialized based on whether we are in "edit" mode.
-        var quantity by remember {
-            mutableStateOf(if (editMode && existingCartItem != null) existingCartItem.quantity else 1)
-        }
-        val availableAddOns = remember {
-            listOf(
-                AddOn("Sambal", 1.5f, R.drawable.side_otakotak),
-                AddOn("Fried Egg", 2.0f, R.drawable.addon_egg),
-                AddOn("Extra Rice", 3.0f, R.drawable.addon_rice),
-                AddOn("Fried Chicken", 4.5f, R.drawable.addon_friedchicken)
-            )
-        }
-        var currentAddOns by remember {
-            mutableStateOf(
-                if (editMode && existingCartItem != null) {
-                    // In edit mode, we merge the existing add-ons with the full available list
-                    // to ensure all options are displayed.
-                    availableAddOns.map { available ->
-                        existingCartItem.selectedAddOns.find { it.name == available.name } ?: available
+    // Add-on options
+    val availableAddOns = remember {
+        listOf(
+            AddOn("Sambal", 1.5f, R.drawable.side_otakotak),
+            AddOn("Fried Egg", 2.0f, R.drawable.side_otakotak),
+            AddOn("Extra Rice", 3.0f, R.drawable.rice_nasilemak),
+            AddOn("Fried Chicken", 4.5f, R.drawable.side_chickensatay)
+        )
+    }
+
+    var currentAddOns by remember {
+        mutableStateOf(
+            if (editMode && existingCartItem != null) {
+                // In edit mode, merge existing add-ons with available ones
+                availableAddOns.map { available ->
+                    existingCartItem.selectedAddOns.find { it.name == available.name } ?: available.copy(quantity = 0)
+                }
+            } else {
+                availableAddOns.map { it.copy(quantity = 0) }
+            }
+        )
+    }
+    var quantity by remember { mutableStateOf(if (editMode && existingCartItem != null) existingCartItem.quantity else 1) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Food Details") },
+                navigationIcon = {
+                    IconButton(onClick = { onBackClick() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                } else {
-                    availableAddOns.map { it.copy() }
                 }
             )
         }
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(if (editMode) "Edit Item" else "Food Details") },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                        }
-                    }
-                )
-            }
-        ) { innerPadding ->
+    ) { innerPadding ->
+        menuItem?.let { currentMenuItem ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -83,17 +82,28 @@ fun FoodDetailScreen(
                     .background(Color.White)
             ) {
                 // Food Image
-                AsyncImage(
-                    model = currentMenuItem.photo,
-                    contentDescription = currentMenuItem.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-                    contentScale = ContentScale.Crop
-                )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    val imageModel = remember(currentMenuItem.photo) {
+                        currentMenuItem.photo.toIntOrNull() ?: currentMenuItem.photo
+                    }
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageModel)
+                            .crossfade(true)
+                            .placeholder(R.drawable.ic_launcher_background)
+                            .error(R.drawable.ic_launcher_foreground)
+                            .build(),
+                        contentDescription = currentMenuItem.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Food Name, Description, and Price
+                // Name and Price
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -102,11 +112,12 @@ fun FoodDetailScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(currentMenuItem.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                        Text(currentMenuItem.description, fontSize = 14.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
+                        Text(text = currentMenuItem.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                        Text(text = currentMenuItem.description, fontSize = 14.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
                     }
-                    Text("RM ${"%.2f".format(currentMenuItem.price)}", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4CAF50))
+                    Text(text = "RM ${"%.2f".format(currentMenuItem.price)}", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4CAF50))
                 }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Quantity Selector
@@ -117,30 +128,23 @@ fun FoodDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Quantity:", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                    Text(text = "Quantity:", fontSize = 18.sp, fontWeight = FontWeight.Medium)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Button(
-                            onClick = { if (quantity > 1) quantity-- },
-                            modifier = Modifier.size(40.dp),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Text("-", fontSize = 18.sp)
+                        Button(onClick = { if (quantity > 1) quantity-- }, modifier = Modifier.size(40.dp), contentPadding = PaddingValues(0.dp)) {
+                            Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         }
-                        Text(quantity.toString(), modifier = Modifier.padding(horizontal = 16.dp), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Button(
-                            onClick = { quantity++ },
-                            modifier = Modifier.size(40.dp),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Text("+", fontSize = 18.sp)
+                        Text(text = quantity.toString(), modifier = Modifier.padding(horizontal = 16.dp), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Button(onClick = { quantity++ }, modifier = Modifier.size(40.dp), contentPadding = PaddingValues(0.dp)) {
+                            Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
 
-                // Add-Ons Section
-                Text("Add Ons:", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(horizontal = 16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Add Ons:", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(horizontal = 16.dp))
                 Spacer(modifier = Modifier.height(8.dp))
+
+                // Add-Ons List
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
@@ -148,25 +152,29 @@ fun FoodDetailScreen(
                 ) {
                     items(currentAddOns.size) { index ->
                         val addOn = currentAddOns[index]
-                        AddOnItemRow(
+                        AddOnRow(
                             addOn = addOn,
-                            onQuantityChange = { newQuantity ->
+                            onQuantityChange = { change ->
                                 val updatedList = currentAddOns.toMutableList()
-                                updatedList[index] = addOn.copy(quantity = newQuantity)
+                                val currentQuantity = updatedList[index].quantity
+                                val newQuantity = (currentQuantity + change).coerceAtLeast(0)
+                                updatedList[index] = updatedList[index].copy(quantity = newQuantity)
                                 currentAddOns = updatedList
                             }
                         )
                     }
                 }
 
-                // Total Price Calculation
-                val addOnPrice = currentAddOns.sumOf { it.price.toDouble() * it.quantity }
+                // Total price calculation
+                val selectedAddOns = currentAddOns.filter { it.quantity > 0 }
+                val addOnPrice = selectedAddOns.sumOf { it.price.toDouble() * it.quantity }
                 val totalPrice = (currentMenuItem.price + addOnPrice) * quantity
 
-                // Add to Cart / Update Button
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Add to/Update Cart Button
                 Button(
                     onClick = {
-                        val selectedAddOns = currentAddOns.filter { it.quantity > 0 }
                         if (editMode) {
                             orderViewModel.editItem(cartItemIndex, selectedAddOns, quantity)
                         } else {
@@ -177,7 +185,7 @@ fun FoodDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                        .padding(horizontal = 16.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
@@ -186,14 +194,14 @@ fun FoodDetailScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
 
 @Composable
-fun AddOnItemRow(
+private fun AddOnRow(
     addOn: AddOn,
     onQuantityChange: (Int) -> Unit
 ) {
@@ -202,6 +210,7 @@ fun AddOnItemRow(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -213,25 +222,16 @@ fun AddOnItemRow(
             Image(painter = painterResource(id = addOn.imageRes), contentDescription = addOn.name, modifier = Modifier.size(40.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(addOn.name, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                Text("RM ${"%.2f".format(addOn.price)}", fontSize = 14.sp, color = Color.Gray)
+                Text(text = addOn.name, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                Text(text = "RM ${"%.2f".format(addOn.price)}", fontSize = 14.sp, color = Color.Gray)
             }
-            // Add-On Quantity Control
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Button(
-                    onClick = { if (addOn.quantity > 0) onQuantityChange(addOn.quantity - 1) },
-                    modifier = Modifier.size(32.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text("-", fontSize = 14.sp)
+                Button(onClick = { onQuantityChange(-1) }, modifier = Modifier.size(32.dp), contentPadding = PaddingValues(0.dp)) {
+                    Text("-", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
-                Text(addOn.quantity.toString(), modifier = Modifier.padding(horizontal = 12.dp), fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                Button(
-                    onClick = { onQuantityChange(addOn.quantity + 1) },
-                    modifier = Modifier.size(32.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text("+", fontSize = 14.sp)
+                Text(text = addOn.quantity.toString(), modifier = Modifier.padding(horizontal = 12.dp), fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                Button(onClick = { onQuantityChange(1) }, modifier = Modifier.size(32.dp), contentPadding = PaddingValues(0.dp)) {
+                    Text("+", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

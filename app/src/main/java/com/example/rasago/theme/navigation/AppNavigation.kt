@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.rasago.order.OrderHistoryViewModel
 import com.example.rasago.order.OrderViewModel
+import com.example.rasago.theme.auth.AuthViewModel
 import com.example.rasago.theme.auth.LoginScreen as AuthLoginScreen
 import com.example.rasago.theme.auth.RegisterScreen
 import com.example.rasago.theme.menu.AddMenuItemScreen
@@ -20,28 +21,26 @@ import com.example.rasago.theme.order.FoodStatusScreen
 import com.example.rasago.theme.order.OrderHistoryScreen
 import com.example.rasago.theme.order.OrderSummaryScreen
 import com.example.rasago.theme.payment.OrderConfirmationScreen
+import com.example.rasago.theme.payment.ReceiptScreen
+import com.example.rasago.theme.payment.customer.CashPaymentScreen
+import com.example.rasago.theme.payment.customer.DebitCreditCardPaymentScreen
+import com.example.rasago.theme.profile.EditProfileScreen
 import com.example.rasago.theme.profile.ProfileScreen
-import com.example.rasago.theme.profile.StaffProfileScreen
 import com.example.rasago.theme.utils.RoleDetector
 import com.example.rasago.ui.theme.menu.MenuViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun AppNavigation(
     menuViewModel: MenuViewModel = hiltViewModel(),
-    orderViewModel: OrderViewModel = hiltViewModel()
+    orderViewModel: OrderViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
     val menuItems by menuViewModel.menuItems.collectAsState()
     val orderState by orderViewModel.uiState.collectAsState()
-
-    // Hoisted state for payment method, shared between OrderSummary and OrderConfirmation
-    var selectedPaymentMethod by remember { mutableStateOf(0) }
-    val paymentMethodName = when (selectedPaymentMethod) {
-        0 -> "QR Scan"
-        1 -> "Cash"
-        2 -> "Card"
-        else -> "QR Scan"
-    }
+    val loginState by authViewModel.loginState.collectAsState()
 
     NavHost(
         navController = navController,
@@ -50,14 +49,18 @@ fun AppNavigation(
         // --- Authentication Flow ---
         composable("auth_flow") {
             AuthLoginScreen(
-                navController = navController,
-                onLoginSuccess = { isStaff ->
-                    val destination = if (isStaff) "staff_menu" else "menu"
+                authViewModel = authViewModel,
+                navController = navController
+            )
+            // Handle successful login navigation
+            LaunchedEffect(loginState) {
+                if (loginState.isLoginSuccess) {
+                    val destination = if (loginState.isStaff) "staff_menu" else "menu"
                     navController.navigate(destination) {
                         popUpTo("auth_flow") { inclusive = true }
                     }
                 }
-            )
+            }
         }
         composable("register") {
             RegisterScreen(
@@ -66,13 +69,34 @@ fun AppNavigation(
             )
         }
 
-        // --- Main App Flow ---
+        // --- Customer App Flow ---
         composable("menu") {
+            val historyViewModel: OrderHistoryViewModel = hiltViewModel()
+            val navigateToOrderStatus by historyViewModel.navigateToOrderStatus.collectAsState()
+
+            // This effect will trigger navigation when the state in the ViewModel changes.
+            LaunchedEffect(navigateToOrderStatus) {
+                navigateToOrderStatus?.let { orderId ->
+                    if (orderId != -1) {
+                        navController.navigate("food_status/$orderId")
+                    } else {
+                        // If no orders exist, navigate to the history screen which will show an empty state.
+                        val customerId = loginState.customer?.customerId
+                        navController.navigate("orders?customerId=${customerId ?: -1}")
+                    }
+                    historyViewModel.onNavigationComplete() // Reset the state
+                }
+            }
+
             MenuScreen(
                 foodList = menuItems,
                 cartItemCount = orderState.orderItems.size,
                 onNavigateToCart = { navController.navigate("order_summary") },
-                onNavigateToOrders = { navController.navigate("orders") },
+                onNavigateToOrders = {
+                    loginState.customer?.customerId?.let { customerId ->
+                        historyViewModel.onOrdersTabClicked(customerId)
+                    }
+                },
                 onNavigateToProfile = { navController.navigate("profile") },
                 onFoodItemClicked = { menuItem ->
                     menuViewModel.selectMenuItem(menuItem.id)
@@ -81,6 +105,7 @@ fun AppNavigation(
             )
         }
 
+        // --- Staff App Flow ---
         composable("staff_menu") {
             MenuScreen(
                 isStaff = true,
@@ -107,7 +132,6 @@ fun AppNavigation(
             val editMode = backStackEntry.arguments?.getBoolean("editMode") ?: false
             val cartItemIndex = backStackEntry.arguments?.getInt("cartItemIndex") ?: -1
 
-            // Ensure the correct menu item is selected before showing the screen
             LaunchedEffect(menuItemId) {
                 menuViewModel.selectMenuItem(menuItemId)
             }
@@ -125,37 +149,103 @@ fun AppNavigation(
         composable("order_summary") {
             OrderSummaryScreen(
                 orderViewModel = orderViewModel,
-                onNavigateToOrderConfirmation = { navController.navigate("order_confirmation") },
+                onNavigateToPayment = {
+                    when (orderState.paymentMethod) {
+                        "Cash" -> navController.navigate("cash_payment")
+                        "Card" -> navController.navigate("debit_payment")
+                        // "QR Scan" will go to confirmation directly for now
+                        else -> navController.navigate("order_confirmation")
+                    }
+                },
                 onNavigateBack = { navController.popBackStack() },
                 onAddItemClick = { navController.navigate("menu") },
                 onEditItem = { cartItem, index ->
                     navController.navigate("foodDetail/${cartItem.menuItem.id}?editMode=true&cartItemIndex=$index")
-                },
-                selectedPaymentMethod = selectedPaymentMethod,
-                onPaymentMethodSelect = { selectedPaymentMethod = it }
+                }
+            )
+        }
+
+        composable("cash_payment") {
+            CashPaymentScreen(
+                orderViewModel = orderViewModel,
+                onBackClick = { navController.popBackStack() },
+                onPaymentSuccess = { navController.navigate("order_confirmation") }
+            )
+        }
+
+        composable("debit_payment") {
+            DebitCreditCardPaymentScreen(
+                orderViewModel = orderViewModel,
+                onBackClick = { navController.popBackStack() },
+                onPaymentSuccess = { navController.navigate("order_confirmation") }
             )
         }
 
         composable("order_confirmation") {
             OrderConfirmationScreen(
-                cartItems = orderState.orderItems,
-                paymentMethod = paymentMethodName,
+                orderState = orderState,
                 onContinueClick = {
+                    val orderNo = "T${System.currentTimeMillis() % 10000}"
                     orderViewModel.saveOrder(
-                        customerId = 1, // Placeholder for logged-in user ID
-                        paymentMethod = paymentMethodName
+                        customerId = loginState.customer?.customerId ?: 1,
                     )
-                    orderViewModel.clearOrder()
-                    navController.navigate("menu") {
-                        popUpTo("menu") { inclusive = true }
-                    }
+                    navController.navigate("receipt/$orderNo")
                 },
-                onChangePaymentClick = { navController.popBackStack() },
+                onChangePaymentClick = { navController.navigate("order_summary") },
                 onCancelClick = { navController.popBackStack() }
             )
         }
 
-        composable("orders") {
+        composable(
+            route = "receipt/{orderNo}?isHistorical={isHistorical}",
+            arguments = listOf(
+                navArgument("orderNo") { type = NavType.StringType },
+                navArgument("isHistorical") { type = NavType.BoolType; defaultValue = false }
+            )
+        ) { backStackEntry ->
+            val orderNo = backStackEntry.arguments?.getString("orderNo") ?: "Unknown"
+            val isHistorical = backStackEntry.arguments?.getBoolean("isHistorical") ?: false
+            val receiptItems = orderState.orderItems.map { cartItem ->
+                val itemName = cartItem.menuItem.name
+                val addOnText = if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
+                    " + " + cartItem.selectedAddOns.filter { it.quantity > 0 }.joinToString(", ") { "${it.name} x${it.quantity}" }
+                } else ""
+                val fullItemName = "$itemName$addOnText"
+                fullItemName to cartItem.calculateTotalPrice()
+            }
+
+            ReceiptScreen(
+                orderNo = orderNo,
+                orderTime = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date()),
+                orderType = orderState.orderType,
+                orderItems = receiptItems,
+                subtotal = orderState.subtotal,
+                serviceCharge = orderState.serviceCharge,
+                tax = orderState.tax,
+                takeAwayCharge = orderState.takeAwayCharge,
+                paymentMethod = orderState.paymentMethod,
+                onBackClick = {
+                    if (isHistorical) {
+                        navController.popBackStack()
+                    } else {
+                        orderViewModel.clearOrder()
+                        navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                    }
+                },
+                onProceedClick = {
+                    orderViewModel.clearOrder()
+                    navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                }
+            )
+        }
+
+        composable(
+            "orders?customerId={customerId}",
+            arguments = listOf(navArgument("customerId") {
+                type = NavType.IntType
+                defaultValue = -1
+            })
+        ) {
             OrderHistoryScreen(
                 onBackClick = { navController.popBackStack() },
                 onViewOrder = { orderId ->
@@ -170,39 +260,61 @@ fun AppNavigation(
         ) { backStackEntry ->
             val orderId = backStackEntry.arguments?.getInt("orderId") ?: 0
             val historyViewModel: OrderHistoryViewModel = hiltViewModel()
-
             LaunchedEffect(orderId) {
                 historyViewModel.loadOrderDetails(orderId)
             }
-
             FoodStatusScreen(
                 historyViewModel = historyViewModel,
                 onBackClick = { navController.popBackStack() },
-                // This role would come from the logged-in user's profile
-                role = RoleDetector.ROLE_KITCHEN
+                role = if (loginState.isStaff) loginState.staff?.role ?: "" else RoleDetector.ROLE_CUSTOMER,
+                onViewReceipt = {
+                    navController.navigate("receipt/${orderId}?isHistorical=true")
+                }
             )
         }
 
         composable("profile") {
             ProfileScreen(
+                customer = loginState.customer,
+                staff = null,
                 onBackClick = { navController.popBackStack() },
+                onEditProfileClick = { navController.navigate("edit_profile") },
+                onManageMenuClicked = { /* Not applicable for customers */ },
+                onNavigateToOrders = {
+                    navController.navigate("orders?customerId=${loginState.customer?.customerId ?: -1}")
+                },
                 onLogout = {
+                    authViewModel.logout()
                     navController.navigate("auth_flow") {
-                        popUpTo("menu") { inclusive = true }
+                        popUpTo("profile") { inclusive = true }
                     }
                 }
             )
         }
 
         composable("staff_profile") {
-            StaffProfileScreen(
+            ProfileScreen(
+                customer = null,
+                staff = loginState.staff,
                 onBackClick = { navController.popBackStack() },
+                onEditProfileClick = { navController.navigate("edit_profile") },
                 onManageMenuClicked = { navController.navigate("menu_management") },
+                onNavigateToOrders = { navController.navigate("orders") }, // Staff see all orders
                 onLogout = {
+                    authViewModel.logout()
                     navController.navigate("auth_flow") {
-                        popUpTo("staff_menu") { inclusive = true }
+                        popUpTo("staff_profile") { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable("edit_profile") {
+            EditProfileScreen(
+                customer = loginState.customer,
+                staff = loginState.staff,
+                onBackClick = { navController.popBackStack() },
+                onSaveSuccess = { navController.popBackStack() }
             )
         }
 

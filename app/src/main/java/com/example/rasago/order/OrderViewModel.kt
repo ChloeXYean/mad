@@ -43,16 +43,9 @@ class OrderViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Edits an existing item in the cart.
-     * @param itemIndex The index of the item to edit in the orderItems list.
-     * @param newAddOns The updated list of selected add-ons.
-     * @param newQuantity The updated quantity for the item.
-     */
     fun editItem(itemIndex: Int, newAddOns: List<AddOn>, newQuantity: Int) {
         _uiState.update { currentState ->
             val currentItems = currentState.orderItems.toMutableList()
-            // Ensure the index is valid before attempting to update.
             if (itemIndex >= 0 && itemIndex < currentItems.size) {
                 val itemToEdit = currentItems[itemIndex]
                 val updatedItem = itemToEdit.copy(
@@ -96,32 +89,39 @@ class OrderViewModel @Inject constructor(
         }
     }
 
-    fun removeItemFromOrder(cartItem: CartItem) {
+    fun setOrderType(orderType: String) {
         _uiState.update { currentState ->
-            val updatedItems = currentState.orderItems.filter { it != cartItem }
-            recalculateTotals(currentState.copy(orderItems = updatedItems))
+            recalculateTotals(currentState.copy(orderType = orderType))
         }
+    }
+
+    fun setPaymentMethod(methodIndex: Int) {
+        val paymentMethod = when (methodIndex) {
+            0 -> "QR Scan"
+            1 -> "Cash"
+            2 -> "Card"
+            else -> "QR Scan"
+        }
+        _uiState.update { it.copy(paymentMethod = paymentMethod) }
     }
 
     private fun recalculateTotals(state: OrderUiState): OrderUiState {
         val subtotal = state.orderItems.sumOf { it.calculateTotalPrice().toDouble() }
         val serviceCharge = subtotal * 0.1
-        val tax = (subtotal + serviceCharge) * 0.06
-        val total = subtotal + serviceCharge + tax
+        val takeAwayCharge = if (state.orderType == "Take-away") 0.50 else 0.0
+        val tax = (subtotal + serviceCharge + takeAwayCharge) * 0.06
+        val total = subtotal + serviceCharge + tax + takeAwayCharge
 
         return state.copy(
             subtotal = subtotal,
             serviceCharge = serviceCharge,
             tax = tax,
+            takeAwayCharge = takeAwayCharge,
             total = total
         )
     }
 
-    /**
-     * Saves the final order to the database.
-     * Note: This version saves each item quantity as a separate row and cannot save add-ons.
-     */
-    fun saveOrder(customerId: Int, orderType: String = "Dine-In", paymentMethod: String = "Cash") {
+    fun saveOrder(customerId: Int) {
         viewModelScope.launch {
             val currentState = _uiState.value
             if (currentState.orderItems.isNotEmpty()) {
@@ -132,14 +132,13 @@ class OrderViewModel @Inject constructor(
                     serviceCharge = currentState.serviceCharge,
                     sst = currentState.tax,
                     totalPayment = currentState.total,
-                    paymentMethod = paymentMethod,
-                    remarks = "Thank you for your order!",
-                    orderType = orderType,
+                    paymentMethod = currentState.paymentMethod,
+                    remarks = "Take-away charge: RM ${currentState.takeAwayCharge}",
+                    orderType = currentState.orderType,
                     foodStatus = "Preparing",
                     customerId = customerId
                 )
 
-                // This logic correctly saves main items but cannot save add-ons due to DB structure.
                 val orderItemEntities = currentState.orderItems.flatMap { cartItem ->
                     List(cartItem.quantity) {
                         OrderItemEntity(
