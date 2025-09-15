@@ -26,6 +26,9 @@ interface CustomerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(customer: CustomerEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(customers: List<CustomerEntity>)
+
     @Query("SELECT COUNT(*) FROM customers")
     suspend fun getCount(): Int
 

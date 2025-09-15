@@ -101,8 +101,9 @@ fun StaffBottomNavigationBar(
     ) {
         // "Log Out" has been removed from this list
         val navItems = listOf(
-            NavItem("Menu", Icons.Default.Home),
-            NavItem("Staff", Icons.Default.Person)
+            NavItem("Main", Icons.Default.Home),
+            NavItem("Cart", Icons.Default.ShoppingCart),
+            NavItem("Profile", Icons.Default.Person)
         )
 
         navItems.forEach { item ->

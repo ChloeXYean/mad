@@ -30,9 +30,6 @@ import com.example.rasago.theme.profile.StaffMainScreen
 import com.example.rasago.theme.staff.StaffScheduleScreen
 import com.example.rasago.theme.utils.RoleDetector
 import com.example.rasago.ui.theme.menu.MenuViewModel
-import com.example.rasago.theme.profile.Staff
-import com.example.rasago.theme.profile.StaffMain
-import com.example.rasago.theme.profile.StaffStatus
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -70,7 +67,6 @@ fun AppNavigation(
         composable("register") {
             RegisterScreen(
                 navController = navController,
-                authViewModel = authViewModel,
                 onRegisterSuccess = { navController.popBackStack() }
             )
         }
@@ -92,42 +88,19 @@ fun AppNavigation(
                 }
             }
 
-            var navigateToCart by remember { mutableStateOf(false) }
-            var navigateToProfile by remember { mutableStateOf(false) }
-            var navigateToFoodDetail by remember { mutableStateOf<Int?>(null) }
-            
-            LaunchedEffect(navigateToCart) {
-                if (navigateToCart) {
-                    navController.navigate("order_summary")
-                    navigateToCart = false
-                }
-            }
-            
-            LaunchedEffect(navigateToProfile) {
-                if (navigateToProfile) {
-                    navController.navigate("profile")
-                    navigateToProfile = false
-                }
-            }
-            
-            LaunchedEffect(navigateToFoodDetail) {
-                navigateToFoodDetail?.let { menuItemId ->
-                    navController.navigate("foodDetail/$menuItemId")
-                    navigateToFoodDetail = null
-                }
-            }
-            
             MenuScreen(
                 foodList = menuItems,
                 cartItemCount = orderState.orderItems.size,
-                onNavigateToCart = { navigateToCart = true },
+                onNavigateToCart = { navController.navigate("order_summary") },
                 onNavigateToOrders = {
-                    navController.navigate("orders?customerId=${loginState.customer?.customerId ?: -1}")
+                    loginState.customer?.customerId?.let { customerId ->
+                        historyViewModel.onOrdersTabClicked(customerId)
+                    }
                 },
-                onNavigateToProfile = { navigateToProfile = true },
+                onNavigateToProfile = { navController.navigate("profile") },
                 onFoodItemClicked = { menuItem ->
                     menuViewModel.selectMenuItem(menuItem.id)
-                    navigateToFoodDetail = menuItem.id
+                    navController.navigate("foodDetail/${menuItem.id}")
                 }
             )
         }
@@ -151,40 +124,15 @@ fun AppNavigation(
         }
 
         composable("staff_menu") {
-            var navigateToCart by remember { mutableStateOf(false) }
-            var navigateToStaffProfile by remember { mutableStateOf(false) }
-            var navigateToFoodDetail by remember { mutableStateOf<Int?>(null) }
-            
-            LaunchedEffect(navigateToCart) {
-                if (navigateToCart) {
-                    navController.navigate("order_summary")
-                    navigateToCart = false
-                }
-            }
-            
-            LaunchedEffect(navigateToStaffProfile) {
-                if (navigateToStaffProfile) {
-                    navController.navigate("staff_profile")
-                    navigateToStaffProfile = false
-                }
-            }
-            
-            LaunchedEffect(navigateToFoodDetail) {
-                navigateToFoodDetail?.let { menuItemId ->
-                    navController.navigate("foodDetail/$menuItemId")
-                    navigateToFoodDetail = null
-                }
-            }
-            
             MenuScreen(
                 isStaff = true,
                 foodList = menuItems,
                 cartItemCount = orderState.orderItems.size,
-                onNavigateToCart = { navigateToCart = true },
-                onNavigateToStaffProfile = { navigateToStaffProfile = true },
+                onNavigateToCart = { navController.navigate("order_summary") },
+                onNavigateToStaffProfile = { navController.navigate("staff_profile") },
                 onFoodItemClicked = { menuItem ->
                     menuViewModel.selectMenuItem(menuItem.id)
-                    navigateToFoodDetail = menuItem.id
+                    navController.navigate("foodDetail/${menuItem.id}")
                 }
             )
         }
@@ -220,108 +168,50 @@ fun AppNavigation(
         }
 
         composable("order_summary") {
-            var navigateToPayment by remember { mutableStateOf(false) }
-            var navigateToMenu by remember { mutableStateOf(false) }
-            var navigateToEditItem by remember { mutableStateOf<String?>(null) }
-            
-            LaunchedEffect(navigateToPayment) {
-                if (navigateToPayment) {
+            OrderSummaryScreen(
+                orderViewModel = orderViewModel,
+                onNavigateToPayment = {
                     when (orderState.paymentMethod) {
                         "Cash" -> navController.navigate("cash_payment")
                         "Card" -> navController.navigate("debit_payment")
                         else -> navController.navigate("order_confirmation")
                     }
-                    navigateToPayment = false
-                }
-            }
-            
-            LaunchedEffect(navigateToMenu) {
-                if (navigateToMenu) {
-                    navController.navigate("menu")
-                    navigateToMenu = false
-                }
-            }
-            
-            LaunchedEffect(navigateToEditItem) {
-                navigateToEditItem?.let { editParams ->
-                    navController.navigate("foodDetail/$editParams")
-                    navigateToEditItem = null
-                }
-            }
-            
-            OrderSummaryScreen(
-                orderViewModel = orderViewModel,
-                onNavigateToPayment = { navigateToPayment = true },
+                },
                 onNavigateBack = { navController.popBackStack() },
-                onAddItemClick = { navigateToMenu = true },
+                onAddItemClick = { navController.navigate("menu") },
                 onEditItem = { cartItem, index ->
-                    navigateToEditItem = "${cartItem.menuItem.id}?editMode=true&cartItemIndex=$index"
+                    navController.navigate("foodDetail/${cartItem.menuItem.id}?editMode=true&cartItemIndex=$index")
                 }
             )
         }
 
         composable("cash_payment") {
-            var navigateToConfirmation by remember { mutableStateOf(false) }
-            
-            LaunchedEffect(navigateToConfirmation) {
-                if (navigateToConfirmation) {
-                    navController.navigate("order_confirmation")
-                    navigateToConfirmation = false
-                }
-            }
-            
             CashPaymentScreen(
                 orderViewModel = orderViewModel,
                 onBackClick = { navController.popBackStack() },
-                onPaymentSuccess = { navigateToConfirmation = true }
+                onPaymentSuccess = { navController.navigate("order_confirmation") }
             )
         }
 
         composable("debit_payment") {
-            var navigateToConfirmation by remember { mutableStateOf(false) }
-            
-            LaunchedEffect(navigateToConfirmation) {
-                if (navigateToConfirmation) {
-                    navController.navigate("order_confirmation")
-                    navigateToConfirmation = false
-                }
-            }
-            
             DebitCreditCardPaymentScreen(
                 orderViewModel = orderViewModel,
                 onBackClick = { navController.popBackStack() },
-                onPaymentSuccess = { navigateToConfirmation = true }
+                onPaymentSuccess = { navController.navigate("order_confirmation") }
             )
         }
 
         composable("order_confirmation") {
-            var navigateToReceipt by remember { mutableStateOf<String?>(null) }
-            var navigateToSummary by remember { mutableStateOf(false) }
-            
-            LaunchedEffect(navigateToReceipt) {
-                navigateToReceipt?.let { orderNo ->
-                    navController.navigate("receipt/$orderNo")
-                    navigateToReceipt = null
-                }
-            }
-            
-            LaunchedEffect(navigateToSummary) {
-                if (navigateToSummary) {
-                    navController.navigate("order_summary")
-                    navigateToSummary = false
-                }
-            }
-            
             OrderConfirmationScreen(
                 orderState = orderState,
                 onContinueClick = {
-                    val orderNo = "T${System.currentTimeMillis() % 1000}"
+                    val orderNo = "T${System.currentTimeMillis() % 10000}"
                     orderViewModel.saveOrder(
                         customerId = loginState.customer?.customerId ?: 1,
                     )
-                    navigateToReceipt = orderNo
+                    navController.navigate("receipt/$orderNo")
                 },
-                onChangePaymentClick = { navigateToSummary = true },
+                onChangePaymentClick = { navController.navigate("order_summary") },
                 onCancelClick = { navController.popBackStack() }
             )
         }
@@ -344,16 +234,6 @@ fun AppNavigation(
                 fullItemName to cartItem.calculateTotalPrice()
             }
 
-            var navigateToMenu by remember { mutableStateOf(false) }
-            
-            LaunchedEffect(navigateToMenu) {
-                if (navigateToMenu) {
-                    orderViewModel.clearOrder()
-                    navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
-                    navigateToMenu = false
-                }
-            }
-            
             ReceiptScreen(
                 orderNo = orderNo,
                 orderTime = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date()),
@@ -368,11 +248,13 @@ fun AppNavigation(
                     if (isHistorical) {
                         navController.popBackStack()
                     } else {
-                        navigateToMenu = true
+                        orderViewModel.clearOrder()
+                        navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
                     }
                 },
                 onProceedClick = {
-                    navigateToMenu = true
+                    orderViewModel.clearOrder()
+                    navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
                 }
             )
         }
@@ -418,7 +300,9 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() },
                 onEditProfileClick = { navController.navigate("edit_profile") },
                 onManageMenuClicked = { /* Not applicable for customers */ },
-                onNavigateToOrders = { /* Not applicable for customers */ },
+                onNavigateToOrders = {
+                    navController.navigate("orders?customerId=${loginState.customer?.customerId ?: -1}")
+                },
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate("auth_flow") {
@@ -435,7 +319,7 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() },
                 onEditProfileClick = { navController.navigate("edit_profile") },
                 onManageMenuClicked = { navController.navigate("menu_management") },
-                onNavigateToOrders = { navController.navigate("order_history") },
+                onNavigateToOrders = { navController.navigate("orders") }, // Staff see all orders
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate("auth_flow") {
@@ -446,15 +330,12 @@ fun AppNavigation(
         }
 
         composable("edit_profile") {
-            val currentCustomer = remember { loginState.customer }
-            currentCustomer?.let { customer ->
-                EditProfileScreen(
-                    customer = customer,
-                    authViewModel = authViewModel,
-                    onBackClick = { navController.popBackStack() },
-                    onUpdateSuccess = { navController.popBackStack() }
-                )
-            }
+            EditProfileScreen(
+                customer = loginState.customer,
+                staff = loginState.staff,
+                onBackClick = { navController.popBackStack() },
+                onSaveSuccess = { navController.popBackStack() }
+            )
         }
 
         composable("menu_management") {
@@ -492,48 +373,6 @@ fun AppNavigation(
                 },
                 onBackClick = { navController.popBackStack() }
             )
-
-            // --- Staff App Flow ---
-            // --- 员工流程 ---
-            navigation(startDestination = "staff_main", route = "staff_app") {
-                composable("staff_main") {
-                    var navigateToMenu by remember { mutableStateOf(false) }
-                    var navigateToLogout by remember { mutableStateOf(false) }
-                    
-                    LaunchedEffect(navigateToMenu) {
-                        if (navigateToMenu) {
-                            navController.navigate("menu")
-                            navigateToMenu = false
-                        }
-                    }
-                    
-                    LaunchedEffect(navigateToLogout) {
-                        if (navigateToLogout) {
-                            navController.navigate("login_flow") {
-                                popUpTo("staff_app") { inclusive = true }
-                            }
-                            navigateToLogout = false
-                        }
-                    }
-                    
-                    StaffMain(
-                        staff = staffData,
-                        onMenuClick = { navigateToMenu = true },
-                        onLogoutClick = { navigateToLogout = true },
-                        navController = navController // 传递导航控制器
-                    )
-                }
-
-                composable("order_history") {
-                    OrderHistoryScreen(
-                        onBackClick = { navController.popBackStack() },
-                        onViewOrder = { orderId ->
-                            navController.navigate("food_status/$orderId")
-                        }
-                    )
-                }
-            }
-
         }
     }
 }

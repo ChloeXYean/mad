@@ -3,7 +3,6 @@ package com.example.rasago
 import com.example.rasago.data.entity.CustomerEntity
 import com.example.rasago.data.entity.MenuItemEntity
 import com.example.rasago.data.entity.StaffEntity
-import com.example.rasago.theme.utils.RoleDetector
 
 /**
  * Provides a pre-defined list of menu items to populate the database on its first creation.
@@ -26,7 +25,55 @@ fun getPredefinedMenuItems(): List<MenuItemEntity> {
             photo = R.drawable.noodle_asamlaksa.toString(),
             isRecommended = true
         ),
-        // ... other menu items
+        MenuItemEntity(
+            name = "Curry Mee",
+            description = "A rich and spicy curry noodle soup with coconut milk.",
+            price = 9.50,
+            category = "Noodles",
+            photo = R.drawable.noodle_currymee.toString()
+        ),
+        MenuItemEntity(
+            name = "Otak-Otak",
+            description = "Grilled fish cake made of ground fish meat mixed with tapioca starch and spices.",
+            price = 7.00,
+            category = "Side Dishes",
+            photo = R.drawable.side_otakotak.toString()
+        ),
+        MenuItemEntity(
+            name = "Chicken Rice",
+            description = "Poached chicken and seasoned rice, served with chili sauce and cucumber garnishes.",
+            price = 9.00,
+            category = "Rice",
+            photo = R.drawable.rice_chickenrice.toString()
+        ),
+        MenuItemEntity(
+            name = "Char Kuey Teow",
+            description = "Stir-fried rice noodles with shrimp, cockles, bean sprouts, and chives in a soy sauce mixture.",
+            price = 11.00,
+            category = "Noodles",
+            photo = R.drawable.noodle_charkueyteow.toString()
+        ),
+        MenuItemEntity(
+            name = "Chicken Satay",
+            description = "Grilled marinated chicken skewers served with a peanut sauce.",
+            price = 12.00,
+            category = "Side Dishes",
+            photo = R.drawable.side_chickensatay.toString()
+        ),
+        MenuItemEntity(
+            name = "Cendol",
+            description = "An iced sweet dessert that contains droplets of green rice flour jelly, coconut milk and palm sugar syrup.",
+            price = 5.00,
+            category = "Desserts",
+            photo = R.drawable.dessert_cendol.toString()
+        ),
+        MenuItemEntity(
+            name = "Teh Tarik",
+            description = "A popular hot milk tea beverage most commonly found in restaurants, outdoor stalls and kopitiams.",
+            price = 3.50,
+            category = "Drinks",
+            photo = R.drawable.drink_tehtarik.toString()
+        )
     )
 }
 
@@ -38,7 +85,7 @@ fun getPredefinedCustomers(): List<CustomerEntity> {
         CustomerEntity(
             name = "John Doe",
             phone = "0123456789",
-            email = "customer@gmail.com",
+            email = "customer@rasago.com",
             password = "password123",
             gender = "Male"
         )
@@ -46,38 +93,38 @@ fun getPredefinedCustomers(): List<CustomerEntity> {
 }
 
 /**
- * Provides a pre-defined list of staff members for database seeding, covering all roles.
+ * Provides a pre-defined list of staff members for database seeding.
  */
 fun getPredefinedStaff(): List<StaffEntity> {
     return listOf(
         StaffEntity(
-
-            name = "Manager Sarah",
-            email = "mgr_sarah@gmail.com",
-            password = "admin123",
-            phone = "0111111111",
-            role = RoleDetector.ROLE_MANAGER,
-            status = "Working", //got working, on break, 
+            name = "Ali the Cashier",
+            email = "cas_ali@rasago.com",
+            password = "password123",
+            phone = "0198765432",
+            role = "cashier",
+            status = "active",
             jobTime = System.currentTimeMillis()
         ),
         StaffEntity(
-            name = "Cashier Ali",
-            email = "cas_ali@gmail.com",
-            password = "admin123",
-            phone = "0122222222",
-            role = RoleDetector.ROLE_CASHIER,
-            status = "Working",
+            name = "Lily",
+            email = "mgr_lily@rasago.com",
+            password = "password123",
+            phone = "0198765432",
+            role = "manager",
+            status = "active",
             jobTime = System.currentTimeMillis()
         ),
         StaffEntity(
-            name = "Kitchen David",
-            email = "kit_david@gmail.com",
-            password = "admin123",
-            phone = "0133333333",
-            role = RoleDetector.ROLE_KITCHEN,
-            status = "Working",
+            name = "John",
+            email = "kit_john@rasago.com",
+            password = "password123",
+            phone = "0198765432",
+            role = "kitchen",
+            status = "active",
             jobTime = System.currentTimeMillis()
         )
+
     )
 }
 

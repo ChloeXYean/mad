@@ -1,11 +1,13 @@
 package com.example.rasago.theme.profile
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.rasago.data.entity.StaffEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class StaffMainUiState(
@@ -20,12 +22,28 @@ class StaffMainViewModel @Inject constructor() : ViewModel() {
     val uiState = _uiState.asStateFlow()
 
     fun setStaff(staff: StaffEntity?) {
-        _uiState.update { it.copy(staff = staff, status = staff?.status ?: "Working") }
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    staff = staff,
+                    // Use staff's current status from DB as initial status
+                    status = staff?.status?.replaceFirstChar { char -> char.uppercase() } ?: "Working"
+                )
+            }
+        }
     }
 
     fun updateStatus(newStatus: String) {
-        _uiState.update { it.copy(status = newStatus) }
-        // In a real app, you would call the repository to save the new status to the database.
+        viewModelScope.launch {
+            _uiState.update { it.copy(status = newStatus) }
+            // Here you would typically also update the status in your repository/database
+        }
     }
-}
 
+//    fun loadStaff(staffId: Int) {
+//        viewModelScope.launch {
+//            val staff = getStaffFromDatabase(staffId)
+//            setStaff(staff)
+//        }
+//    }
+}

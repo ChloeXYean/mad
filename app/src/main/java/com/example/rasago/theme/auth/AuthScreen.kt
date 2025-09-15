@@ -85,10 +85,7 @@ fun LoginScreen(
             AuthTextField(
                 label = "Email Address",
                 value = authViewModel.email,
-                onValueChange = { 
-                    authViewModel.email = it
-                    authViewModel.clearError()
-                },
+                onValueChange = { authViewModel.email = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
@@ -101,10 +98,7 @@ fun LoginScreen(
             AuthPasswordField(
                 label = "Password",
                 value = authViewModel.password,
-                onValueChange = { 
-                    authViewModel.password = it
-                    authViewModel.clearError()
-                },
+                onValueChange = { authViewModel.password = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp),
@@ -136,22 +130,11 @@ fun LoginScreen(
             }
 
             loginState.error?.let { error ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFFFEBEE)
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = error,
-                        color = Color(0xFFD32F2F),
-                        modifier = Modifier.padding(12.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
 
             Row(modifier = Modifier.padding(top = 16.dp)) {
@@ -179,10 +162,8 @@ fun LoginScreen(
 @Composable
 fun RegisterScreen(
     navController: NavController,
-    authViewModel: AuthViewModel,
     onRegisterSuccess: () -> Unit = {}
 ) {
-    val loginState by authViewModel.loginState.collectAsState()
     var registerUsername by remember { mutableStateOf("") }
     var registerEmail by remember { mutableStateOf("") }
     var registerPhoneNo by remember { mutableStateOf("") }
@@ -248,10 +229,7 @@ fun RegisterScreen(
                 AuthTextField(
                     label = "Username",
                     value = registerUsername,
-                    onValueChange = { 
-                        registerUsername = it
-                        authViewModel.clearError()
-                    },
+                    onValueChange = { registerUsername = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -264,10 +242,7 @@ fun RegisterScreen(
                 AuthTextField(
                     label = "Email Address",
                     value = registerEmail,
-                    onValueChange = { 
-                        registerEmail = it
-                        authViewModel.clearError()
-                    },
+                    onValueChange = { registerEmail = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -280,10 +255,7 @@ fun RegisterScreen(
                 AuthTextField(
                     label = "Phone Number",
                     value = registerPhoneNo,
-                    onValueChange = { 
-                        registerPhoneNo = it
-                        authViewModel.clearError()
-                    },
+                    onValueChange = { registerPhoneNo = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -296,10 +268,7 @@ fun RegisterScreen(
                 AuthPasswordField(
                     label = "Password",
                     value = registerPassword,
-                    onValueChange = { 
-                        registerPassword = it
-                        authViewModel.clearError()
-                    },
+                    onValueChange = { registerPassword = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
@@ -312,10 +281,7 @@ fun RegisterScreen(
                 AuthPasswordField(
                     label = "Confirm Password",
                     value = registerConfirmPassword,
-                    onValueChange = { 
-                        registerConfirmPassword = it
-                        authViewModel.clearError()
-                    },
+                    onValueChange = { registerConfirmPassword = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
@@ -325,33 +291,24 @@ fun RegisterScreen(
                     )
                 )
 
-                if (loginState.isLoading) {
-                    CircularProgressIndicator()
-                } else {
-                    Button(
-                        onClick = {
-                            authViewModel.registerCustomer(
-                                name = registerUsername,
-                                email = registerEmail,
-                                password = registerPassword,
-                                phoneNumber = registerPhoneNo,
-                                confirmPassword = registerConfirmPassword
-                            )
-                        },
-                        modifier = Modifier
-                            .width(150.dp)
-                            .height(50.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4CAF50),
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text(
-                            text = "Register",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                Button(
+                    onClick = {
+                        // TODO: 实际注册逻辑
+                        onRegisterSuccess()
+                    },
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "Register",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 Row(modifier = Modifier.padding(top = 16.dp)) {
@@ -371,33 +328,7 @@ fun RegisterScreen(
                         }
                     )
                 }
-
-                loginState.error?.let { error ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFFFEBEE)
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = error,
-                            color = Color(0xFFD32F2F),
-                            modifier = Modifier.padding(12.dp),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
             }
-        }
-    }
-
-    // Handle successful registration
-    LaunchedEffect(loginState.isLoginSuccess) {
-        if (loginState.isLoginSuccess) {
-            onRegisterSuccess()
         }
     }
 }
@@ -413,11 +344,7 @@ fun AuthTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { 
-            Text(
-                text = label,
-            ) 
-        },
+        label = { Text(label) },
         keyboardOptions = keyboardOptions,
         modifier = modifier,
         singleLine = true,
@@ -426,12 +353,8 @@ fun AuthTextField(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,
             disabledContainerColor = Color.White,
-            focusedBorderColor = Color.White,
-            unfocusedBorderColor = Color.White,
-            focusedLabelColor = Color.White,
-            unfocusedLabelColor = Color.Gray,
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black
+            focusedBorderColor = Color.Gray,
+            unfocusedBorderColor = Color.White
         )
     )
 }
@@ -449,11 +372,7 @@ fun AuthPasswordField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { 
-            Text(
-                text = label,
-            ) 
-        },
+        label = { Text(label) },
         modifier = modifier,
         singleLine = true,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -475,12 +394,8 @@ fun AuthPasswordField(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,
             disabledContainerColor = Color.White,
-            focusedBorderColor = Color.White,
-            unfocusedBorderColor = Color.White,
-            focusedLabelColor = Color.White,
-            unfocusedLabelColor = Color.Gray,
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black
+            focusedBorderColor = Color.Gray,
+            unfocusedBorderColor = Color.White
         )
     )
 }
