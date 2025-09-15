@@ -1,10 +1,18 @@
 package com.example.rasago.theme.navigation
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.rasago.order.OrderHistoryViewModel
@@ -28,6 +36,10 @@ import com.example.rasago.theme.profile.EditProfileScreen
 import com.example.rasago.theme.profile.ProfileScreen
 import com.example.rasago.theme.utils.RoleDetector
 import com.example.rasago.ui.theme.menu.MenuViewModel
+import com.example.rasago.theme.profile.Staff
+import com.example.rasago.theme.profile.StaffMain
+import com.example.rasago.theme.profile.StaffStatus
+import com.example.rasago.theme.order.OrderHistoryScreen
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,6 +53,15 @@ fun AppNavigation(
     val menuItems by menuViewModel.menuItems.collectAsState()
     val orderState by orderViewModel.uiState.collectAsState()
     val loginState by authViewModel.loginState.collectAsState()
+
+    // TEMPORARY
+    val staffData = Staff(
+        name = "Ali",
+        role = "cashier",
+        jobTime = "08:00 - 18:00",
+        lastLogin = "2025-09-15 09:30",
+        status = StaffStatus.WORKING
+    )
 
     NavHost(
         navController = navController,
@@ -141,7 +162,9 @@ fun AppNavigation(
                 orderViewModel = orderViewModel,
                 onBackClick = { navController.popBackStack() },
                 editMode = editMode,
-                existingCartItem = if (editMode && cartItemIndex != -1) orderState.orderItems.getOrNull(cartItemIndex) else null,
+                existingCartItem = if (editMode && cartItemIndex != -1) orderState.orderItems.getOrNull(
+                    cartItemIndex
+                ) else null,
                 cartItemIndex = cartItemIndex
             )
         }
@@ -208,7 +231,8 @@ fun AppNavigation(
             val receiptItems = orderState.orderItems.map { cartItem ->
                 val itemName = cartItem.menuItem.name
                 val addOnText = if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
-                    " + " + cartItem.selectedAddOns.filter { it.quantity > 0 }.joinToString(", ") { "${it.name} x${it.quantity}" }
+                    " + " + cartItem.selectedAddOns.filter { it.quantity > 0 }
+                        .joinToString(", ") { "${it.name} x${it.quantity}" }
                 } else ""
                 val fullItemName = "$itemName$addOnText"
                 fullItemName to cartItem.calculateTotalPrice()
@@ -216,7 +240,10 @@ fun AppNavigation(
 
             ReceiptScreen(
                 orderNo = orderNo,
-                orderTime = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date()),
+                orderTime = SimpleDateFormat(
+                    "dd/MM/yyyy HH:mm",
+                    Locale.getDefault()
+                ).format(Date()),
                 orderType = orderState.orderType,
                 orderItems = receiptItems,
                 subtotal = orderState.subtotal,
@@ -266,7 +293,8 @@ fun AppNavigation(
             FoodStatusScreen(
                 historyViewModel = historyViewModel,
                 onBackClick = { navController.popBackStack() },
-                role = if (loginState.isStaff) loginState.staff?.role ?: "" else RoleDetector.ROLE_CUSTOMER,
+                role = if (loginState.isStaff) loginState.staff?.role
+                    ?: "" else RoleDetector.ROLE_CUSTOMER,
                 onViewReceipt = {
                     navController.navigate("receipt/${orderId}?isHistorical=true")
                 }
@@ -354,6 +382,30 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() }
             )
         }
+
+        // --- Staff App Flow ---
+        navigation(startDestination = "staff_main", route = "staff_app") {
+            composable("staff_main") {
+                StaffMain(
+                    staff = staffData,
+                    onMenuClick = { navController.navigate("menu") },
+                    onLogoutClick = {
+                        navController.navigate("auth_flow") {
+                            popUpTo("staff_app") { inclusive = true }
+                        }
+                    },
+                    navController = navController
+                )
+            }
+
+            composable("staff_order_history") {
+                OrderHistoryScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onViewOrder = { orderId ->
+                        navController.navigate("food_status/$orderId")
+                    }
+                )
+            }
+        }
     }
 }
-
