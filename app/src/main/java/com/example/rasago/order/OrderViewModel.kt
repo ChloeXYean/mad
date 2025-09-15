@@ -126,7 +126,7 @@ class OrderViewModel @Inject constructor(
             val currentState = _uiState.value
             if (currentState.orderItems.isNotEmpty()) {
                 val orderEntity = OrderEntity(
-                    orderNo = "T${System.currentTimeMillis()}",
+                    orderNo = "T${System.currentTimeMillis() % 1000}",
                     orderTime = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date()),
                     subtotal = currentState.subtotal,
                     serviceCharge = currentState.serviceCharge,

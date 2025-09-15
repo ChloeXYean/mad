@@ -38,7 +38,7 @@ fun getPredefinedCustomers(): List<CustomerEntity> {
         CustomerEntity(
             name = "John Doe",
             phone = "0123456789",
-            email = "customer@rasago.com",
+            email = "customer@gmail.com",
             password = "password123",
             gender = "Male"
         )
@@ -51,30 +51,31 @@ fun getPredefinedCustomers(): List<CustomerEntity> {
 fun getPredefinedStaff(): List<StaffEntity> {
     return listOf(
         StaffEntity(
+
             name = "Manager Sarah",
-            email = "mgr_sarah@rasago.com",
-            password = "password123",
+            email = "mgr_sarah@gmail.com",
+            password = "admin123",
             phone = "0111111111",
             role = RoleDetector.ROLE_MANAGER,
-            status = "active",
+            status = "Working", //got working, on break, 
             jobTime = System.currentTimeMillis()
         ),
         StaffEntity(
             name = "Cashier Ali",
-            email = "cas_ali@rasago.com",
-            password = "password123",
+            email = "cas_ali@gmail.com",
+            password = "admin123",
             phone = "0122222222",
             role = RoleDetector.ROLE_CASHIER,
-            status = "active",
+            status = "Working",
             jobTime = System.currentTimeMillis()
         ),
         StaffEntity(
             name = "Kitchen David",
-            email = "kit_david@rasago.com",
-            password = "password123",
+            email = "kit_david@gmail.com",
+            password = "admin123",
             phone = "0133333333",
             role = RoleDetector.ROLE_KITCHEN,
-            status = "active",
+            status = "Working",
             jobTime = System.currentTimeMillis()
         )
     )

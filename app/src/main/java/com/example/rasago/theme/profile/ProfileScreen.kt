@@ -177,12 +177,6 @@ fun ProfileScreen(
                 icon = Icons.Default.ReceiptLong,
                 onClick = onNavigateToOrders
             )
-        } else {
-            ProfileActionButton(
-                text = "My Orders",
-                icon = Icons.Default.ReceiptLong,
-                onClick = onNavigateToOrders
-            )
         }
 
         // Log Out Button

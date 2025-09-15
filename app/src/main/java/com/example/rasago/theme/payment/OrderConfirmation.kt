@@ -27,95 +27,107 @@ fun OrderConfirmationScreen(
     onCancelClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val orderNo = "T${System.currentTimeMillis() % 10000}"
+    val orderNo = "T${System.currentTimeMillis() % 1000}"
     val orderTime = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(Date())
 
     var showPaymentSuccess by remember { mutableStateOf(false) }
 
     Surface {
-        Column(
+        LazyColumn(
             modifier = modifier
                 .fillMaxSize()
-                .background(Color(0xFFF5F5F5))
+                .background(Color(0xFFF5F5F5)),
+            contentPadding = PaddingValues(bottom = 140.dp) // Space for floating buttons
+        ) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Order Confirmation",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.padding(10.dp))
+            }
+
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text("Order No : $orderNo", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                        Text("Order Time : $orderTime", style = MaterialTheme.typography.bodyLarge)
+                        Text("Order Type : ${orderState.orderType}", style = MaterialTheme.typography.bodyLarge)
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                        Text("Order :", style = MaterialTheme.typography.titleMedium)
+                        orderState.orderItems.forEach { cartItem ->
+                            val itemName = cartItem.menuItem.name
+                            OrderItemRow(
+                                name = "$itemName x${cartItem.quantity}",
+                                price = "RM ${String.format("%.2f", cartItem.calculateTotalPrice())}"
+                            )
+                            if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
+                                Column(modifier = Modifier.padding(start = 16.dp)) {
+                                    cartItem.selectedAddOns.filter { it.quantity > 0 }.forEach { addOn ->
+                                        Text(
+                                            text = "+ ${addOn.name} x${addOn.quantity}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                        Text("Price Summary:", style = MaterialTheme.typography.titleMedium)
+                        TotalRow(name = "Subtotal :", price = "RM ${String.format("%.2f", orderState.subtotal)}")
+                        TotalRow(name = "Service Charge (10%) :", price = "RM ${String.format("%.2f", orderState.serviceCharge)}")
+                        if (orderState.takeAwayCharge > 0) {
+                            TotalRow(name = "Take-away Charge :", price = "RM ${String.format("%.2f", orderState.takeAwayCharge)}")
+                        }
+                        TotalRow(name = "SST (6%) :", price = "RM ${String.format("%.2f", orderState.tax)}")
+                        Spacer(modifier = Modifier.height(12.dp))
+                        TotalRow(name = "Total Payment :", price = "RM ${String.format("%.2f", orderState.total)}", fontWeight = FontWeight.Bold)
+                        Divider(modifier = Modifier.padding(vertical = 16.dp))
+
+                        Text("Payment Method : ${orderState.paymentMethod}", style = MaterialTheme.typography.bodyLarge)
+                        Button(onClick = onChangePaymentClick, modifier = Modifier.padding(top = 8.dp)) {
+                            Text(text = "Change payment method")
+                        }
+                    }
+                }
+            }
+        }
+
+        // Floating Action Buttons at the bottom
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp),
+            contentAlignment = Alignment.BottomCenter
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Order Confirmation",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.padding(10.dp))
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text("Order No : $orderNo", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                    Text("Order Time : $orderTime", style = MaterialTheme.typography.bodyLarge)
-                    Text("Order Type : ${orderState.orderType}", style = MaterialTheme.typography.bodyLarge) // Display order type
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
-
-                    Text("Order :", style = MaterialTheme.typography.titleMedium)
-                    orderState.orderItems.forEach { cartItem ->
-                        val itemName = cartItem.menuItem.name
-                        OrderItemRow(
-                            name = "$itemName x${cartItem.quantity}",
-                            price = "RM ${String.format("%.2f", cartItem.calculateTotalPrice())}"
-                        )
-                        if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
-                            Column(modifier = Modifier.padding(start = 16.dp)) {
-                                cartItem.selectedAddOns.filter { it.quantity > 0 }.forEach { addOn ->
-                                    Text(
-                                        text = "+ ${addOn.name} x${addOn.quantity}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
-
-                    Text("Price Summary:", style = MaterialTheme.typography.titleMedium)
-                    TotalRow(name = "Subtotal :", price = "RM ${String.format("%.2f", orderState.subtotal)}")
-                    TotalRow(name = "Service Charge (10%) :", price = "RM ${String.format("%.2f", orderState.serviceCharge)}")
-                    if (orderState.takeAwayCharge > 0) {
-                        TotalRow(name = "Take-away Charge :", price = "RM ${String.format("%.2f", orderState.takeAwayCharge)}")
-                    }
-                    TotalRow(name = "SST (6%) :", price = "RM ${String.format("%.2f", orderState.tax)}")
-                    Spacer(modifier = Modifier.height(12.dp))
-                    TotalRow(name = "Total Payment :", price = "RM ${String.format("%.2f", orderState.total)}", fontWeight = FontWeight.Bold)
-                    Divider(modifier = Modifier.padding(vertical = 16.dp))
-
-                    Text("Payment Method : ${orderState.paymentMethod}", style = MaterialTheme.typography.bodyLarge)
-                    Button(onClick = onChangePaymentClick, modifier = Modifier.padding(top = 8.dp)) {
-                        Text(text = "Change payment method")
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
                     .height(120.dp)
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(color = Color.White, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
