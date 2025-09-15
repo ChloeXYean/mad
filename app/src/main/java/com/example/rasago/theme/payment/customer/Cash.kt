@@ -45,7 +45,7 @@ fun CashPaymentScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Order No :", style = MaterialTheme.typography.bodyLarge)
-                Text(text = "T${System.currentTimeMillis() % 10000}", style = MaterialTheme.typography.bodyLarge)
+                Text(text = "T${System.currentTimeMillis() % 1000}", style = MaterialTheme.typography.bodyLarge)
             }
 
             Row(

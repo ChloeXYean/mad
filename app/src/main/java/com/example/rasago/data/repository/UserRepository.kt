@@ -14,6 +14,12 @@ data class RegistrationResult(
     val customerId: Long?
 )
 
+data class UpdateProfileResult(
+    val isSuccess: Boolean,
+    val message: String,
+    val updatedCustomer: CustomerEntity? = null
+)
+
 @Singleton
 class UserRepository @Inject constructor(
     private val customerDao: CustomerDao,
@@ -185,6 +191,55 @@ class UserRepository @Inject constructor(
      */
     suspend fun getAllActiveStaff(): List<StaffEntity> {
         return staffDao.getAllActive()
+    }
+
+    /**
+     * Update customer profile information
+     */
+    suspend fun updateCustomerProfile(
+        customerId: Int,
+        newName: String,
+        newPhone: String,
+        newGender: String
+    ): UpdateProfileResult {
+        return try {
+            // Get current customer
+            val currentCustomer = customerDao.getById(customerId)
+            if (currentCustomer == null) {
+                return UpdateProfileResult(
+                    isSuccess = false,
+                    message = "Customer not found"
+                )
+            }
+
+            // Check if new name is different and if it already exists
+            if (newName != currentCustomer.name && customerDao.isNameExists(newName)) {
+                return UpdateProfileResult(
+                    isSuccess = false,
+                    message = "Name already taken. Please choose a different one."
+                )
+            }
+
+            // Update customer
+            val updatedCustomer = currentCustomer.copy(
+                name = newName,
+                phone = newPhone,
+                gender = newGender
+            )
+            
+            customerDao.update(updatedCustomer)
+            
+            UpdateProfileResult(
+                isSuccess = true,
+                message = "Profile updated successfully!",
+                updatedCustomer = updatedCustomer
+            )
+        } catch (e: Exception) {
+            UpdateProfileResult(
+                isSuccess = false,
+                message = "Failed to update profile. Please try again."
+            )
+        }
     }
 
     /**

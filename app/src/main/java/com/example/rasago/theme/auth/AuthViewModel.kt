@@ -157,5 +157,58 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateCustomerProfile(
+        newName: String,
+        newPhone: String,
+        newGender: String
+    ) {
+        val currentCustomer = _loginState.value.customer
+        if (currentCustomer == null) {
+            _loginState.update { it.copy(error = "No customer logged in") }
+            return
+        }
+
+        when {
+            newName.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your name") }
+                return
+            }
+            newPhone.isBlank() -> {
+                _loginState.update { it.copy(error = "Please enter your phone number") }
+                return
+            }
+            newGender.isBlank() -> {
+                _loginState.update { it.copy(error = "Please select your gender") }
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            _loginState.update { it.copy(isLoading = true, error = null) }
+            val result = userRepository.updateCustomerProfile(
+                customerId = currentCustomer.customerId,
+                newName = newName,
+                newPhone = newPhone,
+                newGender = newGender
+            )
+            
+            if (result.isSuccess && result.updatedCustomer != null) {
+                _loginState.update {
+                    it.copy(
+                        customer = result.updatedCustomer,
+                        isLoading = false
+                    )
+                }
+            } else {
+                _loginState.update {
+                    it.copy(
+                        error = result.message,
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
 }
 
