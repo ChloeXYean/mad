@@ -6,3 +6,9 @@ plugins {
     id("com.google.devtools.ksp") version "2.2.20-2.0.3" apply false // <-- CORRECTED VERSION HERE
     id("com.google.dagger.hilt.android") version "2.57.1" apply false
 }
+
+buildscript {
+    dependencies {
+        classpath ("com.google.dagger:hilt-android-gradle-plugin:2.52")
+    }
+}
