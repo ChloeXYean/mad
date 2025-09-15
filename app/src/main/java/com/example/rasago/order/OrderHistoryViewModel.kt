@@ -14,18 +14,41 @@ import javax.inject.Inject
 @HiltViewModel
 class OrderHistoryViewModel @Inject constructor(
     private val orderRepository: OrderRepository,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val ordersFlow = savedStateHandle.get<Int>("customerId")?.let { customerId ->
-        orderRepository.getOrdersByCustomerId(customerId)
-    } ?: orderRepository.getAllOrders()
-
-    val allOrders: StateFlow<List<Order>> = ordersFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    private val _allOrders = MutableStateFlow<List<Order>>(emptyList())
+    val allOrders: StateFlow<List<Order>> = _allOrders.asStateFlow()
+    
+    init {
+        loadOrders()
+    }
+    
+    private fun loadOrders() {
+        viewModelScope.launch {
+            val customerId = savedStateHandle.get<Int>("customerId")
+            println("DEBUG: OrderHistoryViewModel - customerId: $customerId")
+            
+            val ordersFlow = if (customerId == -1) {
+                // Staff view - show all orders
+                println("DEBUG: OrderHistoryViewModel - Loading all orders for staff")
+                orderRepository.getAllOrders()
+            } else if (customerId != null) {
+                // Customer view - show specific customer orders
+                println("DEBUG: OrderHistoryViewModel - Loading orders for customer: $customerId")
+                orderRepository.getOrdersByCustomerId(customerId)
+            } else {
+                // Default - show all orders
+                println("DEBUG: OrderHistoryViewModel - No customerId, loading all orders")
+                orderRepository.getAllOrders()
+            }
+            
+            ordersFlow.collect { orders ->
+                println("DEBUG: OrderHistoryViewModel - Received ${orders.size} orders")
+                _allOrders.value = orders
+            }
+        }
+    }
 
     private val _selectedOrderDetails = MutableStateFlow<OrderDetails?>(null)
     val selectedOrderDetails: StateFlow<OrderDetails?> = _selectedOrderDetails.asStateFlow()
@@ -53,8 +76,10 @@ class OrderHistoryViewModel @Inject constructor(
 
     fun loadOrderDetails(orderId: Int) {
         viewModelScope.launch {
-            orderRepository.getOrderDetails(orderId).collect {
-                _selectedOrderDetails.value = it
+            println("DEBUG: OrderHistoryViewModel - Loading order details for order $orderId")
+            orderRepository.getOrderDetails(orderId).collect { orderDetails ->
+                println("DEBUG: OrderHistoryViewModel - Received order details: ${orderDetails?.order?.orderNo}")
+                _selectedOrderDetails.value = orderDetails
             }
         }
     }
@@ -62,13 +87,21 @@ class OrderHistoryViewModel @Inject constructor(
     fun updateOrderItemStatus(orderItemId: Int, newStatus: String) {
         viewModelScope.launch {
             try {
+                println("DEBUG: OrderHistoryViewModel - Updating item $orderItemId to status $newStatus")
                 orderRepository.updateOrderItemStatus(orderItemId, newStatus)
+                println("DEBUG: OrderHistoryViewModel - Status updated successfully")
+                
                 // After updating, reload the order details to get the fresh data
-                _selectedOrderDetails.value?.order?.orderId?.let {
-                    loadOrderDetails(it)
+                _selectedOrderDetails.value?.order?.orderId?.let { orderId ->
+                    println("DEBUG: OrderHistoryViewModel - Reloading order details for order $orderId")
+                    loadOrderDetails(orderId)
                 }
+                
+                // Reload all orders to reflect the status change
+                println("DEBUG: OrderHistoryViewModel - Reloading all orders after status update")
+                loadOrders()
             } catch (e: Exception) {
-                // Handle or log the error appropriately
+                println("DEBUG: OrderHistoryViewModel - Error updating status: ${e.message}")
             }
         }
     }

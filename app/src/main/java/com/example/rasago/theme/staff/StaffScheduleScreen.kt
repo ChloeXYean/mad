@@ -331,21 +331,21 @@ fun StaffScheduleScreen(
                         onDismissRequest = { expanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("全部") },
+                            text = { Text("All") },
                             onClick = {
                                 selectedRole = null
                                 expanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("活跃员工") },
+                            text = { Text("Active") },
                             onClick = {
                                 selectedRole = "active"
                                 expanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("非活跃员工") },
+                            text = { Text("Inactive") },
                             onClick = {
                                 selectedRole = "inactive"
                                 expanded = false

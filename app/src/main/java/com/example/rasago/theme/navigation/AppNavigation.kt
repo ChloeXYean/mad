@@ -258,12 +258,20 @@ fun AppNavigation(
                         navController.popBackStack()
                     } else {
                         orderViewModel.clearOrder()
-                        navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                        if (loginState.isStaff) {
+                            navController.navigate("staff_menu") { popUpTo("staff_menu") { inclusive = true } }
+                        } else {
+                            navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                        }
                     }
                 },
                 onProceedClick = {
                     orderViewModel.clearOrder()
-                    navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                    if (loginState.isStaff) {
+                        navController.navigate("staff_menu") { popUpTo("staff_menu") { inclusive = true } }
+                    } else {
+                        navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                    }
                 }
             )
         }
@@ -329,7 +337,7 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() },
                 onEditProfileClick = { navController.navigate("edit_profile") },
                 onManageMenuClicked = { navController.navigate("menu_management") },
-                onNavigateToOrders = { navController.navigate("orders") }, // Staff see all orders
+                onNavigateToOrders = { navController.navigate("orders?customerId=-1") }, // Staff see all orders
                 onStaffManagementClicked = { navController.navigate("staff_management") },
                 onLogout = {
                     authViewModel.logout()
