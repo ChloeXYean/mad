@@ -15,8 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.rasago.data.model.CustomerProfile
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.rasago.theme.navigation.AppNavigation
 
 // 员工数据类
 data class Staff(
@@ -34,11 +35,11 @@ enum class StaffStatus {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StaffProfileScreen(
-    customerProfile: CustomerProfile = viewModel(),
+fun StaffMain(
     staff: Staff,
     onMenuClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    navController: NavController // 接收导航控制器
 ) {
     var staffStatus by remember { mutableStateOf(staff.status) }
 
@@ -52,7 +53,7 @@ fun StaffProfileScreen(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            "Staff Profile",
+                            "Staff Menu",
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 10.dp),
@@ -178,22 +179,23 @@ fun StaffProfileScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 中间按钮保持不变
+            // 跳转到员工资料页面（若有）
             Button(
-                onClick = { /* 功能暂不实现 */ },
+                onClick = { /* 若有StaffProfile页面，可导航：navController.navigate("staff_profile") */ },
                 modifier = Modifier
                     .height(60.dp)
                     .width(250.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
             ) {
-                Text("Orders Management", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Text("Staff Profile", fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
 
             Spacer(modifier = Modifier.padding(15.dp))
 
+            // 跳转到订单历史页面
             Button(
-                onClick = { /* 功能暂不实现 */ },
+                onClick = { navController.navigate("order_history") },
                 modifier = Modifier
                     .width(250.dp)
                     .height(60.dp),
@@ -205,8 +207,9 @@ fun StaffProfileScreen(
 
             Spacer(modifier = Modifier.padding(15.dp))
 
+            // 跳转到员工排班页面（若有）
             Button(
-                onClick = { /* 功能暂不实现 */ },
+                onClick = { /* 若有StaffSchedule页面，可导航：navController.navigate("staff_schedule") */ },
                 modifier = Modifier
                     .width(250.dp)
                     .height(60.dp),
@@ -215,11 +218,25 @@ fun StaffProfileScreen(
             ) {
                 Text("Staff Schedule", fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
+
+            Spacer(modifier = Modifier.padding(15.dp))
+
+            // 跳转到订单管理页面
+            Button(
+                onClick = { navController.navigate("order_management") },
+                modifier = Modifier
+                    .width(250.dp)
+                    .height(60.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+            ) {
+                Text("Orders Management", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+            }
         }
     }
 }
 
-// 员工底部导航栏（保持不变）
+// 员工底部导航栏
 @Composable
 fun StaffBottomNavigationBar(
     selectedItem: String,
@@ -251,11 +268,13 @@ fun StaffBottomNavigationBar(
 @Preview
 @Composable
 fun StaffProfilePreview() {
-//    AssignmentTestTheme {
-//        StaffProfileScreen(
-//            staff = Staff("Ali", "Cashier", "8am - 8pm", "Sept 13, 2025", StaffStatus.WORKING),
-//            onMenuClick = {},
-//            onLogoutClick = {}
-//        )
-//    }
+    MaterialTheme {
+        // 预览时可传空的navController，实际运行时由导航传递
+        StaffMain(
+            staff = Staff("Ali", "Cashier", "8am - 8pm", "Sept 13, 2025", StaffStatus.WORKING),
+            onMenuClick = {},
+            onLogoutClick = {},
+            navController = rememberNavController()
+        )
+    }
 }

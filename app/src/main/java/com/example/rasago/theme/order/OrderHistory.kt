@@ -99,7 +99,7 @@ fun OrderList(orders: List<Order>) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderHistoryScreen(
-    isStaff: Boolean = false,
+    isStaff: Boolean = true,
     cartItemCount: Int = 0,
     selectedNavItem: String = "Orders",
     onNavItemSelect: (String) -> Unit = {}
@@ -127,14 +127,6 @@ fun OrderHistoryScreen(
                     onNavItemSelect = onNavItemSelect
                 )
             }
-
-//            else { SUPPOSE ONLY FOR STAFF
-//                CustomerBottomNavigationBar(
-//                    cartItemCount = cartItemCount,
-//                    selectedNavItem = selectedNavItem,
-//                    onNavItemSelect = onNavItemSelect
-//                )
-//            }
         }
     ) { innerPadding ->
         Column(
