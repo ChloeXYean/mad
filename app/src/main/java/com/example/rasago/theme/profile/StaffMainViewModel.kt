@@ -1,4 +1,4 @@
-package com.example.rasago.theme.staff
+package com.example.rasago.theme.profile
 
 import androidx.lifecycle.ViewModel
 import com.example.rasago.data.entity.StaffEntity

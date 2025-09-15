@@ -26,7 +26,7 @@ import com.example.rasago.theme.payment.customer.CashPaymentScreen
 import com.example.rasago.theme.payment.customer.DebitCreditCardPaymentScreen
 import com.example.rasago.theme.profile.EditProfileScreen
 import com.example.rasago.theme.profile.ProfileScreen
-import com.example.rasago.theme.staff.StaffMainScreen
+import com.example.rasago.theme.profile.StaffMainScreen
 import com.example.rasago.theme.staff.StaffScheduleScreen
 import com.example.rasago.theme.utils.RoleDetector
 import com.example.rasago.ui.theme.menu.MenuViewModel

@@ -1,4 +1,4 @@
-package com.example.rasago.theme.staff
+package com.example.rasago.theme.profile
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
