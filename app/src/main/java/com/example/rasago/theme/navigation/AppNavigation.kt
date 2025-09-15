@@ -1,18 +1,10 @@
 package com.example.rasago.theme.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.rasago.order.OrderHistoryViewModel
@@ -34,12 +26,10 @@ import com.example.rasago.theme.payment.customer.CashPaymentScreen
 import com.example.rasago.theme.payment.customer.DebitCreditCardPaymentScreen
 import com.example.rasago.theme.profile.EditProfileScreen
 import com.example.rasago.theme.profile.ProfileScreen
+import com.example.rasago.theme.staff.StaffMainScreen
+import com.example.rasago.theme.staff.StaffScheduleScreen
 import com.example.rasago.theme.utils.RoleDetector
 import com.example.rasago.ui.theme.menu.MenuViewModel
-import com.example.rasago.theme.profile.Staff
-import com.example.rasago.theme.profile.StaffMain
-import com.example.rasago.theme.profile.StaffStatus
-import com.example.rasago.theme.order.OrderHistoryScreen
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -54,15 +44,6 @@ fun AppNavigation(
     val orderState by orderViewModel.uiState.collectAsState()
     val loginState by authViewModel.loginState.collectAsState()
 
-    // TEMPORARY
-    val staffData = Staff(
-        name = "Ali",
-        role = "cashier",
-        jobTime = "08:00 - 18:00",
-        lastLogin = "2025-09-15 09:30",
-        status = StaffStatus.WORKING
-    )
-
     NavHost(
         navController = navController,
         startDestination = "auth_flow"
@@ -76,7 +57,7 @@ fun AppNavigation(
             // Handle successful login navigation
             LaunchedEffect(loginState) {
                 if (loginState.isLoginSuccess) {
-                    val destination = if (loginState.isStaff) "staff_menu" else "menu"
+                    val destination = if (loginState.isStaff) "staff_main" else "menu"
                     navController.navigate(destination) {
                         popUpTo("auth_flow") { inclusive = true }
                     }
@@ -95,17 +76,15 @@ fun AppNavigation(
             val historyViewModel: OrderHistoryViewModel = hiltViewModel()
             val navigateToOrderStatus by historyViewModel.navigateToOrderStatus.collectAsState()
 
-            // This effect will trigger navigation when the state in the ViewModel changes.
             LaunchedEffect(navigateToOrderStatus) {
                 navigateToOrderStatus?.let { orderId ->
                     if (orderId != -1) {
                         navController.navigate("food_status/$orderId")
                     } else {
-                        // If no orders exist, navigate to the history screen which will show an empty state.
                         val customerId = loginState.customer?.customerId
                         navController.navigate("orders?customerId=${customerId ?: -1}")
                     }
-                    historyViewModel.onNavigationComplete() // Reset the state
+                    historyViewModel.onNavigationComplete()
                 }
             }
 
@@ -127,6 +106,22 @@ fun AppNavigation(
         }
 
         // --- Staff App Flow ---
+        composable("staff_main") {
+            StaffMainScreen(
+                staff = loginState.staff,
+                onNavigateToOrders = { navController.navigate("orders") },
+                onNavigateToStaffSchedule = { navController.navigate("staff_schedule") },
+                onNavigateToMenuManagement = { navController.navigate("menu_management") },
+                onNavigateToProfile = { navController.navigate("staff_profile") },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate("auth_flow") {
+                        popUpTo("staff_main") { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable("staff_menu") {
             MenuScreen(
                 isStaff = true,
@@ -139,6 +134,10 @@ fun AppNavigation(
                     navController.navigate("foodDetail/${menuItem.id}")
                 }
             )
+        }
+
+        composable("staff_schedule") {
+            StaffScheduleScreen(navController = navController)
         }
 
         composable(
@@ -162,9 +161,7 @@ fun AppNavigation(
                 orderViewModel = orderViewModel,
                 onBackClick = { navController.popBackStack() },
                 editMode = editMode,
-                existingCartItem = if (editMode && cartItemIndex != -1) orderState.orderItems.getOrNull(
-                    cartItemIndex
-                ) else null,
+                existingCartItem = if (editMode && cartItemIndex != -1) orderState.orderItems.getOrNull(cartItemIndex) else null,
                 cartItemIndex = cartItemIndex
             )
         }
@@ -176,7 +173,6 @@ fun AppNavigation(
                     when (orderState.paymentMethod) {
                         "Cash" -> navController.navigate("cash_payment")
                         "Card" -> navController.navigate("debit_payment")
-                        // "QR Scan" will go to confirmation directly for now
                         else -> navController.navigate("order_confirmation")
                     }
                 },
@@ -231,8 +227,7 @@ fun AppNavigation(
             val receiptItems = orderState.orderItems.map { cartItem ->
                 val itemName = cartItem.menuItem.name
                 val addOnText = if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
-                    " + " + cartItem.selectedAddOns.filter { it.quantity > 0 }
-                        .joinToString(", ") { "${it.name} x${it.quantity}" }
+                    " + " + cartItem.selectedAddOns.filter { it.quantity > 0 }.joinToString(", ") { "${it.name} x${it.quantity}" }
                 } else ""
                 val fullItemName = "$itemName$addOnText"
                 fullItemName to cartItem.calculateTotalPrice()
@@ -240,10 +235,7 @@ fun AppNavigation(
 
             ReceiptScreen(
                 orderNo = orderNo,
-                orderTime = SimpleDateFormat(
-                    "dd/MM/yyyy HH:mm",
-                    Locale.getDefault()
-                ).format(Date()),
+                orderTime = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date()),
                 orderType = orderState.orderType,
                 orderItems = receiptItems,
                 subtotal = orderState.subtotal,
@@ -293,8 +285,7 @@ fun AppNavigation(
             FoodStatusScreen(
                 historyViewModel = historyViewModel,
                 onBackClick = { navController.popBackStack() },
-                role = if (loginState.isStaff) loginState.staff?.role
-                    ?: "" else RoleDetector.ROLE_CUSTOMER,
+                role = if (loginState.isStaff) loginState.staff?.role ?: "" else RoleDetector.ROLE_CUSTOMER,
                 onViewReceipt = {
                     navController.navigate("receipt/${orderId}?isHistorical=true")
                 }
@@ -382,30 +373,6 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() }
             )
         }
-
-        // --- Staff App Flow ---
-        navigation(startDestination = "staff_main", route = "staff_app") {
-            composable("staff_main") {
-                StaffMain(
-                    staff = staffData,
-                    onMenuClick = { navController.navigate("menu") },
-                    onLogoutClick = {
-                        navController.navigate("auth_flow") {
-                            popUpTo("staff_app") { inclusive = true }
-                        }
-                    },
-                    navController = navController
-                )
-            }
-
-            composable("staff_order_history") {
-                OrderHistoryScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onViewOrder = { orderId ->
-                        navController.navigate("food_status/$orderId")
-                    }
-                )
-            }
-        }
     }
 }
+
