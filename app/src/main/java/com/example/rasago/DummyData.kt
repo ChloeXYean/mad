@@ -98,11 +98,29 @@ fun getPredefinedCustomers(): List<CustomerEntity> {
 fun getPredefinedStaff(): List<StaffEntity> {
     return listOf(
         StaffEntity(
-            name = "Ali the Cashier",
+            name = "Cashier Ali",
             email = "cas_ali@rasago.com",
             password = "password123",
             phone = "0198765432",
             role = "cashier",
+            status = "active",
+            jobTime = System.currentTimeMillis()
+        ),
+        StaffEntity(
+            name = "Kitchen David",
+            email = "kit_david@rasago.com",
+            password = "password123",
+            phone = "0123456789",
+            role = "kitchen",
+            status = "active",
+            jobTime = System.currentTimeMillis()
+        ),
+        StaffEntity(
+            name = "Manager Sarah",
+            email = "mgr_sarah@rasago.com",
+            password = "password123",
+            phone = "0111222333",
+            role = "manager",
             status = "active",
             jobTime = System.currentTimeMillis()
         )

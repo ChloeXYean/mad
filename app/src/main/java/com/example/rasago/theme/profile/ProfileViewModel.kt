@@ -16,6 +16,7 @@ data class ProfileUiState(
     val name: String = "",
     val email: String = "",
     val phone: String = "",
+    val gender: String = "",
     val isLoading: Boolean = false,
     val saveSuccess: Boolean = false,
     val error: String? = null
@@ -29,13 +30,20 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var currentCustomer: CustomerEntity? = null
+    private var currentStaff: StaffEntity? = null
+
     fun loadProfile(customer: CustomerEntity?, staff: StaffEntity?) {
+        currentCustomer = customer
+        currentStaff = staff
+        
         if (customer != null) {
             _uiState.update {
                 it.copy(
                     name = customer.name,
                     email = customer.email,
-                    phone = customer.phone
+                    phone = customer.phone,
+                    gender = customer.gender
                 )
             }
         } else if (staff != null) {
@@ -43,7 +51,8 @@ class ProfileViewModel @Inject constructor(
                 it.copy(
                     name = staff.name,
                     email = staff.email,
-                    phone = staff.phone ?: ""
+                    phone = staff.phone ?: "",
+                    gender = "" // Staff don't have gender field
                 )
             }
         }
@@ -57,19 +66,57 @@ class ProfileViewModel @Inject constructor(
         _uiState.update { it.copy(phone = phone) }
     }
 
+    fun updateGender(gender: String) {
+        _uiState.update { it.copy(gender = gender) }
+    }
+
     fun saveProfile() {
-        // In a real app, you would have a more complex update logic
-        // For now, we'll just simulate a successful save.
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            // Simulate network/db delay
-            kotlinx.coroutines.delay(1000)
-            _uiState.update { it.copy(isLoading = false, saveSuccess = true) }
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            
+            try {
+                val success = if (currentCustomer != null) {
+                    // Update customer profile
+                    val updatedCustomer = currentCustomer!!.copy(
+                        name = _uiState.value.name,
+                        phone = _uiState.value.phone,
+                        gender = _uiState.value.gender
+                    )
+                    userRepository.updateCustomerProfile(updatedCustomer)
+                } else if (currentStaff != null) {
+                    // Update staff profile
+                    val updatedStaff = currentStaff!!.copy(
+                        name = _uiState.value.name,
+                        phone = _uiState.value.phone
+                    )
+                    userRepository.updateStaffProfile(updatedStaff)
+                } else {
+                    false
+                }
+                
+                if (success) {
+                    _uiState.update { it.copy(isLoading = false, saveSuccess = true) }
+                } else {
+                    _uiState.update { 
+                        it.copy(
+                            isLoading = false, 
+                            error = "Failed to update profile. Please try again."
+                        ) 
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false, 
+                        error = "An error occurred: ${e.message}"
+                    ) 
+                }
+            }
         }
     }
 
     fun resetSaveStatus() {
-        _uiState.update { it.copy(saveSuccess = false) }
+        _uiState.update { it.copy(saveSuccess = false, error = null) }
     }
 }
 

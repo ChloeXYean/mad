@@ -68,5 +68,31 @@ class AuthViewModel @Inject constructor(
     fun clearError() {
         _loginState.update { it.copy(error = null) }
     }
+
+    /**
+     * Refresh user information after profile update
+     */
+    fun refreshUserInfo() {
+        viewModelScope.launch {
+            val currentState = _loginState.value
+            if (currentState.isStaff && currentState.staff != null) {
+                // Refresh staff info
+                val refreshedStaff = userRepository.loginStaff(currentState.staff!!.email, currentState.staff!!.password ?: "")
+                if (refreshedStaff != null) {
+                    _loginState.update { 
+                        it.copy(staff = refreshedStaff) 
+                    }
+                }
+            } else if (!currentState.isStaff && currentState.customer != null) {
+                // Refresh customer info
+                val refreshedCustomer = userRepository.loginCustomer(currentState.customer!!.email, currentState.customer!!.password ?: "")
+                if (refreshedCustomer != null) {
+                    _loginState.update { 
+                        it.copy(customer = refreshedCustomer) 
+                    }
+                }
+            }
+        }
+    }
 }
 

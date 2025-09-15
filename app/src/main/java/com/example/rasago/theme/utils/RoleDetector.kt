@@ -42,17 +42,17 @@ object RoleDetector {
     }
 
     /**
-     * 获取角色的显示名称
-     * @param role 用户角色字符串
-     * @return 角色的中文显示名称
+     * 
+     * @param role 
+     * @return 
      */
     fun getRoleDisplayName(role: String): String {
         return when (role) {
-            ROLE_CUSTOMER -> "顾客"
-            ROLE_CASHIER -> "收银员"
-            ROLE_KITCHEN -> "厨房员工"
-            ROLE_MANAGER -> "经理"
-            else -> "未知角色"
+            ROLE_CUSTOMER -> "Customer"
+            ROLE_CASHIER -> "Cashier"
+            ROLE_KITCHEN -> "Kitchen"
+            ROLE_MANAGER -> "Manager"
+            else -> "Unknown Role"
         }
     }
 
