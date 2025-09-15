@@ -12,8 +12,8 @@ fun CustomerProfile.toEntity(id: Int): CustomerEntity {
         email = this.email,
         phone = this.phone,
         gender = this.gender,
-        profileImageRes = this.profileImageRes,
-        password = this.password
+        isActive = true,
+        createdAt = System.currentTimeMillis()
     )
 }
 
@@ -21,7 +21,6 @@ fun StaffProfile.toEntity(): StaffEntity {
     return StaffEntity(
         staffId = this.id,
         name = this.name,
-        gender = this.gender,
         email = this.email,
         phone = this.phone,
         role = this.role,

@@ -57,7 +57,7 @@ object AppModule {
         menuItemDao: MenuItemDao,
         orderItemDao: OrderItemDao
     ): OrderRepository {
-        return OrderRepository(orderDao, menuItemDao)
+        return OrderRepository(orderDao, menuItemDao, orderItemDao)
     }
 
     @Provides

@@ -6,11 +6,12 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "staff")
 data class StaffEntity(
     @PrimaryKey(autoGenerate = true) val staffId: Int = 0,
-    val email: String,
-    val phone: String,
     val name: String,
-    val gender: String,
-    val role: String,                 // waiter, cashier, chef
+    val email: String,                // 邮箱作为主键用于登录
+    val password: String? = null,     // 添加密码字段用于登录
+    val phone: String? = null,  // 添加电话号码字段
+    val role: String,                 // waiter, cashier, chef, manager
     val status: String,               // active / inactive
-    val jobTime: Long                 // shift start or handled order time
+    val jobTime: Long,                // shift start or handled order time
+    val createdAt: Long = System.currentTimeMillis()
 )

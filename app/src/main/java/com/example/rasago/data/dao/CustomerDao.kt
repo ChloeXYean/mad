@@ -28,4 +28,16 @@ interface CustomerDao {
 
     @Query("SELECT COUNT(*) FROM customers")
     suspend fun getCount(): Int
+
+    @Query("SELECT * FROM customers WHERE email = :email AND password = :password AND isActive = 1 LIMIT 1")
+    suspend fun login(email: String, password: String): CustomerEntity?
+
+    @Query("SELECT * FROM customers WHERE email = :email LIMIT 1")
+    suspend fun getByEmail(email: String): CustomerEntity?
+
+    @Query("SELECT EXISTS(SELECT 1 FROM customers WHERE email = :email)")
+    suspend fun isEmailExists(email: String): Boolean
+
+    @Query("SELECT * FROM customers WHERE isActive = 1")
+    suspend fun getAllActive(): List<CustomerEntity>
 }

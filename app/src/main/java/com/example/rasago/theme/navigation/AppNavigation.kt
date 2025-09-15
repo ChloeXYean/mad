@@ -1,11 +1,7 @@
 package com.example.rasago.theme.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,18 +9,20 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.rasago.order.OrderHistoryViewModel
 import com.example.rasago.order.OrderViewModel
+import com.example.rasago.theme.auth.LoginScreen as AuthLoginScreen
+import com.example.rasago.theme.auth.RegisterScreen
 import com.example.rasago.theme.menu.AddMenuItemScreen
 import com.example.rasago.theme.menu.EditMenuItemScreen
 import com.example.rasago.theme.menu.FoodDetailScreen
-import com.example.rasago.theme.menu.LoginScreen
 import com.example.rasago.theme.menu.MenuManagementScreen
 import com.example.rasago.theme.menu.MenuScreen
-import com.example.rasago.theme.order.OrderConfirmationScreen
 import com.example.rasago.theme.order.FoodStatusScreen
 import com.example.rasago.theme.order.OrderHistoryScreen
 import com.example.rasago.theme.order.OrderSummaryScreen
+import com.example.rasago.theme.payment.OrderConfirmationScreen
 import com.example.rasago.theme.profile.ProfileScreen
 import com.example.rasago.theme.profile.StaffProfileScreen
+import com.example.rasago.theme.utils.RoleDetector
 import com.example.rasago.ui.theme.menu.MenuViewModel
 
 @Composable
@@ -34,28 +32,41 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
     val menuItems by menuViewModel.menuItems.collectAsState()
-    val selectedMenuItem by menuViewModel.selectedMenuItem.collectAsState()
     val orderState by orderViewModel.uiState.collectAsState()
+
+    // Hoisted state for payment method, shared between OrderSummary and OrderConfirmation
+    var selectedPaymentMethod by remember { mutableStateOf(0) }
+    val paymentMethodName = when (selectedPaymentMethod) {
+        0 -> "QR Scan"
+        1 -> "Cash"
+        2 -> "Card"
+        else -> "QR Scan"
+    }
 
     NavHost(
         navController = navController,
-        startDestination = "login"
+        startDestination = "auth_flow"
     ) {
-        composable("login") {
-            LoginScreen(
-                onLoginAsCustomer = {
-                    navController.navigate("menu") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                },
-                onLoginAsStaff = {
-                    navController.navigate("staff_menu") {
-                        popUpTo("login") { inclusive = true }
+        // --- Authentication Flow ---
+        composable("auth_flow") {
+            AuthLoginScreen(
+                navController = navController,
+                onLoginSuccess = { isStaff ->
+                    val destination = if (isStaff) "staff_menu" else "menu"
+                    navController.navigate(destination) {
+                        popUpTo("auth_flow") { inclusive = true }
                     }
                 }
             )
         }
+        composable("register") {
+            RegisterScreen(
+                navController = navController,
+                onRegisterSuccess = { navController.popBackStack() }
+            )
+        }
 
+        // --- Main App Flow ---
         composable("menu") {
             MenuScreen(
                 foodList = menuItems,
@@ -84,27 +95,63 @@ fun AppNavigation(
             )
         }
 
-        composable("add_menu_item") {
-            AddMenuItemScreen(
-                onAddItemClicked = { name, description, price, category, imageUri ->
-                    menuViewModel.addMenuItem(name, description, price, category, imageUri)
-                    navController.popBackStack()
-                },
-                onBackClick = { navController.popBackStack() }
+        composable(
+            route = "foodDetail/{menuItemId}?editMode={editMode}&cartItemIndex={cartItemIndex}",
+            arguments = listOf(
+                navArgument("menuItemId") { type = NavType.IntType },
+                navArgument("editMode") { type = NavType.BoolType; defaultValue = false },
+                navArgument("cartItemIndex") { type = NavType.IntType; defaultValue = -1 }
+            )
+        ) { backStackEntry ->
+            val menuItemId = backStackEntry.arguments?.getInt("menuItemId") ?: 0
+            val editMode = backStackEntry.arguments?.getBoolean("editMode") ?: false
+            val cartItemIndex = backStackEntry.arguments?.getInt("cartItemIndex") ?: -1
+
+            // Ensure the correct menu item is selected before showing the screen
+            LaunchedEffect(menuItemId) {
+                menuViewModel.selectMenuItem(menuItemId)
+            }
+
+            FoodDetailScreen(
+                menuViewModel = menuViewModel,
+                orderViewModel = orderViewModel,
+                onBackClick = { navController.popBackStack() },
+                editMode = editMode,
+                existingCartItem = if (editMode && cartItemIndex != -1) orderState.orderItems.getOrNull(cartItemIndex) else null,
+                cartItemIndex = cartItemIndex
             )
         }
 
-        composable(
-            route = "edit_menu_item/{menuItemId}",
-            arguments = listOf(navArgument("menuItemId") { type = NavType.IntType })
-        ) {
-            EditMenuItemScreen(
-                menuItem = selectedMenuItem,
-                onUpdateItemClicked = { id, name, description, price, category, imageUri ->
-                    menuViewModel.updateMenuItem(id, name, description, price, category, imageUri)
-                    navController.popBackStack()
+        composable("order_summary") {
+            OrderSummaryScreen(
+                orderViewModel = orderViewModel,
+                onNavigateToOrderConfirmation = { navController.navigate("order_confirmation") },
+                onNavigateBack = { navController.popBackStack() },
+                onAddItemClick = { navController.navigate("menu") },
+                onEditItem = { cartItem, index ->
+                    navController.navigate("foodDetail/${cartItem.menuItem.id}?editMode=true&cartItemIndex=$index")
                 },
-                onBackClick = { navController.popBackStack() }
+                selectedPaymentMethod = selectedPaymentMethod,
+                onPaymentMethodSelect = { selectedPaymentMethod = it }
+            )
+        }
+
+        composable("order_confirmation") {
+            OrderConfirmationScreen(
+                cartItems = orderState.orderItems,
+                paymentMethod = paymentMethodName,
+                onContinueClick = {
+                    orderViewModel.saveOrder(
+                        customerId = 1, // Placeholder for logged-in user ID
+                        paymentMethod = paymentMethodName
+                    )
+                    orderViewModel.clearOrder()
+                    navController.navigate("menu") {
+                        popUpTo("menu") { inclusive = true }
+                    }
+                },
+                onChangePaymentClick = { navController.popBackStack() },
+                onCancelClick = { navController.popBackStack() }
             )
         }
 
@@ -130,7 +177,9 @@ fun AppNavigation(
 
             FoodStatusScreen(
                 historyViewModel = historyViewModel,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                // This role would come from the logged-in user's profile
+                role = RoleDetector.ROLE_KITCHEN
             )
         }
 
@@ -138,10 +187,8 @@ fun AppNavigation(
             ProfileScreen(
                 onBackClick = { navController.popBackStack() },
                 onLogout = {
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            inclusive = true
-                        }
+                    navController.navigate("auth_flow") {
+                        popUpTo("menu") { inclusive = true }
                     }
                 }
             )
@@ -152,10 +199,8 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() },
                 onManageMenuClicked = { navController.navigate("menu_management") },
                 onLogout = {
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            inclusive = true
-                        }
+                    navController.navigate("auth_flow") {
+                        popUpTo("staff_menu") { inclusive = true }
                     }
                 }
             )
@@ -169,56 +214,32 @@ fun AppNavigation(
                     menuViewModel.selectMenuItem(it.id)
                     navController.navigate("edit_menu_item/${it.id}")
                 },
-                onDeleteItemClicked = {
-                    menuViewModel.deleteMenuItem(it)
+                onDeleteItemClicked = { menuViewModel.deleteMenuItem(it) },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("add_menu_item") {
+            AddMenuItemScreen(
+                onAddItemClicked = { name, description, price, category, imageUri ->
+                    menuViewModel.addMenuItem(name, description, price, category, imageUri)
+                    navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }
             )
         }
 
         composable(
-            route = "foodDetail/{menuItemId}",
+            route = "edit_menu_item/{menuItemId}",
             arguments = listOf(navArgument("menuItemId") { type = NavType.IntType })
         ) {
-            FoodDetailScreen(
-                menuViewModel = menuViewModel,
-                onBackClick = { navController.popBackStack() },
-                onAddToCart = {
-                    selectedMenuItem?.let { item ->
-                        orderViewModel.addItemToOrder(item)
-                        navController.popBackStack()
-                    }
-                }
-            )
-        }
-
-        composable("order_summary") {
-            OrderSummaryScreen(
-                orderUiState = orderState,
-                onNextButtonClicked = { navController.navigate("order_confirmation") },
-                onCancelButtonClicked = { navController.popBackStack() },
-                onAddItemClick = { navController.popBackStack() },
-                onIncreaseItem = { orderViewModel.increaseItemQuantity(it) },
-                onDecreaseItem = { orderViewModel.decreaseItemQuantity(it) },
-                onRemoveItem = { orderViewModel.removeItemFromOrder(it) }
-            )
-        }
-
-        composable("order_confirmation") {
-            OrderConfirmationScreen(
-                orderState = orderState,
-                onBackButtonClicked = { navController.popBackStack() },
-                onConfirmButtonClicked = {
-                    orderViewModel.saveOrder(
-                        orderType = "Dine-In",
-                        paymentMethod = "Cash",
-                        customerId = 1
-                    )
-                    orderViewModel.clearOrder()
-                    navController.navigate("menu") {
-                        popUpTo("menu") { inclusive = true }
-                    }
-                }
+            EditMenuItemScreen(
+                menuItem = menuViewModel.selectedMenuItem.collectAsState().value,
+                onUpdateItemClicked = { id, name, desc, price, cat, uri ->
+                    menuViewModel.updateMenuItem(id, name, desc, price, cat, uri)
+                    navController.popBackStack()
+                },
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

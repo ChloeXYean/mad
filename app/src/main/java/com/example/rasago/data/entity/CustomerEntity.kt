@@ -9,7 +9,8 @@ data class CustomerEntity(
     val name: String,
     val phone: String,
     val email: String,
+    val password: String? = null,     // 添加密码字段用于登录
     val gender: String,
-    val profileImageRes: Int,
-    val password: String
+    val isActive: Boolean = true,     // 账户状态
+    val createdAt: Long = System.currentTimeMillis()
 )

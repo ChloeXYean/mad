@@ -62,7 +62,7 @@ interface OrderDao {
     fun getOrderWithItems(orderId: Int): Flow<OrderWithItems?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrder(order: OrderEntity)
+    suspend fun insertOrder(order: OrderEntity): Long
 
     @Query("SELECT COUNT(*) FROM orders")
     suspend fun getOrderCount(): Int

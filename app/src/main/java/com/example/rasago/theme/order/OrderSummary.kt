@@ -3,88 +3,52 @@ package com.example.rasago.theme.order
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.rasago.data.model.MenuItem
-import com.example.rasago.order.OrderUiState
-import java.text.NumberFormat
-import java.util.Locale
+import com.example.rasago.data.model.CartItem
+import com.example.rasago.order.OrderViewModel
 
-// --- Style Constants ---
 private val backgroundColor = Color(0xFFF0F0F0)
 private val cardColor = Color.White
-
-// --- Helper Function ---
-private fun formatPriceForSummary(price: Double): String {
-    return "RM ${String.format(Locale.US, "%.2f", price)}"
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderSummaryScreen(
-    orderUiState: OrderUiState,
-    onNextButtonClicked: () -> Unit,
-    onCancelButtonClicked: () -> Unit,
+    orderViewModel: OrderViewModel,
+    onNavigateToOrderConfirmation: () -> Unit,
+    onNavigateBack: () -> Unit,
     onAddItemClick: () -> Unit,
-    onIncreaseItem: (MenuItem) -> Unit,
-    onDecreaseItem: (MenuItem) -> Unit,
-    onRemoveItem: (MenuItem) -> Unit
+    onEditItem: (CartItem, Int) -> Unit,
+    selectedPaymentMethod: Int,
+    onPaymentMethodSelect: (Int) -> Unit
 ) {
-    var selectedPaymentMethod by remember { mutableStateOf(0) } // 0: QR, 1: Cash, 2: Card
+    val orderState by orderViewModel.uiState.collectAsState()
+    val cartItems = orderState.orderItems
+    var selectedPaymentMethod by remember { mutableStateOf(0) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(text = "Order Summary", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onCancelButtonClicked) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -98,26 +62,33 @@ fun OrderSummaryScreen(
         Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 10.dp)
                 .fillMaxSize()
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 120.dp),
+                    .padding(bottom = 120.dp), // Space for the floating footer
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
                     YourOrderCard(
-                        orderItems = orderUiState.orderItems,
-                        subtotal = orderUiState.subtotal,
-                        tax = orderUiState.tax,
+                        cartItems = cartItems,
                         onAddItemClick = onAddItemClick,
-                        onIncrease = onIncreaseItem,
-                        onDecrease = onDecreaseItem,
-                        onRemove = onRemoveItem
+                        onQuantityChange = { item, change ->
+                            if (change > 0) {
+                                orderViewModel.increaseItemQuantity(item)
+                            } else {
+                                orderViewModel.decreaseItemQuantity(item)
+                            }
+                        },
+                        onEditItem = onEditItem,
+                        subtotal = orderState.subtotal,
+                        serviceCharge = orderState.serviceCharge,
+                        tax = orderState.tax
                     )
                 }
+
                 item {
                     PaymentDetailsCard(
                         selectedPaymentMethod = selectedPaymentMethod,
@@ -125,6 +96,8 @@ fun OrderSummaryScreen(
                     )
                 }
             }
+
+            // Bottom Floating Card
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -132,8 +105,8 @@ fun OrderSummaryScreen(
                     .padding(bottom = 16.dp)
             ) {
                 TotalFooterCard(
-                    total = orderUiState.total,
-                    onPlaceOrderClick = onNextButtonClicked
+                    total = orderState.total,
+                    onPlaceOrderClick = onNavigateToOrderConfirmation
                 )
             }
         }
@@ -142,13 +115,13 @@ fun OrderSummaryScreen(
 
 @Composable
 private fun YourOrderCard(
-    orderItems: List<MenuItem>,
-    subtotal: Double,
-    tax: Double,
+    cartItems: List<CartItem>,
     onAddItemClick: () -> Unit,
-    onIncrease: (MenuItem) -> Unit,
-    onDecrease: (MenuItem) -> Unit,
-    onRemove: (MenuItem) -> Unit
+    onQuantityChange: (CartItem, Int) -> Unit,
+    onEditItem: (CartItem, Int) -> Unit,
+    subtotal: Double,
+    serviceCharge: Double,
+    tax: Double
 ) {
     Column(
         modifier = Modifier
@@ -180,66 +153,116 @@ private fun YourOrderCard(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        orderItems.forEach { item ->
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        cartItems.forEachIndexed { index, cartItem ->
             SummaryItemRow(
-                item = item,
-                onIncrease = { onIncrease(item) },
-                onDecrease = { onDecrease(item) },
-                onRemove = { onRemove(item) }
+                cartItem = cartItem,
+                onQuantityChange = { change -> onQuantityChange(cartItem, change) },
+                onEditItem = { onEditItem(cartItem, index) }
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Subtotal:")
-            Text(text = formatPriceForSummary(subtotal))
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "SST (6%):")
-            Text(text = formatPriceForSummary(tax))
-        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        PriceDetails(subtotal = subtotal, serviceCharge = serviceCharge, tax = tax)
     }
 }
 
 @Composable
 private fun SummaryItemRow(
-    item: MenuItem,
-    onIncrease: () -> Unit,
-    onDecrease: () -> Unit,
-    onRemove: () -> Unit
+    cartItem: CartItem,
+    onQuantityChange: (Int) -> Unit,
+    onEditItem: () -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(text = item.name, modifier = Modifier.weight(1f))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = cartItem.menuItem.name)
+            if (cartItem.selectedAddOns.any { it.quantity > 0 }) {
+                cartItem.selectedAddOns.filter { it.quantity > 0 }.forEach { addOn ->
+                    Text(
+                        text = "+ ${addOn.name} (x${addOn.quantity})",
+                        fontSize = 10.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(vertical = 1.dp)
+                    )
+                }
+            }
+            Text(
+                text = "Edit",
+                fontSize = 12.sp,
+                color = Color(0xFF236cb2),
+                modifier = Modifier.clickable(onClick = onEditItem)
+            )
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            IconButton(onClick = onDecrease, modifier = Modifier.size(24.dp)) {
-                Icon(Icons.Default.Remove, contentDescription = "Decrease quantity")
-            }
-            Text(text = item.quantity.toString())
-            IconButton(onClick = onIncrease, modifier = Modifier.size(24.dp)) {
-                Icon(Icons.Default.Add, contentDescription = "Increase quantity")
-            }
-            IconButton(onClick = onRemove, modifier = Modifier.size(24.dp)) {
-                Icon(Icons.Default.Delete, contentDescription = "Remove item", tint = MaterialTheme.colorScheme.error)
+            Column(
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "RM ${String.format("%.2f", cartItem.calculateTotalPrice())}")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .border(1.dp, Color(0xFF4CAF50), shape = CircleShape)
+                            .clickable { onQuantityChange(-1) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "-", color = Color(0xFF4CAF50))
+                    }
+                    Text(text = cartItem.quantity.toString())
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .border(1.dp, Color(0xFF4CAF50), shape = CircleShape)
+                            .clickable { onQuantityChange(1) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "+", color = Color(0xFF4CAF50))
+                    }
+                }
             }
         }
     }
 }
 
+@Composable
+private fun PriceDetails(subtotal: Double, serviceCharge: Double, tax: Double) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(text = "Subtotal:")
+        Text(text = "RM ${String.format("%.2f", subtotal)}")
+    }
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(text = "Service Charge (10%):")
+        Text(text = "RM ${String.format("%.2f", serviceCharge)}")
+    }
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(text = "SST (6%):")
+        Text(text = "RM ${String.format("%.2f", tax)}")
+    }
+}
 
 @Composable
 private fun PaymentDetailsCard(
@@ -277,7 +300,7 @@ private fun PaymentDetailsCard(
 }
 
 @Composable
-private fun RadioButtonRow(
+fun RadioButtonRow(
     text: String,
     icon: ImageVector,
     selected: Boolean,
@@ -308,10 +331,7 @@ private fun RadioButtonRow(
                     modifier = Modifier.size(24.dp)
                 )
             }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyLarge
-            )
+            Text(text = text, style = MaterialTheme.typography.bodyLarge)
         }
         RadioButton(
             selected = selected,
@@ -334,12 +354,8 @@ private fun TotalFooterCard(total: Double, onPlaceOrderClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Total", style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = formatPriceForSummary(total),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(text = "Total:", fontWeight = FontWeight.Bold)
+                Text(text = "RM ${String.format("%.2f", total)}", fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
@@ -355,3 +371,4 @@ private fun TotalFooterCard(total: Double, onPlaceOrderClick: () -> Unit) {
         }
     }
 }
+
