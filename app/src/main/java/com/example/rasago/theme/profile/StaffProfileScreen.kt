@@ -75,8 +75,8 @@ fun StaffProfileScreen(
                             onClick = { staffStatus = StaffStatus.WORKING },
                             shape = RoundedCornerShape(50),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (staffStatus == StaffStatus.WORKING) Color(0xFF4CAF50) else Color.LightGray,
-                                contentColor = if (staffStatus == StaffStatus.WORKING) Color.White else Color.Black
+                                containerColor = if (staffStatus == StaffStatus.WORKING) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outline,
+                                contentColor = if (staffStatus == StaffStatus.WORKING) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onBackground
                             )
                         ) {
                             Text("Working", fontSize = 12.sp)
@@ -86,14 +86,14 @@ fun StaffProfileScreen(
                             onClick = { staffStatus = StaffStatus.ON_BREAK },
                             shape = RoundedCornerShape(50),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (staffStatus == StaffStatus.ON_BREAK) Color(0xFFF8BE0B) else Color.LightGray,
-                                contentColor = if (staffStatus == StaffStatus.ON_BREAK) Color.White else Color.Black
+                                containerColor = if (staffStatus == StaffStatus.ON_BREAK) Color(0xFFF8BE0B) else MaterialTheme.colorScheme.outline,
+                                contentColor = if (staffStatus == StaffStatus.ON_BREAK) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onBackground
                             )
                         ) {
                             Text("On Break", fontSize = 12.sp)
                         }
                     }
-                    Text("Last Login: $staffLastLogin", fontSize = 14.sp, color = Color.Gray)
+                    Text("Last Login: $staffLastLogin", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 

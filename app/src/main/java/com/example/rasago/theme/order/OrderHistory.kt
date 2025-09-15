@@ -57,7 +57,7 @@ fun OrderHistoryScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             // Search Bar
             OutlinedTextField(
@@ -70,8 +70,8 @@ fun OrderHistoryScreen(
                 shape = RoundedCornerShape(20.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Gray,
-                    unfocusedBorderColor = Color.Gray
+                    focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
 
@@ -149,12 +149,12 @@ fun OrderHistoryScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text("No orders yet", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+                    Text("No orders yet", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         "Your order history will appear here",
                         fontSize = 16.sp,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -198,7 +198,7 @@ fun OrderHistoryItem(order: Order, onViewClick: () -> Unit) {
                 Text(
                     text = order.orderTime,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -209,7 +209,7 @@ fun OrderHistoryItem(order: Order, onViewClick: () -> Unit) {
                         color = when (order.orderType) {
                             "Dine-In" -> Color(0xFF81C784)
                             "Takeaway" -> Color(0xFFFFD54F)
-                            else -> Color.Gray
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
                         shape = RoundedCornerShape(15.dp)
                     )
@@ -219,7 +219,7 @@ fun OrderHistoryItem(order: Order, onViewClick: () -> Unit) {
                 Text(
                     text = order.orderType,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -231,7 +231,7 @@ fun OrderHistoryItem(order: Order, onViewClick: () -> Unit) {
             TextButton(
                 onClick = onViewClick,
                 modifier = Modifier.padding(top = 4.dp),
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.Gray)
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
             ) {
                 Text("View Status", style = MaterialTheme.typography.bodySmall)
             }

@@ -84,7 +84,7 @@ fun EditProfileScreen(
                     modifier = Modifier
                         .size(150.dp)
                         .clip(CircleShape)
-                        .border(3.dp, Color.White, CircleShape)
+                        .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
@@ -133,7 +133,7 @@ fun EditProfileScreen(
                     if (uiState.isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.surface
                         )
                     } else {
                         Text("Save Changes")

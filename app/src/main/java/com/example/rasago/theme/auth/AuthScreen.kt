@@ -68,7 +68,7 @@ fun LoginScreen(
                 fontSize = 20.sp,
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 24.dp, top = 8.dp),
-                color = Color.White
+                color = MaterialTheme.colorScheme.surface
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -79,7 +79,7 @@ fun LoginScreen(
                 fontWeight = FontWeight.ExtraBold,
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 24.dp),
-                color = Color.White
+                color = MaterialTheme.colorScheme.surface
             )
 
             AuthTextField(
@@ -118,7 +118,7 @@ fun LoginScreen(
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF4CAF50),
-                        contentColor = Color.White
+                        contentColor = MaterialTheme.colorScheme.surface
                     )
                 ) {
                     Text(
@@ -141,7 +141,7 @@ fun LoginScreen(
                 Text(
                     text = "Don't have an account? ",
                     fontSize = 16.sp,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.surface
                 )
                 Text(
                     text = "Sign Up",
@@ -181,8 +181,8 @@ fun RegisterScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    titleContentColor = MaterialTheme.colorScheme.surface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.surface
                 )
             )
         }
@@ -223,7 +223,7 @@ fun RegisterScreen(
                     fontSize = 18.sp,
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(bottom = 24.dp),
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.surface
                 )
 
                 AuthTextField(
@@ -301,7 +301,7 @@ fun RegisterScreen(
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF4CAF50),
-                        contentColor = Color.White
+                        contentColor = MaterialTheme.colorScheme.surface
                     )
                 ) {
                     Text(
@@ -315,7 +315,7 @@ fun RegisterScreen(
                     Text(
                         text = "Already have an account? ",
                         fontSize = 16.sp,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.surface
                     )
                     Text(
                         text = "Login",
@@ -350,11 +350,11 @@ fun AuthTextField(
         singleLine = true,
         shape = RoundedCornerShape(44.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            disabledContainerColor = Color.White,
-            focusedBorderColor = Color.Gray,
-            unfocusedBorderColor = Color.White
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
+            focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedBorderColor = MaterialTheme.colorScheme.surface
         )
     )
 }
@@ -391,11 +391,11 @@ fun AuthPasswordField(
         },
         shape = RoundedCornerShape(44.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            disabledContainerColor = Color.White,
-            focusedBorderColor = Color.Gray,
-            unfocusedBorderColor = Color.White
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
+            focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedBorderColor = MaterialTheme.colorScheme.surface
         )
     )
 }

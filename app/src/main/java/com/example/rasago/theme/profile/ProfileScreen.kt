@@ -88,7 +88,7 @@ fun ProfileScreen(
                     .size(120.dp) // slightly bigger
                     .clip(CircleShape)
                     .align(Alignment.BottomCenter) // aligns at the bottom of the Box
-                    .border(3.dp, Color.White, CircleShape), // optional border
+                    .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape), // optional border
                 contentScale = ContentScale.Crop
             )
 
@@ -102,18 +102,18 @@ fun ProfileScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBackClick) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
                 }
                 Text(
                     text = if (isStaff) "Staff Profile" else "My Profile",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 TextButton(onClick = onEditProfileClick) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit Profile", tint = Color.Black, modifier = Modifier.size(16.dp))
-                        Text("Edit", color = Color.Black)
+                        Icon(Icons.Default.Edit, contentDescription = "Edit Profile", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(16.dp))
+                        Text("Edit", color = MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }
@@ -134,7 +134,7 @@ fun ProfileScreen(
             Text(
                 text = email,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         Spacer(Modifier.height(16.dp))
@@ -263,7 +263,7 @@ fun AccountStatusBadge(status: AccountStatus) {
     ) {
         Text(
             text = status.label,
-            color = Color.White
+            color = MaterialTheme.colorScheme.surface
         )
     }
 }

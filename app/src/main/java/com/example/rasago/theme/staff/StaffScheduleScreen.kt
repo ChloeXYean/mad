@@ -162,7 +162,7 @@ fun StaffScheduleScreen(navController: NavController? = null) {
                 Icon(
                     Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.Black,
+                    tint = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -171,7 +171,7 @@ fun StaffScheduleScreen(navController: NavController? = null) {
         }
 
         Spacer(modifier = Modifier.height(12.dp))
-        HorizontalDivider(color = Color.LightGray, thickness = 2.dp, modifier = Modifier.padding(vertical = 10.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 2.dp, modifier = Modifier.padding(vertical = 10.dp))
         // 🔍 Search Bar
         OutlinedTextField(
             value = searchQuery,
@@ -281,7 +281,7 @@ fun StaffItem(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
@@ -294,7 +294,7 @@ fun StaffItem(
             // 🔹 左边：姓名、职位、状态
             Column {
                 Text(staff.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(staff.role.displayName, fontSize = 14.sp, color = Color.Gray)
+                Text(staff.role.displayName, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                 Spacer(Modifier.height(8.dp))
 
@@ -326,7 +326,7 @@ fun StaffItem(
                         Icon(
                             painter = painterResource(id = R.drawable.edit_icon),
                             contentDescription = "Edit Status",
-                            tint = Color.Gray,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -354,7 +354,7 @@ fun StaffItem(
             var endTime by remember { mutableStateOf("17:00") }
 
             Column(horizontalAlignment = Alignment.End) {
-                Text("Work Hours", fontSize = 12.sp, color = Color.Gray)
+                Text("Work Hours", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
