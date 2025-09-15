@@ -28,10 +28,10 @@ data class Staff(
     val status: StaffStatus
 )
 
-// 员工状态枚举
-enum class StaffStatus {
-    WORKING, ON_BREAK
-}
+//// 员工状态枚举
+//enum class StaffStatus {
+//    WORKING, ON_BREAK
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
