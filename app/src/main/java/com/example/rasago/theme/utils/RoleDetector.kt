@@ -2,39 +2,39 @@ package com.example.rasago.theme.utils
 
 object RoleDetector {
 
-    // 角色常量
+    // Role constants
     const val ROLE_CUSTOMER = "customer"
     const val ROLE_CASHIER = "cashier"
     const val ROLE_KITCHEN = "kitchen"
-    const val ROLE_MANAGER = "manager"   // 经理拥有最高权限
+    const val ROLE_MANAGER = "manager"   // Manager has the highest permission
 
     /**
-     * 根据邮箱前缀自动检测用户角色
-     * @param email 用户邮箱
-     * @return 检测到的用户角色字符串
+     * Automatically detects user role based on email prefix
+     * @param email User's email
+     * @return Detected user role string
      */
     fun detectRoleFromEmail(email: String): String {
         val emailPrefix = email.substringBefore("@").lowercase()
 
         return when {
-            // 收银员 - cas_ 开头
+            // Cashier - starts with cas_
             emailPrefix.startsWith("cas_") -> ROLE_CASHIER
 
-            // 厨房 - kit_ 开头
+            // Kitchen - starts with kit_
             emailPrefix.startsWith("kit_") -> ROLE_KITCHEN
 
-            // 经理 - mgr_ 开头 (拥有最高权限)
+            // Manager - starts with mgr_ (highest permission)
             emailPrefix.startsWith("mgr_") -> ROLE_MANAGER
 
-            // 默认为顾客
+            // Default to customer
             else -> ROLE_CUSTOMER
         }
     }
 
     /**
-     * 检查邮箱是否为员工邮箱
-     * @param email 用户邮箱
-     * @return true如果是员工邮箱
+     * Checks if the email is a staff email
+     * @param email User's email
+     * @return true if it is a staff email
      */
     fun isStaffEmail(email: String): Boolean {
         val role = detectRoleFromEmail(email)
@@ -42,68 +42,54 @@ object RoleDetector {
     }
 
     /**
-     * 获取角色的显示名称
-     * @param role 用户角色字符串
-     * @return 角色的中文显示名称
+     * Gets the display name for a role
+     * @param role User role string
+     * @return Chinese display name for the role
      */
     fun getRoleDisplayName(role: String): String {
         return when (role) {
-            ROLE_CUSTOMER -> "顾客"
-            ROLE_CASHIER -> "收银员"
-            ROLE_KITCHEN -> "厨房员工"
-            ROLE_MANAGER -> "经理"
-            else -> "未知角色"
+            ROLE_CUSTOMER -> "Customer"
+            ROLE_CASHIER -> "Cashier"
+            ROLE_KITCHEN -> "Kitchen Staff"
+            ROLE_MANAGER -> "Manager"
+            else -> "Unknown Role"
         }
     }
 
     /**
-     * 获取角色建议的邮箱格式示例
-     * @param role 用户角色字符串
-     * @return 邮箱格式示例
-     */
-    fun getEmailFormatExample(role: String): String {
-        return when (role) {
-            ROLE_CUSTOMER -> "customer@example.com"
-            ROLE_CASHIER -> "cas_mary@rasago.com"
-            ROLE_KITCHEN -> "kit_david@rasago.com"
-            ROLE_MANAGER -> "mgr_sarah@rasago.com"
-            else -> "user@example.com"
-        }
-    }
-
-    /**
-     * 检查用户是否有管理权限（管理现有员工）
-     * @param role 用户角色字符串
-     * @return true如果有管理权限
+     * Checks if the user has permission to manage staff
+     * @param role User role string
+     * @return true if they have management permission
      */
     fun hasManagementPermission(role: String): Boolean {
-        return role == ROLE_MANAGER  // 经理有管理权限
+        return role == ROLE_MANAGER  // Only managers have staff management permission
     }
 
     /**
-     * 检查用户是否可以处理订单
-     * @param role 用户角色字符串
-     * @return true如果可以处理订单
+     * Checks if the user has permission to manage the menu
+     * @param role User role string
+     * @return true if they have menu management permission
+     */
+    fun canManageMenu(role: String): Boolean {
+        return role == ROLE_MANAGER // Only managers can manage the menu
+    }
+
+    /**
+     * Checks if the user can handle orders
+     * @param role User role string
+     * @return true if they can handle orders
      */
     fun canHandleOrders(role: String): Boolean {
         return role in listOf(ROLE_CASHIER, ROLE_MANAGER)
     }
 
     /**
-     * 检查用户是否可以处理厨房任务
-     * @param role 用户角色字符串
-     * @return true如果可以处理厨房任务
+     * Checks if the user can handle kitchen tasks
+     * @param role User role string
+     * @return true if they can handle kitchen tasks
      */
     fun canHandleKitchen(role: String): Boolean {
         return role in listOf(ROLE_KITCHEN, ROLE_MANAGER)
     }
-
-    /**
-     * 检查用户是否可以查看所有数据和报表
-     * @param role 用户角色字符串
-     * @return true如果有查看权限
-     */
-    fun canViewAllData(role: String): Boolean {
-        return role == ROLE_MANAGER
-    }
 }
+
